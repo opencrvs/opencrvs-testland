@@ -121,7 +121,10 @@ export const DEATH_CERTIFICATE_COLLECTOR_FORM = defineActionForm({
                     .days(DEATH_REGISTRATION_TARGET_DAYS)
                     .inPast()
                 ),
-                field('eventDetails.date').isBefore().now()
+                field('eventDetails.date').isBefore().now(),
+                not(
+                  field('collector.requesterId').isEqualTo('PRINT_IN_ADVANCE')
+                )
               )
             }
           ],
