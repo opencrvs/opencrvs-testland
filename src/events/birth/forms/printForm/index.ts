@@ -101,6 +101,9 @@ export const BIRTH_CERTIFICATE_COLLECTOR_FORM = defineActionForm({
         defaultMessage: 'Collect Payment',
         description: 'This is the title of the section'
       },
+      conditional: not(
+        field('collector.requesterId').isEqualTo('PRINT_IN_ADVANCE')
+      ),
       fields: [
         {
           id: 'collector.collect.payment.data.afterLateRegistrationTarget',
@@ -120,10 +123,7 @@ export const BIRTH_CERTIFICATE_COLLECTOR_FORM = defineActionForm({
                     .days(BIRTH_LATE_REGISTRATION_TARGET_DAYS)
                     .inPast()
                 ),
-                field('child.dob').isBefore().now(),
-                not(
-                  field('collector.requesterId').isEqualTo('PRINT_IN_ADVANCE')
-                )
+                field('child.dob').isBefore().now()
               )
             }
           ],
