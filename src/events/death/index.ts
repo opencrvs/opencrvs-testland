@@ -477,13 +477,7 @@ export const deathEvent = defineConfig({
         defaultMessage:
           'This will remove the declaration from the workqueue and change the status to Archive. To revert this change you will need to search for the declaration.',
         description: 'Confirmation body for archiving a declaration'
-      },
-      conditionals: [
-        {
-          type: ConditionalType.SHOW,
-          conditional: not(status('ARCHIVED'))
-        }
-      ]
+      }
     }
   ],
   advancedSearch: advancedSearchDeath
