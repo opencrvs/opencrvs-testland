@@ -260,7 +260,27 @@ export const deathEvent = defineConfig({
           operation: 'add',
           conditional: user.hasRole('HOSPITAL_CLERK')
         }
-      ]
+      ],
+      dialogCopy: {
+        notify: {
+          id: 'event.death.action.declare.notify.copy',
+          defaultMessage:
+            'You are about to formally notify the relevant Registration Office that a death event has occurred. Please confirm that the information provided is accurate before proceeding.',
+          description: 'Confirmation text for the notify action'
+        },
+        declare: {
+          id: 'event.death.action.declare.declare.copy',
+          defaultMessage:
+            'You are about to formally declare this death event. Once declared, the record will enter the verification and approval process.',
+          description: 'Confirmation text for the declare action'
+        },
+        register: {
+          id: 'event.death.action.declare.register.copy',
+          defaultMessage:
+            '<strong>WARNING!</strong>: By clicking "Register", you confirm that you have reviewed the record alongside supporting documentation in the Record tab. The record will proceed to be <strong>legally registered</strong> via the outbox. Further amends after registration can only be made via a legal correction process.',
+          description: 'Confirmation text for the register action'
+        }
+      }
     },
     {
       type: ActionType.EDIT,
@@ -287,7 +307,7 @@ export const deathEvent = defineConfig({
         register: {
           id: 'event.death.action.edit.register.copy',
           defaultMessage:
-            'You are about to register this death event with your edits. Registering this event will create an official civil registration record.',
+            'You are about to register this death event with your edits. Please ensure all details are correct before proceeding.<br></br><br></br><strong>WARNING!</strong>: By continuing, you confirm that you have reviewed the record alongside supporting documentation. The record will proceed to be <strong>legally registered</strong> via the outbox. Further amends after registration can only be made via a legal correction process.',
           description: 'Confirmation text for the register with edits action'
         }
       }
@@ -411,7 +431,7 @@ export const deathEvent = defineConfig({
         id: 'event.death.action.register.supportingCopy',
         description: 'Confirmation text for the register action',
         defaultMessage:
-          'Registering this death event will create an official civil registration record. Please ensure all details are correct before proceeding.'
+          "Registering this death event will create an official civil registration record. Please ensure all details are correct before proceeding.<br></br><br></br><strong>WARNING!</strong>: By clicking 'Register', you confirm that you have reviewed the record alongside supporting documentation in the Record tab. The record will proceed to be <strong>legally registered</strong> via the outbox. Further amends after registration can only be made via a legal correction process."
       },
       flags: [
         { id: 'validated', operation: 'remove' },
