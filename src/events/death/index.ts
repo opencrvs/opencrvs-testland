@@ -271,6 +271,12 @@ export const deathEvent = defineConfig({
         id: 'actions.edit'
       },
       flags: [{ id: 'validated', operation: 'remove' }],
+      conditionals: [
+        {
+          type: ConditionalType.ENABLE,
+          conditional: not(flag('attestation-required'))
+        }
+      ],
       dialogCopy: {
         notify: {
           id: 'event.death.action.edit.notify.copy',
