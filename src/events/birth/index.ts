@@ -349,7 +349,7 @@ export const birthEvent = defineConfig({
         register: {
           id: 'event.birth.action.declare.register.copy',
           defaultMessage:
-            'Registering this birth event will create an official civil registration record. Please ensure all details are correct before proceeding.',
+            '<strong>WARNING!</strong>: By clicking "Register", you confirm that you have reviewed the record alongside supporting documentation in the Record tab. The record will proceed to be <strong>legally registered</strong> via the outbox. Further amends after registration can only be made via a legal correction process.',
           description: 'Confirmation text for the register action'
         }
       }
