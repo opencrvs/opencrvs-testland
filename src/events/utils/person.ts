@@ -19,6 +19,7 @@ import {
   or,
   SelectOption,
   TranslationConfig,
+  user,
   ValidationConfig
 } from '@opencrvs/toolkit/events'
 import { createSelectOptions } from '../utils'
@@ -110,14 +111,22 @@ export const getIdentityFields = ({
   showConditional,
   parent,
   uniqueNidAgainst = [],
-  dobValidation = []
+  dobValidation = [],
+  hideIdFieldsForHospitalClerk = false
 }: {
   prefix: string
   showConditional: any
   parent?: FieldReference
   uniqueNidAgainst?: string[]
   dobValidation?: ValidationConfig[]
+  hideIdFieldsForHospitalClerk?: boolean
 }): FieldConfigInput[] => {
+  // Show conditional for the ID-specific fields. Name and date of birth keep
+  // using `showConditional` so they stay visible for hospital clerks.
+  const idFieldsShowConditional = hideIdFieldsForHospitalClerk
+    ? and(showConditional, not(user.hasRole('HOSPITAL_CLERK')))
+    : showConditional
+
   const conditionals = [
     {
       type: ConditionalType.SHOW,
@@ -136,7 +145,12 @@ export const getIdentityFields = ({
           description: 'This is the label for the field',
           id: 'event.death.action.declare.form.section.informant.field.nationality.label'
         },
-        conditionals,
+        conditionals: [
+          {
+            type: ConditionalType.SHOW,
+            conditional: idFieldsShowConditional
+          }
+        ],
         defaultValue: 'FAR',
         parent
       },
@@ -158,7 +172,7 @@ export const getIdentityFields = ({
       conditionals: [
         {
           type: ConditionalType.SHOW,
-          conditional: showConditional
+          conditional: idFieldsShowConditional
         },
         {
           type: ConditionalType.ENABLE,
@@ -184,7 +198,7 @@ export const getIdentityFields = ({
           {
             type: ConditionalType.SHOW,
             conditional: and(
-              showConditional,
+              idFieldsShowConditional,
               field(`${prefix}.nationality`).isEqualTo('FAR'),
               or(
                 field(`${prefix}.idType`).isEqualTo(IdType.NATIONAL_ID),
@@ -197,7 +211,7 @@ export const getIdentityFields = ({
           {
             type: ConditionalType.SHOW,
             conditional: and(
-              showConditional,
+              idFieldsShowConditional,
               field(`${prefix}.nationality`).isEqualTo('FAR'),
               field(`${prefix}.idType`).isEqualTo(IdType.NATIONAL_ID)
             )
@@ -221,7 +235,7 @@ export const getIdentityFields = ({
             conditional: and(
               field(`${prefix}.idType`).isEqualTo(IdType.NATIONAL_ID),
               field(`${prefix}.nationality`).isEqualTo('FAR'),
-              showConditional
+              idFieldsShowConditional
             )
           }
         ],
