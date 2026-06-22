@@ -103,6 +103,7 @@ export const father = defineFormPage({
     ...getIdentityFields({
       prefix: 'father',
       showConditional: requireFatherDetails,
+      hideIdFieldsForHospitalClerk: true,
       uniqueNidAgainst: ['mother.nid', 'informant.nid'],
       dobValidation: [dobBeforeChildDobValidator('father')]
     }),
