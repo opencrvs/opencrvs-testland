@@ -416,7 +416,10 @@ export const birthEvent = defineConfig({
           conditional: not(flag(InherentFlags.POTENTIAL_DUPLICATE))
         }
       ],
-      flags: [{ id: 'validated', operation: 'add' }],
+      flags: [
+        { id: 'validated', operation: 'add' },
+        { id: InherentFlags.REJECTED, operation: 'remove' }
+      ],
       form: [
         {
           id: 'comments',
