@@ -232,7 +232,7 @@ export const roles: Role[] = [
     scopes: defineScopes([
       { type: 'user.read-only-my-audit' },
       { type: 'record.search', options: { placeOfEvent: 'administrativeArea' } },
-      { type: 'workqueue', options: { ids: ['assigned-to-you', 'recent'] } },
+      { type: 'workqueue', options: { ids: ['assigned-to-you', 'recent', 'pending-updates'] } },
       { type: 'record.create', options: { placeOfEvent: 'administrativeArea' } },
       { type: 'record.read', options: { placeOfEvent: 'administrativeArea' } },
       { type: 'record.edit', options: { placeOfEvent: 'administrativeArea' } },
