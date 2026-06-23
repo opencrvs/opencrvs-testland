@@ -166,6 +166,7 @@ export const getMOSIPIntegrationFields = (
           {
             id: `${page}.query-params`,
             type: FieldType.QUERY_PARAM_READER,
+            parent: resetParent,
             conditionals: [
               {
                 type: ConditionalType.DISPLAY_ON_REVIEW,
@@ -200,6 +201,7 @@ export const getMOSIPIntegrationFields = (
               description: 'Fetch applicant information',
               id: 'applicant.http-fetch.label'
             },
+            parent: resetParent,
             configuration: {
               trigger: field(`${page}.query-params`),
               url: MOSIP_API_USERINFO_URL,
