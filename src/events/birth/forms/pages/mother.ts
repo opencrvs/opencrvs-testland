@@ -231,6 +231,7 @@ export const mother = defineFormPage({
         }
       ],
       configuration: {
+        integer: true,
         min: 0
       }
     }
