@@ -9,7 +9,17 @@
  * Copyright (C) The OpenCRVS Authors located at https://github.com/opencrvs/opencrvs-core/blob/master/AUTHORS.
  */
 
-import { ActionType, and, ConditionalType, defineDeclarationForm, event, FieldType, not, or, user } from '@opencrvs/toolkit/events'
+import {
+  ActionType,
+  and,
+  ConditionalType,
+  defineDeclarationForm,
+  event,
+  FieldType,
+  not,
+  or,
+  user
+} from '@opencrvs/toolkit/events'
 import { child } from './pages/child'
 import { informant } from './pages/informant'
 import { introduction } from './pages/introduction'
@@ -29,16 +39,16 @@ export const BIRTH_DECLARATION_REVIEW = {
       id: 'review.print',
       type: FieldType.ALPHA_PRINT_BUTTON,
       label: {
-        defaultMessage: 'Print certificate inadvance of registration',
+        defaultMessage: 'Print certificate in advance of registration',
         id: 'event.birth.action.declare.form.review.print.label',
         description: 'Label for the print button in the review section'
       },
       configuration: {
         template: 'v2.birth-certified-certificate',
         buttonLabel: {
-          defaultMessage: 'Print certificate inadvance of registration',
+          defaultMessage: 'Print certificate in advance of registration',
           description: "Print button's label",
-          id: 'event.birth.action.declare.form.review.print.button.label'
+          id: 'event.birth.action.declare.form.review.print.label'
         }
       },
       conditionals: [
