@@ -48,7 +48,7 @@ export const BIRTH_DECLARATION_REVIEW = {
         buttonLabel: {
           defaultMessage: 'Print certificate in advance of registration',
           description: "Print button's label",
-          id: 'event.birth.action.declare.form.review.print.button.label'
+          id: 'event.birth.action.declare.form.review.print.label'
         }
       },
       conditionals: [
