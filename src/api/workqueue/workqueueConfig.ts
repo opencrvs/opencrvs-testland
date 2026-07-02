@@ -111,7 +111,6 @@ export const Workqueues = defineWorkqueues([
         noneOf: [
           InherentFlags.REJECTED,
           'validated',
-          'approval-required-for-late-registration',
           InherentFlags.POTENTIAL_DUPLICATE
         ]
       }
@@ -159,7 +158,7 @@ export const Workqueues = defineWorkqueues([
       ...declaredInMyAdminArea,
       status: { type: 'exact', term: EventStatus.enum.DECLARED },
       flags: {
-        anyOf: ['approval-required-for-late-registration'],
+        allOf: ['validated', 'approval-required-for-late-registration'],
         noneOf: [InherentFlags.POTENTIAL_DUPLICATE]
       }
     },
