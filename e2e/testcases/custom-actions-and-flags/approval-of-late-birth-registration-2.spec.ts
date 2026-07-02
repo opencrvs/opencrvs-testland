@@ -140,7 +140,7 @@ test.describe
   test.describe('Declaration Review by RO', async () => {
     test('Navigate to the declaration review page', async () => {
       await login(page, CREDENTIALS.REGISTRATION_OFFICER)
-      await page.getByText('Pending approval').click()
+      await page.getByText('Pending validation').click()
       await openRecordByTitle(page, childNameFormatted)
     })
 
