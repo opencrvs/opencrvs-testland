@@ -119,31 +119,6 @@
     state: absent
   when: metabase_data_backup.stat.exists
 
-- name: Check influxdb data directory
-  stat:
-    path: /data/influxdb
-  register: influxdb_data
-
-- name: 'Create influxdb data directory'
-  file:
-    path: /data/influxdb
-    state: directory
-  when: not influxdb_data.stat.exists
-
-- name: Check influxdb data backup directory
-  stat:
-    path: /data/backups/influxdb
-  register: influxdb_data_backup
-
-- name: 'Create influxdb backup directory'
-  file:
-    path: /data/backups/influxdb
-    state: directory
-    group: 1000
-    owner: 1000
-    mode: g+rwx
-  when: not influxdb_data_backup.stat.exists
-
 - name: Check Postgres data directory
   stat:
     path: /data/postgres

@@ -55,8 +55,7 @@ tilt_label = '4.Dependencies'
 dependencies = [
   'elasticsearch',
   'mongodb',
-  'minio', 
-  'influxdb', 
+  'minio',
   'redis',
   'postgres',
   # 'postgres-on-deploy',
@@ -77,7 +76,6 @@ opensrvs_predeploy_jobs = [
   # FIXME: works only if security is enabled
   # 'mongo-on-deploy',
   # 'elasticsearch-on-deploy',
-  'influxdb-on-deploy',
   'data-migration',
   'data-migration-analytics',
   'data-migration-legacy',
