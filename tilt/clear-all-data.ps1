@@ -5,7 +5,6 @@ $Namespace = "opencrvs-dev"
 $Jobs = @(
     "data-cleanup",
     "postgres-on-deploy",
-    "influxdb-on-deploy",
     "data-migration",
     "data-migration-analytics",
     "data-seed",

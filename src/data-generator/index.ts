@@ -650,7 +650,7 @@ function birthDeclarationWorkflow(
 
       const sex = Math.random() < probabilityForMale ? 'male' : 'female'
       // This is here so that no creation timestamps would be equal
-      // InfluxDB will otherwise interpret the events as the same exact measurement
+      // Downstream systems could otherwise treat events with identical timestamps as the same exact record
       const submissionTime = add(startOfDay(submissionDate), {
         seconds: 24 * 60 * 60 * Math.random()
       })

@@ -68,7 +68,7 @@ services:
       - USER_MGNT_MONGO_URL=mongodb://user-mgnt:${USER_MGNT_MONGODB_PASSWORD}@mongo1,mongo2/user-mgnt?replicaSet=rs0
       - PERFORMANCE_MONGO_URL=mongodb://performance:${PERFORMANCE_MONGODB_PASSWORD}@mongo1,mongo2/performance?replicaSet=rs0
       - HEARTH_MONGO_URL=mongodb://hearth:${HEARTH_MONGODB_PASSWORD}@mongo1,mongo2/hearth-dev?replicaSet=rs0
-      - WAIT_HOSTS=mongo1:27017,mongo2:27017,influxdb:8086,minio:9000,elasticsearch:9200
+      - WAIT_HOSTS=mongo1:27017,mongo2:27017,minio:9000,elasticsearch:9200
 
   mongo2:
     image: mongo:4.4

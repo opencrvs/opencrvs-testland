@@ -111,10 +111,6 @@ for index in ${indices[@]}; do
   docker run --rm --network=$NETWORK appropriate/curl curl -sS -XDELETE "http://$(elasticsearch_host)/$index"
 done
 
-# Delete all data from metrics
-#-----------------------------
-docker run --rm --network=$NETWORK appropriate/curl curl -X POST 'http://influxdb:8086/query?db=ocrvs' --data-urlencode "q=DROP SERIES FROM /.*/" -v
-
 # Delete all data from minio
 #-----------------------------
 docker run --rm --network=$NETWORK --entrypoint=/bin/sh minio/mc:RELEASE.2025-05-21T01-59-54Z -c "\
