@@ -2,7 +2,11 @@ import { expect, test } from '@playwright/test'
 
 import { login } from '../../helpers'
 import { CLIENT_URL, CREDENTIALS } from '../../constants'
-import { expectBirthsTabSelected, expectNoBrokenCards } from './utils'
+import {
+  expectBirthsTabSelected,
+  expectNoBrokenCards,
+  populateDashboardRecords
+} from './utils'
 
 // Every card on the Births tab, in dashboard grid order. The markdown intro
 // card ("Registrations Dashboard") has no title element.
@@ -24,6 +28,8 @@ const UNTITLED_CARDS = 1 // markdown intro card
 test('Registrations dashboard cards render and survive filtering', async ({
   page
 }) => {
+  await populateDashboardRecords(page)
+
   await login(page, CREDENTIALS.REGISTRAR)
   await page.goto(`${CLIENT_URL}/performance/dashboard/registrations`)
   const frame = page.frameLocator('iframe')

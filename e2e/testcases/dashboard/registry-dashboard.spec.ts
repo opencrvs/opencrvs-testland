@@ -2,7 +2,11 @@ import { expect, test } from '@playwright/test'
 
 import { login } from '../../helpers'
 import { CLIENT_URL, CREDENTIALS } from '../../constants'
-import { expectBirthsTabSelected, expectNoBrokenCards } from './utils'
+import {
+  expectBirthsTabSelected,
+  expectNoBrokenCards,
+  populateDashboardRecords
+} from './utils'
 
 // The Births tab has a single record-table card and no untitled cards
 const EXPECTED_CARD_TITLES = ['Birth records (no PII)']
@@ -10,6 +14,8 @@ const EXPECTED_CARD_TITLES = ['Birth records (no PII)']
 test('Registry dashboard cards render and survive filtering', async ({
   page
 }) => {
+  await populateDashboardRecords(page)
+
   await login(page, CREDENTIALS.REGISTRAR)
   await page.goto(`${CLIENT_URL}/performance/dashboard/registry`)
   const frame = page.frameLocator('iframe')

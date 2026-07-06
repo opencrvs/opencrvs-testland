@@ -1,4 +1,23 @@
-import { expect, type FrameLocator } from '@playwright/test'
+import { expect, Page, type FrameLocator } from '@playwright/test'
+import { faker } from '@faker-js/faker'
+import { AddressType } from '@opencrvs/toolkit/events'
+
+import { dateToIsoDateString, getToken, randomPastDate } from '../../helpers'
+import {
+  getAdministrativeAreas,
+  getIdByName,
+  getLocations
+} from '../birth/helpers'
+import {
+  createDeclaration,
+  type CreateDeclarationResponse
+} from '../test-data/birth-declaration'
+import {
+  CREDENTIALS,
+  METABASE_EMAIL,
+  METABASE_PASSWORD,
+  METABASE_URL
+} from '../../constants'
 
 /*
  * A broken Metabase card renders a warning icon and an error message
@@ -56,4 +75,109 @@ export async function expectBirthsTabSelected(frame: FrameLocator) {
     'true',
     { timeout: 60_000 }
   )
+}
+
+function fullAddress(administrativeArea: string) {
+  return {
+    country: 'FAR',
+    addressType: AddressType.DOMESTIC,
+    administrativeArea,
+    streetLevelDetails: {
+      town: faker.location.city(),
+      residentialArea: faker.location.county(),
+      street: faker.location.street(),
+      number: faker.string.numeric(2),
+      zipCode: faker.string.numeric(4)
+    }
+  }
+}
+
+function fullParentDetails(
+  parent: 'mother' | 'father',
+  administrativeArea: string
+) {
+  return {
+    [`${parent}.name`]: {
+      firstname: faker.person.firstName(),
+      surname: faker.person.lastName()
+    },
+    // Must be at least 18 years before child.dob to pass validation
+    [`${parent}.dob`]: dateToIsoDateString(
+      faker.date.between({ from: '1985-01-01', to: '2000-11-28' })
+    ),
+    [`${parent}.nationality`]: 'FAR',
+    [`${parent}.idType`]: 'NATIONAL_ID',
+    [`${parent}.nid`]: faker.string.numeric(10),
+    [`${parent}.address`]: fullAddress(administrativeArea),
+    [`${parent}.maritalStatus`]: 'MARRIED',
+    [`${parent}.educationalAttainment`]: 'FIRST_STAGE_TERTIARY_ISCED_5',
+    [`${parent}.occupation`]: faker.person.jobTitle()
+  }
+}
+
+export async function populateDashboardRecords(page: Page) {
+  const token = await getToken(CREDENTIALS.REGISTRAR)
+  const administrativeAreas = await getAdministrativeAreas(token)
+  const village = getIdByName(administrativeAreas, 'Klow')
+  const facilities = await getLocations('HEALTH_FACILITY', token)
+  const facilityId = getIdByName(facilities, 'Klow Village Hospital')
+
+  const placeOfBirthVariants = [
+    {
+      'child.placeOfBirth': 'HEALTH_FACILITY',
+      'child.birthLocation': facilityId,
+      'child.birthLocationId': facilityId
+    },
+    {
+      'child.placeOfBirth': 'PRIVATE_HOME',
+      'child.birthLocation.privateHome': fullAddress(village),
+      'child.birthLocationId': village
+    },
+    {
+      'child.placeOfBirth': 'OTHER',
+      'child.birthLocation.other': fullAddress(village),
+      'child.birthLocationId': village
+    }
+  ]
+
+  const records: CreateDeclarationResponse[] = []
+
+  for (const [index, placeOfBirth] of placeOfBirthVariants.entries()) {
+    const declaration = {
+      'informant.relation': 'MOTHER',
+      'informant.email': faker.internet.email(),
+
+      'child.name': {
+        firstname: faker.person.firstName(),
+        surname: faker.person.lastName()
+      },
+      'child.gender': (['male', 'female', 'unknown'] as const)[index],
+      'child.dob': randomPastDate(14),
+      ...placeOfBirth,
+      'child.attendantAtBirth': (['PHYSICIAN', 'NURSE', 'MIDWIFE'] as const)[
+        index
+      ],
+      'child.birthType': (['SINGLE', 'TWIN', 'TRIPLET'] as const)[index],
+      'child.weightAtBirth': 3.5,
+
+      ...fullParentDetails('mother', village),
+      'mother.previousBirths': index,
+
+      'father.detailsNotAvailable': false,
+      ...fullParentDetails('father', village),
+      'father.addressSameAs': 'NO'
+    }
+
+    records.push(await createDeclaration(token, declaration))
+  }
+
+  // ensure json is unfolded in metabase
+  await page.goto(`${METABASE_URL}/admin/databases/2`)
+  await page
+    .locator('[placeholder="nicetoseeyou@email.com"]')
+    .fill(METABASE_EMAIL)
+  await page.locator('[placeholder="Shhh..."]').fill(METABASE_PASSWORD)
+  await page.getByRole('button', { name: 'Sign in' }).click()
+
+  await page.getByText('Sync database schema').click()
 }

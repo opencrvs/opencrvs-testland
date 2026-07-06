@@ -20,6 +20,18 @@ export const GATEWAY_HOST =
     ? 'http://localhost:7070'
     : SCHEME + '://gateway.' + DOMAIN
 
+export const METABASE_URL =
+  process.env.NODE_ENV === 'development'
+    ? 'http://localhost:4444'
+    : SCHEME + '://metabase.' + DOMAIN
+
+export const METABASE_EMAIL =
+  process.env.NODE_ENV === 'development'
+    ? 'user@opencrvs.org'
+    : 'user@opencrvs.com'
+
+export const METABASE_PASSWORD = 'm3tabase'
+
 /*
  * This timeout is to ensure that all previous actions have been completed
  * including filling inputs and that the changed values have been reflected
