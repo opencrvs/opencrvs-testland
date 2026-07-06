@@ -57,6 +57,7 @@ import { conditionalsHandler } from './form/common/custom-validation-conditional
 import { COUNTRY_WIDE_CRUDE_DEATH_RATE } from './api/application/application-config'
 import { handlebarsHandler } from './form/common/certificate/handlebars/handler'
 import { trackingIDHandler } from './api/tracking-id/handler'
+import { systemReadyHandler } from './api/integration/handler'
 import { dashboardQueriesHandler } from './api/dashboards/handler'
 import { fontsHandler } from './api/fonts/handler'
 import { recordNotificationHandler } from './api/record-notification/handler'
@@ -667,6 +668,17 @@ export async function createServer() {
       auth: false,
       tags: ['api', 'events'],
       description: 'Serves custom events'
+    }
+  })
+
+  server.route({
+    method: 'GET',
+    path: '/triggers/system/ready',
+    handler: systemReadyHandler,
+    options: {
+      tags: ['api', 'integration'],
+      description:
+        'Called by events on startup. Registers integrations in user-mgmt using the provided bootstrap token.'
     }
   })
 

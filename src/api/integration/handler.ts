@@ -1,0 +1,83 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+ *
+ * OpenCRVS is also distributed under the terms of the Civil Registration
+ * & Healthcare Disclaimer located at http://opencrvs.org/license.
+ *
+ * Copyright (C) The OpenCRVS Authors located at https://github.com/opencrvs/opencrvs-core/blob/master/AUTHORS.
+ */
+import * as Hapi from '@hapi/hapi'
+import fetch from 'node-fetch'
+import { logger } from '@countryconfig/logger'
+import { USER_MGMT_URL } from '@countryconfig/constants'
+
+interface RecordScope {
+  type: string
+  options: { event: string[] }
+}
+
+interface IntegrationConfig {
+  name: string
+  clientId: string
+  clientSecret: string
+  scopes: RecordScope[]
+}
+
+/**
+ * Integrations to register on startup. Each entry maps to a POST /createIntegration call.
+ *
+ * Example (MOSIP):
+ * {
+ *   name: 'MOSIP',
+ *   clientId: process.env.MOSIP_CLIENT_ID!,
+ *   clientSecret: process.env.MOSIP_CLIENT_SECRET!,
+ *   scopes: [
+ *     { type: 'record.register', options: { event: ['birth', 'death'] } }
+ *   ]
+ * }
+ */
+const INTEGRATIONS: IntegrationConfig[] = []
+
+export async function systemReadyHandler(
+  request: Hapi.Request,
+  h: Hapi.ResponseToolkit
+) {
+  const bearerToken = request.headers.authorization
+
+  for (const integration of INTEGRATIONS) {
+    try {
+      const res = await fetch(
+        new URL('/createIntegration', USER_MGMT_URL).toString(),
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: bearerToken
+          },
+          body: JSON.stringify({
+            name: integration.name,
+            clientId: integration.clientId,
+            clientSecret: integration.clientSecret,
+            scopes: integration.scopes
+          })
+        }
+      )
+
+      if (!res.ok) {
+        logger.warn(
+          `createIntegration for "${integration.name}" failed: ${res.status} ${await res.text()}`
+        )
+      } else {
+        logger.info(`Integration "${integration.name}" registered successfully`)
+      }
+    } catch (error) {
+      logger.warn(
+        `createIntegration for "${integration.name}" threw: ${error instanceof Error ? error.message : error}`
+      )
+    }
+  }
+
+  return h.response().code(200)
+}
