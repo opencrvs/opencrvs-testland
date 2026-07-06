@@ -41,7 +41,6 @@ print_usage_and_exit() {
   echo "Script must receive a label parameter to restore data from that specific day in format +%Y-%m-%d i.e. 2019-01-01 or that label"
   echo "The Hearth, Events and User db backup zips you would like to restore from: hearth-dev-{label}.gz, events-{label}.gz, user-mgnt-{label}.gz must exist in /data/backups/mongo/ folder"
   echo "The Elasticsearch backup folder /data/backups/elasticsearch must exist with all previous snapshots and indices. All files are required"
-  echo "The InfluxDB backup files must exist in the /data/backups/influxdb/{label} folder"
   echo ""
   echo "If your MongoDB is password protected, an admin user's credentials can be given as environment variables:"
   echo "MONGODB_ADMIN_USER=your_user MONGODB_ADMIN_PASSWORD=your_pass"
@@ -165,15 +164,6 @@ docker service update --force --update-parallelism 1 --update-delay 30s opencrvs
 docker run --rm --network=$NETWORK toschneck/wait-for-it -t 120 elasticsearch:9200 -- echo "Elasticsearch is up"
 
 ##
-# ------ INFLUXDB -------
-##
-
-# Delete all data from metrics
-#-----------------------------
-docker run --rm --network=$NETWORK appropriate/curl curl -X POST 'http://influxdb:8086/query?db=ocrvs' --data-urlencode "q=DROP SERIES FROM /.*/" -v
-docker run --rm --network=$NETWORK appropriate/curl curl -X POST 'http://influxdb:8086/query?db=ocrvs' --data-urlencode "q=DROP DATABASE \"ocrvs\"" -v
-
-##
 # ------ MINIO -------
 ##
 
@@ -279,21 +269,6 @@ echo
 docker service update --force opencrvs_setup-elasticsearch-users
 echo
 sleep 60
-
-
-
-##
-# ------ INFLUXDB -----
-##
-
-if [ "$IS_LOCAL" = true ]; then
-  INFLUXDB_CONTAINER_ID=$(docker ps -aqf "name=influxdb")
-  docker exec $INFLUXDB_CONTAINER_ID mkdir -p /home/user
-  docker cp $ROOT_PATH/backups/influxdb/$LABEL/ $INFLUXDB_CONTAINER_ID:/home/user/$LABEL
-  docker exec $INFLUXDB_CONTAINER_ID influxd restore -portable -db ocrvs /home/user/$LABEL
-else
-  docker run --rm -v $ROOT_PATH/backups/influxdb/${LABEL:-$BACKUP_DATE}:/backup --network=$NETWORK influxdb:1.8.0 influxd restore -portable -host influxdb:8088 -db ocrvs /backup
-fi
 
 ##
 # ------ MINIO -----

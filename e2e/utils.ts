@@ -1,6 +1,39 @@
 import { Locator, Page, expect } from '@playwright/test'
 import { CLIENT_URL } from './constants'
 import { isMobile } from './mobile-helpers'
+import { UnassignWait, waitForActionResponses } from './helpers'
+
+// tRPC route fragments fired when confirming a correction action. The same
+// approve endpoint backs both "approve a request" and "make a direct correction".
+const CORRECTION_ACTION_URL = {
+  approve: 'event.actions.correction.approve',
+  reject: 'event.actions.correction.reject'
+} as const
+
+/**
+ * Waits for the API responses a correction action fires. The `confirmAction`
+ * callback should contain the interaction that fires the action. By default,
+ * this **does not** wait for the auto-unassign to settle, `opts` can be used
+ * to wait for that as well.
+ *
+ * @param actionType selects the endpoint to wait for ('approve' backs both
+ *   approving a request and making a direct correction).
+ * @param confirmAction fires the action (e.g. clicks the "Confirm" button).
+ * @param opts when `{ waitForUnassign: true, eventId }`, also wait for the
+ *   auto-unassign to settle (via the search-cache refetch). Set when the flow
+ *   re-assigns the record right after.
+ */
+export async function waitForCorrectionAction(
+  page: Page,
+  actionType: keyof typeof CORRECTION_ACTION_URL,
+  confirmAction: () => Promise<void>,
+  opts: UnassignWait = {}
+) {
+  const urls: string[] = [CORRECTION_ACTION_URL[actionType]]
+  const eventId = opts.waitForUnassign ? opts.eventId : undefined
+
+  await waitForActionResponses(page, urls, confirmAction, eventId)
+}
 
 type Workqueue =
   | 'Outbox'

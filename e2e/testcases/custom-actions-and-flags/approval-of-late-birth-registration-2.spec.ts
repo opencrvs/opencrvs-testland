@@ -12,7 +12,7 @@ import {
 import { faker } from '@faker-js/faker'
 import { CREDENTIALS } from '../../constants'
 import { ensureAssignedToUser, selectAction } from '../../utils'
-import { triggerDeclarationAction } from '../../helpers'
+import { getEventIdFromUrl, triggerDeclarationAction } from '../../helpers'
 import { format, subDays } from 'date-fns'
 import { openRecordByTitle } from '../print-certificate/birth/helpers'
 
@@ -140,7 +140,7 @@ test.describe
   test.describe('Declaration Review by RO', async () => {
     test('Navigate to the declaration review page', async () => {
       await login(page, CREDENTIALS.REGISTRATION_OFFICER)
-      await page.getByText('Pending approval').click()
+      await page.getByText('Pending validation').click()
       await openRecordByTitle(page, childNameFormatted)
     })
 
@@ -351,7 +351,10 @@ test.describe
     })
 
     test('Declare with edits', async () => {
-      await triggerDeclarationAction(page, 'Declare with edits')
+      await triggerDeclarationAction(page, 'Declare with edits', {
+        waitForUnassign: true,
+        eventId: getEventIdFromUrl(page)
+      })
     })
 
     test('Go to record', async () => {

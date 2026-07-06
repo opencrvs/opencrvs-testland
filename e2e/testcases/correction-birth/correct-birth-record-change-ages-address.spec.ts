@@ -14,7 +14,12 @@ import {
 } from '../test-data/birth-declaration'
 import { CREDENTIALS } from '../../constants'
 import { formatV2ChildName, getAdministrativeAreas } from '../birth/helpers'
-import { ensureAssignedToUser, expectInUrl, selectAction } from '../../utils'
+import {
+  ensureAssignedToUser,
+  expectInUrl,
+  selectAction,
+  waitForCorrectionAction
+} from '../../utils'
 import { getIdByName } from '../birth/helpers'
 import { AddressType } from '@opencrvs/toolkit/events'
 import { openRecordByTitle } from '../print-certificate/birth/helpers'
@@ -22,6 +27,7 @@ import { openRecordByTitle } from '../print-certificate/birth/helpers'
 test.describe.serial('Correct record - Change ages', () => {
   let declaration: Declaration
   let trackingId = ''
+  let eventId = ''
   let page: Page
 
   test.beforeAll(async ({ browser }) => {
@@ -109,6 +115,7 @@ test.describe.serial('Correct record - Change ages', () => {
       })
     )
     trackingId = res.trackingId!
+    eventId = res.eventId
     token = await getToken(CREDENTIALS.REGISTRAR)
     declaration = res.declaration
   })
@@ -305,7 +312,15 @@ test.describe.serial('Correct record - Change ages', () => {
     await ensureAssignedToUser(page, CREDENTIALS.REGISTRAR)
     await selectAction(page, 'Review correction request')
     await page.getByRole('button', { name: 'Approve', exact: true }).click()
-    await page.getByRole('button', { name: 'Confirm', exact: true }).click()
+
+    await waitForCorrectionAction(
+      page,
+      'approve',
+      async () => {
+        await page.getByRole('button', { name: 'Confirm', exact: true }).click()
+      },
+      { waitForUnassign: true, eventId }
+    )
   })
 
   test('View record', async () => {

@@ -6,7 +6,12 @@ import {
   createDeclaration,
   Declaration
 } from '../test-data/birth-declaration-with-mother-father'
-import { ensureAssignedToUser, expectInUrl, selectAction } from '../../utils'
+import {
+  ensureAssignedToUser,
+  expectInUrl,
+  selectAction,
+  waitForCorrectionAction
+} from '../../utils'
 import { formatV2ChildName, REQUIRED_VALIDATION_ERROR } from '../birth/helpers'
 import { openRecordByTitle } from '../print-certificate/birth/helpers'
 
@@ -212,17 +217,14 @@ test.describe.serial('Birth Record correction flow', () => {
 
     await expect(page.getByText('Correct record?')).toBeVisible()
 
-    const correctionResponse = page.waitForResponse(
-      (response) =>
-        response
-          .url()
-          .includes('/api/events/event.actions.correction.approve.request') &&
-        response.ok()
+    await waitForCorrectionAction(
+      page,
+      'approve',
+      async () => {
+        await page.getByRole('button', { name: 'Confirm', exact: true }).click()
+      },
+      { waitForUnassign: true, eventId }
     )
-
-    await page.getByRole('button', { name: 'Confirm', exact: true }).click()
-
-    await correctionResponse
     await expectInUrl(page, `/workqueue/pending-certification`)
   })
 

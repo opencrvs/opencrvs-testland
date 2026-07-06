@@ -17,7 +17,12 @@ import { CREDENTIALS } from '../../constants'
 import { IdType } from '@countryconfig/events/utils'
 import { random } from 'lodash'
 import { formatV2ChildName, REQUIRED_VALIDATION_ERROR } from '../birth/helpers'
-import { ensureAssignedToUser, expectInUrl, selectAction } from '../../utils'
+import {
+  ensureAssignedToUser,
+  expectInUrl,
+  selectAction,
+  waitForCorrectionAction
+} from '../../utils'
 
 test.describe.serial('Correct record - 4', () => {
   let declaration: DeclarationV2
@@ -862,21 +867,16 @@ test.describe.serial('Correct record - 4', () => {
      * Expected result: should enable the Correct record button
      */
 
-    const correctionResponse = page.waitForResponse(
-      (res) =>
-        res.url().includes('event.actions.correction.approve') && res.ok()
-    )
-
     await page.getByRole('button', { name: 'Correct record' }).click()
 
-    const searchCacheRefetchResponse = page.waitForResponse(
-      (res) => res.url().includes(`event.search?batch=1`) && res.ok()
+    await waitForCorrectionAction(
+      page,
+      'approve',
+      async () => {
+        await page.getByRole('button', { name: 'Confirm', exact: true }).click()
+      },
+      { waitForUnassign: true, eventId }
     )
-
-    await page.getByRole('button', { name: 'Confirm', exact: true }).click()
-
-    await searchCacheRefetchResponse
-    await correctionResponse
 
     await expectInUrl(page, `events/${eventId}`)
 

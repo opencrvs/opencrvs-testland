@@ -3,6 +3,7 @@ import { CLIENT_URL, CREDENTIALS, GATEWAY_HOST } from '../../constants'
 import {
   createPIN,
   getToken,
+  getAuthTokens,
   login,
   loginWithNewUser,
   NEW_USER_PASSWORD
@@ -53,10 +54,10 @@ test('Phone number changed from settings is stored as entered', async ({
   })
 
   await test.step('Log in to the client as the new user', async () => {
-    const token = await getToken(username, NEW_USER_PASSWORD)
-    expect(token).toBeDefined()
+    const { refreshToken } = await getAuthTokens(username, NEW_USER_PASSWORD)
+    expect(refreshToken).toBeDefined()
 
-    await page.goto(`${CLIENT_URL}?token=${token}`)
+    await page.goto(`${CLIENT_URL}?refreshToken=${refreshToken}`)
     await page.waitForSelector('#pin-input, #appSpinner', { state: 'visible' })
     await createPIN(page)
     await page.goto(CLIENT_URL)

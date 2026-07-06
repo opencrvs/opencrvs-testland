@@ -12,7 +12,8 @@ import {
   ensureAssignedToUser,
   expectInUrl,
   selectAction,
-  type
+  type,
+  waitForCorrectionAction
 } from '../../utils'
 import { openRecordByTitle } from '../print-certificate/birth/helpers'
 
@@ -274,19 +275,14 @@ test.describe
   test('Approve the correction', async () => {
     await page.getByRole('button', { name: 'Approve', exact: true }).click()
 
-    const correctionApprovalResponse = page.waitForResponse(
-      (res) =>
-        res.url().includes('event.actions.correction.approve') && res.ok()
+    await waitForCorrectionAction(
+      page,
+      'approve',
+      async () => {
+        await page.getByRole('button', { name: 'Confirm', exact: true }).click()
+      },
+      { waitForUnassign: true, eventId }
     )
-
-    const searchCacheRefetchResponse = page.waitForResponse(
-      (res) => res.url().includes(`event.search?batch=1`) && res.ok()
-    )
-
-    await page.getByRole('button', { name: 'Confirm', exact: true }).click()
-
-    await correctionApprovalResponse
-    await searchCacheRefetchResponse
 
     await expectInUrl(page, `/events/${eventId}`)
 

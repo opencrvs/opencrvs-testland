@@ -129,7 +129,6 @@ done
 
 mkdir -p $ROOT_PATH/backups/elasticsearch
 mkdir -p $ROOT_PATH/backups/elasticsearch/indices
-mkdir -p $ROOT_PATH/backups/influxdb
 mkdir -p $ROOT_PATH/backups/mongo
 mkdir -p $ROOT_PATH/backups/minio
 mkdir -p $ROOT_PATH/backups/vsexport
@@ -292,19 +291,6 @@ create_elasticsearch_backup() {
 
 create_elasticsearch_backup
 
-# If required, SSH into the node running the opencrvs_metrics container and backup the metrics data into an influxdb subfolder
-#-----------------------------------------------------------------------------------------------------------------------------
-
-if [ "$IS_LOCAL" = true ]; then
-  INFLUXDB_CONTAINER_ID=$(docker ps -aqf "name=influxdb")
-  echo "Backing up Influx locally $INFLUXDB_CONTAINER_ID"
-  docker exec $INFLUXDB_CONTAINER_ID influxd backup -portable -database ocrvs /home/user/${LABEL:-$BACKUP_DATE}
-  docker cp $INFLUXDB_CONTAINER_ID:/home/user/${LABEL:-$BACKUP_DATE} $ROOT_PATH/backups/influxdb/${LABEL:-$BACKUP_DATE}
-else
-  echo "Backing up Influx in remote environment"
-  docker run --rm -v $ROOT_PATH/backups/influxdb/${LABEL:-$BACKUP_DATE}:/backup --network=$NETWORK influxdb:1.8.0 influxd backup -portable -host influxdb:8088 /backup
-fi
-
 echo "Creating a backup for Minio"
 
 LOCAL_MINIO_BACKUP=$ROOT_PATH/backups/minio/ocrvs-${LABEL:-$BACKUP_DATE}.tar.gz
@@ -330,8 +316,6 @@ mkdir -p $BACKUP_RAW_FILES_DIR
 
 # Copy full directories to the temporary directory
 cp -r $ROOT_PATH/backups/elasticsearch/ $BACKUP_RAW_FILES_DIR/elasticsearch/
-cp -r $ROOT_PATH/backups/influxdb/${LABEL:-$BACKUP_DATE} $BACKUP_RAW_FILES_DIR/influxdb/
-
 
 mkdir -p $BACKUP_RAW_FILES_DIR/minio/ && cp $ROOT_PATH/backups/minio/ocrvs-${LABEL:-$BACKUP_DATE}.tar.gz $BACKUP_RAW_FILES_DIR/minio/
 mkdir -p $BACKUP_RAW_FILES_DIR/vsexport/ && cp $ROOT_PATH/backups/vsexport/ocrvs-${LABEL:-$BACKUP_DATE}.tar.gz $BACKUP_RAW_FILES_DIR/vsexport/

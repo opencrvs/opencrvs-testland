@@ -6,7 +6,12 @@ import {
   createDeclaration,
   Declaration
 } from '../test-data/birth-declaration-with-mother-father'
-import { ensureAssignedToUser, expectInUrl, selectAction } from '../../utils'
+import {
+  ensureAssignedToUser,
+  expectInUrl,
+  selectAction,
+  waitForCorrectionAction
+} from '../../utils'
 import {
   formatV2ChildName,
   getAdministrativeAreas,
@@ -133,16 +138,16 @@ test('Cleared field values are removed after correcting a registered birth recor
     await page.getByRole('button', { name: 'Continue' }).click()
     await expectInUrl(page, `/events/request-correction/${eventId}/summary`)
 
-    const correctionResponse = page.waitForResponse(
-      (res) =>
-        res.url().includes('event.actions.correction.approve.request') &&
-        res.ok()
-    )
-
     await page.getByRole('button', { name: 'Correct' }).click()
-    await page.getByRole('button', { name: 'Confirm', exact: true }).click()
 
-    await correctionResponse
+    await waitForCorrectionAction(
+      page,
+      'approve',
+      async () => {
+        await page.getByRole('button', { name: 'Confirm', exact: true }).click()
+      },
+      { waitForUnassign: true, eventId }
+    )
   })
 
   await test.step('Record no longer shows the previously entered weight or address details', async () => {

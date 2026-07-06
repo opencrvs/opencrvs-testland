@@ -52,14 +52,13 @@ test.describe
       await page.click('#search')
       await expect(page).toHaveURL(/.*\/search-result/)
       expect(page.url()).toContain(`mother.dob=${yyyy}-${mm}-${dd}`)
-      expect(page.url()).toContain(
-        `mother.name=${encodeURIComponent(
-          JSON.stringify({
-            firstname: record.declaration['mother.name'].firstname,
-            surname: record.declaration['mother.name'].surname
-          })
-        )}`
-      )
+      const param = new URL(page.url()).searchParams.get('mother.name')!
+      const decoded = decodeURIComponent(param)
+      const name = JSON.parse(decoded)
+      expect(name).toEqual({
+        firstname: record.declaration['mother.name'].firstname,
+        surname: record.declaration['mother.name'].surname
+      })
       await expect(page.getByText('Search results')).toBeVisible()
 
       const searchResult = await page.locator('#content-name').textContent()

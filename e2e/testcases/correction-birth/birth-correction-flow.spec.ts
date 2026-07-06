@@ -10,7 +10,8 @@ import {
   ensureAssignedToUser,
   expectInUrl,
   selectAction,
-  type
+  type,
+  waitForCorrectionAction
 } from '../../utils'
 import { formatV2ChildName, REQUIRED_VALIDATION_ERROR } from '../birth/helpers'
 import { openRecordByTitle } from '../print-certificate/birth/helpers'
@@ -301,15 +302,17 @@ test.describe.serial('Birth correction flow', () => {
     })
 
     test('Approve correction request', async () => {
-      const correctionResponse = page.waitForResponse(
-        (res) =>
-          res.url().includes('event.actions.correction.approve') && res.ok()
-      )
-
       await page.getByRole('button', { name: 'Approve', exact: true }).click()
-      await page.getByRole('button', { name: 'Confirm', exact: true }).click()
-
-      await correctionResponse
+      await waitForCorrectionAction(
+        page,
+        'approve',
+        async () => {
+          await page
+            .getByRole('button', { name: 'Confirm', exact: true })
+            .click()
+        },
+        { waitForUnassign: true, eventId }
+      )
       await expectInUrl(page, `/workqueue/correction-requested`)
 
       await page.getByRole('button', { name: 'Pending certification' }).click()

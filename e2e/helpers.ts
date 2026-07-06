@@ -56,10 +56,11 @@ export async function login(
    */
   skipPin?: boolean
 ) {
-  const token = await getToken(username)
-  expect(token).toBeDefined()
+  const { token, refreshToken } = await getAuthTokens(username)
+  expect(refreshToken).toBeDefined()
 
-  await page.goto(`${CLIENT_URL}?token=${token}`)
+  // Hand off only the refresh token; the client mints the access token from it.
+  await page.goto(`${CLIENT_URL}?refreshToken=${refreshToken}`)
 
   await page.waitForSelector('#pin-input, #appSpinner', { state: 'visible' })
 
@@ -72,7 +73,7 @@ export async function login(
   return token
 }
 
-export async function getToken(
+export async function getAuthTokens(
   username: string,
   password: string = TEST_USER_PASSWORD
 ) {
@@ -104,7 +105,17 @@ export async function getToken(
 
   const verifyBody = await verifyResponse.json()
 
-  return verifyBody.token
+  return {
+    token: verifyBody.token as string,
+    refreshToken: verifyBody.refreshToken as string
+  }
+}
+
+export async function getToken(
+  username: string,
+  password: string = TEST_USER_PASSWORD
+) {
+  return (await getAuthTokens(username, password)).token
 }
 
 export async function getClientToken(client_id: string, client_secret: string) {
@@ -412,6 +423,31 @@ export async function validateActionMenuButton(
   await page.getByRole('button', { name: 'Action', exact: true }).click()
 }
 
+const EVENT_ID_URL_REGEX =
+  /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i
+
+/**
+ * Extracts the current record's eventId from the events route (it is embedded as a
+ * UUID path segment). Use when the test reached the record via the workqueue/search
+ * and never captured the id from a create response.
+ */
+export function getEventIdFromUrl(page: Page): string {
+  const match = page.url().match(EVENT_ID_URL_REGEX)
+  if (!match) {
+    throw new Error(`No eventId (UUID) found in URL: ${page.url()}`)
+  }
+  return match[0]
+}
+
+/**
+ * Options for waiting on the auto-unassign that follows some actions. `eventId` is
+ * required by the type only when `waitForUnassign` is true, so callers can never ask
+ * to wait for the unassign refetch without supplying the event to match it against.
+ */
+export type UnassignWait =
+  | { waitForUnassign?: false }
+  | { waitForUnassign: true; eventId: string }
+
 const actionTitleToApiCallMap = {
   Notify: ['event.actions.notify'],
   Declare: ['event.actions.declare'],
@@ -429,10 +465,64 @@ const actionTitleToApiCallMap = {
 }
 
 /**
+ * Attaches response listeners for the given URL fragments, fires the trigger that
+ * causes those API calls, then resolves once all of them have returned successfully.
+ *
+ * The client intentionally does not await action responses (offline requirement), so
+ * tests must wait on the network themselves to avoid racing downstream steps. The
+ * callback shape enforces that listeners are attached *before* the trigger fires.
+ *
+ * When `eventId` is passed, it additionally waits for the auto-unassign to settle.
+ * The unassign triggers a search-cache refetch (`event.search`, a POST whose body
+ * carries `clauses: [{ id: eventId }]`) *onSuccess of the main action*. That listener
+ * is gated on the main responses having returned, so an earlier record-scoped search
+ * (e.g. the one fired on page load) cannot resolve the wait prematurely.
+ *
+ * @param page
+ * @param urls - URL fragments to match (substring) on successful responses
+ * @param trigger - action that fires the API calls (e.g. clicking "Confirm")
+ * @param eventId - when set, also wait for the post-action `event.search` refetch of this event
+ */
+export async function waitForActionResponses(
+  page: Page,
+  urls: string[],
+  trigger: () => Promise<void>,
+  eventId?: string
+) {
+  let mainDone = false
+  const main = Promise.all(
+    urls.map((url) =>
+      page.waitForResponse((res) => res.url().includes(url) && res.ok())
+    )
+  ).then(() => {
+    mainDone = true
+  })
+
+  const waits: Array<Promise<unknown>> = [main]
+
+  if (eventId) {
+    waits.push(
+      page.waitForResponse(
+        (res) =>
+          res.url().includes('event.search') &&
+          res.ok() &&
+          res.request().method() === 'POST' &&
+          (res.request().postData()?.includes(eventId) ?? false) &&
+          mainDone
+      )
+    )
+  }
+
+  await trigger()
+  await Promise.all(waits)
+}
+
+/**
  * Triggers and confirms an action from the action menu and waits for the expected API calls to respond before completing.
  * Offline requirement forces us to not await for the responses in client, so we are by design flaky.
  * @param page
  * @param action - action button text from the action menu
+ * @param opts - when `{ waitForUnassign: true, eventId }`, also wait for the auto-unassign to settle (via the search-cache refetch). Set when the flow re-assigns the record right after.
  */
 export async function triggerDeclarationAction(
   page: Page,
@@ -445,28 +535,31 @@ export async function triggerDeclarationAction(
     | 'Save & Exit'
     | 'Declare with edits'
     | 'Notify with edits'
-    | 'Register with edits'
+    | 'Register with edits',
+  opts: UnassignWait = {}
 ) {
   // 1. Open action menu and click the action
   await page.getByRole('button', { name: 'Action', exact: true }).click()
   await page.getByText(action, { exact: true }).click()
 
-  // 2. Get the expected API calls that the action triggers to wait for.
-  const responses = actionTitleToApiCallMap[action].map((url) =>
-    page.waitForResponse((res) => res.url().includes(url) && res.ok())
+  const urls = actionTitleToApiCallMap[action]
+  const eventId = opts.waitForUnassign ? opts.eventId : undefined
+
+  // 2. Confirm the action, then wait for all the API calls it triggers to return.
+  await waitForActionResponses(
+    page,
+    urls,
+    async () => {
+      const confirmBtn = page.getByRole('button', { name: 'Confirm' })
+
+      if ((await confirmBtn.count()) > 0) {
+        await confirmBtn.click()
+      } else {
+        await page.getByRole('button', { name: action, exact: true }).click()
+      }
+    },
+    eventId
   )
-
-  // 3. Confirm the action and trigger the api calls.
-  const confirmBtn = page.getByRole('button', { name: 'Confirm' })
-
-  if ((await confirmBtn.count()) > 0) {
-    await confirmBtn.click()
-  } else {
-    await page.getByRole('button', { name: action, exact: true }).click()
-  }
-
-  // 4. Complete only once all the API calls have returned.
-  await Promise.all(responses)
 }
 
 export async function searchFromSearchBar(

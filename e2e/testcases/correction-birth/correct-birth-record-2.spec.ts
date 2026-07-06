@@ -16,7 +16,8 @@ import {
   ensureAssignedToUser,
   expectInUrl,
   selectAction,
-  type
+  type,
+  waitForCorrectionAction
 } from '../../utils'
 import {
   navigateToCertificatePrintAction,
@@ -358,76 +359,74 @@ test.describe.serial('Correct record - 2', () => {
 
       await page.locator('#reject-correction-reason').fill('No legal proof')
 
-      const correctionResponse = page.waitForResponse(
-        (res) =>
-          res.url().includes('event.actions.correction.reject') && res.ok()
+      await waitForCorrectionAction(
+        page,
+        'reject',
+        async () => {
+          await page
+            .getByRole('button', { name: 'Confirm', exact: true })
+            .click()
+        },
+        { waitForUnassign: true, eventId }
       )
-      await page.getByRole('button', { name: 'Confirm', exact: true }).click()
-
-      await correctionResponse
 
       await expectInUrl(page, `/events/${eventId}`)
     })
-  })
 
-  test.describe('2.9 Validate history in record audit', async () => {
-    test('2.9.0 Login', async ({ browser }) => {
-      const page = await browser.newPage()
-      await login(page, CREDENTIALS.REGISTRAR)
-    })
+    test.describe('2.8.4 Validate history in record audit', async () => {
+      test('2.8.4.1 Assign', async () => {
+        await ensureAssignedToUser(page, CREDENTIALS.REGISTRAR)
+      })
 
-    test('2.9.1 Assign', async () => {
-      await ensureAssignedToUser(page, CREDENTIALS.REGISTRAR)
-    })
+      test('2.8.4.2 Navigate to record audit', async () => {
+        await page.getByRole('button', { name: 'Audit' }).click()
+      })
 
-    test('2.9.2 Navigate to record audit', async () => {
-      await page.getByRole('button', { name: 'Audit' }).click()
-    })
+      test('2.8.4.3 Validate correction requested modal', async () => {
+        await page
+          .getByRole('button', { name: 'Correction requested', exact: true })
+          .click()
 
-    test('2.9.3 Validate correction requested modal', async () => {
-      await page
-        .getByRole('button', { name: 'Correction requested', exact: true })
-        .click()
+        await expect(page.getByText('Requester' + 'Father')).toBeVisible()
 
-      await expect(page.getByText('Requester' + 'Father')).toBeVisible()
+        await expect(
+          page.getByText(
+            'Reason for correction' +
+              'Informant provided incorrect information (Material error)'
+          )
+        ).toBeVisible()
 
-      await expect(
-        page.getByText(
-          'Reason for correction' +
-            'Informant provided incorrect information (Material error)'
-        )
-      ).toBeVisible()
+        await expect(page.getByText('Fee total' + '$' + fee)).toBeVisible()
 
-      await expect(page.getByText('Fee total' + '$' + fee)).toBeVisible()
+        await expect(
+          page.getByText(
+            'Place of delivery' + 'Health Institution' + 'Residential address'
+          )
+        ).toBeVisible()
 
-      await expect(
-        page.getByText(
-          'Place of delivery' + 'Health Institution' + 'Residential address'
-        )
-      ).toBeVisible()
+        await expect(
+          page.getByText('Relationship to child' + 'Mother' + 'Brother')
+        ).toBeVisible()
 
-      await expect(
-        page.getByText('Relationship to child' + 'Mother' + 'Brother')
-      ).toBeVisible()
+        await expect(
+          page.getByText(
+            "Informant's name" + '-' + formatName(updatedInformantDetails)
+          )
+        ).toBeVisible()
 
-      await expect(
-        page.getByText(
-          "Informant's name" + '-' + formatName(updatedInformantDetails)
-        )
-      ).toBeVisible()
+        await page.locator('#close-dialog').click()
+        await page.getByRole('button', { name: 'Next page' }).click()
+      })
 
-      await page.locator('#close-dialog').click()
-      await page.getByRole('button', { name: 'Next page' }).click()
-    })
+      test('2.8.4.4 Validate correction rejected modal', async () => {
+        await page
+          .getByRole('button', { name: 'Correction rejected', exact: true })
+          .click()
 
-    test('2.9.4 Validate correction rejected modal', async () => {
-      await page
-        .getByRole('button', { name: 'Correction rejected', exact: true })
-        .click()
+        await expect(page.getByText('Reason' + 'No legal proof')).toBeVisible()
 
-      await expect(page.getByText('Reason' + 'No legal proof')).toBeVisible()
-
-      await page.locator('#close-dialog').click()
+        await page.locator('#close-dialog').click()
+      })
     })
   })
 })

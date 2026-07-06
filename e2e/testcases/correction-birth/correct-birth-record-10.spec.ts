@@ -19,7 +19,8 @@ import {
   ensureAssignedToUser,
   expectInUrl,
   selectAction,
-  type
+  type,
+  waitForCorrectionAction
 } from '../../utils'
 import { formatV2ChildName, REQUIRED_VALIDATION_ERROR } from '../birth/helpers'
 import { getMixedPath } from '@opencrvs/toolkit/events'
@@ -628,18 +629,22 @@ test.describe('10. Correct record', () => {
 
       test('10.1.6.3 Approve correction', async () => {
         await page.getByRole('button', { name: 'Approve', exact: true }).click()
-        await page.getByRole('button', { name: 'Confirm', exact: true }).click()
+
+        await waitForCorrectionAction(
+          page,
+          'approve',
+          async () => {
+            await page
+              .getByRole('button', { name: 'Confirm', exact: true })
+              .click()
+          },
+          { waitForUnassign: true, eventId }
+        )
 
         await expectInUrl(page, `/events/${eventId}`)
       })
       test.describe('10.1.6.4 Validate history in record audit', async () => {
         test('10.1.6.4.0 Ensure record is assigned', async () => {
-          // Wait for the correction approval to fully complete before checking
-          // assignment. The approval triggers an auto-unassign — if we call
-          // ensureAssignedToUser before that unassign lands, we may skip
-          // re-assigning (record appears still assigned), then the unassign
-          // fires late and leaves the record unassigned for the audit steps.
-          await page.waitForTimeout(3000)
           await ensureAssignedToUser(page, CREDENTIALS.REGISTRAR)
         })
         test('10.1.6.4.1 Validate correction requested modal', async () => {

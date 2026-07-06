@@ -1365,7 +1365,7 @@ test.describe.serial('8. Validate declaration review page', () => {
       test("8.3.2.3 Change deceased's birthday", async () => {
         await page.getByTestId('change-button-deceased.dob').click()
 
-        declaration.deceased.dob = getRandomDate(0, 200)
+        declaration.deceased.dob = getRandomDate(1, 200)
         await page.getByPlaceholder('dd').fill(declaration.deceased.dob.dd)
         await page.getByPlaceholder('mm').fill(declaration.deceased.dob.mm)
         await page.getByPlaceholder('yyyy').fill(declaration.deceased.dob.yyyy)

@@ -24,15 +24,36 @@ TL;DR:
 
 \* When user is redirected after action back to event overview (happens only if you come to the event through search), it takes few seconds for the UI to sync up completely. In these scenarios you might need to explicitly wait for the search cache to update.
 
+The search-cache refetch is a `POST` to `event.search` fired _onSuccess of the
+action_, and it carries `clauses: [{ id: eventId }]` in its body. Two consequences:
+
+1. Match on the request **body** (`postData`) using the eventId.
+2. Attach the listener but only accept it **after the action's own responses have returned**. Several `event.search` calls (page load, workqueues) hit the same endpoint; without the gate you can resolve on a pre-action search and race downstream steps.
+
+`triggerDeclarationAction` / `waitForCorrectionAction` do this for you — pass
+`{ waitForUnassign: true, eventId }`. If you must wait manually:
+
 ```
 // Example: How to know UI is ready without setting 30 second timeout:
+    let actionDone = false
+    const actionResponse = page
+      .waitForResponse((res) => res.url().includes('event.actions.…') && res.ok())
+      .then(() => {
+        actionDone = true
+      })
+
     const searchCacheRefetchResponse = page.waitForResponse(
-      (res) => res.url().includes(`event.search?batch=1`) && res.ok()
+      (res) =>
+        res.url().includes('event.search') &&
+        res.ok() &&
+        res.request().method() === 'POST' &&
+        (res.request().postData()?.includes(eventId) ?? false) &&
+        actionDone // gate: only the post-action refetch counts
     )
 
     // ... Code to trigger the action.
 
-    await searchCacheRefetchResponse
+    await Promise.all([actionResponse, searchCacheRefetchResponse])
 ```
 
 ## Why we need these

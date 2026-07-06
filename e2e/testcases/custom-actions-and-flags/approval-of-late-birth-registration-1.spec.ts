@@ -149,7 +149,7 @@ test.describe.serial('Approval of late birth registration', () => {
   test.describe('Declaration Review by RO', async () => {
     test('Navigate to the declaration review page', async () => {
       await login(page, CREDENTIALS.REGISTRATION_OFFICER)
-      await page.getByText('Pending approval').click()
+      await page.getByText('Pending validation').click()
 
       await openRecordByTitle(page, childNameFormatted)
       await ensureAssignedToUser(page, CREDENTIALS.REGISTRATION_OFFICER)
@@ -164,6 +164,19 @@ test.describe.serial('Approval of late birth registration', () => {
     test('RO should not have the option to Approve', async () => {
       await page.getByRole('button', { name: 'Action', exact: true }).click()
       await expect(page.getByText('Approve', { exact: true })).not.toBeVisible()
+      await page.getByRole('button', { name: 'Action', exact: true }).click()
+    })
+
+    test('Validate', async () => {
+      const validateResponse = page.waitForResponse(
+        (response) =>
+          response.url().includes('event.actions.custom') && response.ok()
+      )
+
+      await selectAction(page, 'Validate')
+      await page.getByRole('button', { name: 'Confirm' }).click()
+
+      await validateResponse
     })
   })
 
@@ -173,25 +186,6 @@ test.describe.serial('Approval of late birth registration', () => {
       await page.getByText('Pending approval').click()
 
       await openRecordByTitle(page, childNameFormatted)
-    })
-
-    test('Unassign', async () => {
-      await page.getByRole('button', { name: 'Action', exact: true }).click()
-      await page.getByText('Unassign', { exact: true }).click()
-
-      const unassignResponse = page.waitForResponse(
-        (response) =>
-          response.url().includes('event.actions.assignment.unassign') &&
-          response.ok()
-      )
-
-      await page.getByRole('button', { name: 'Unassign', exact: true }).click()
-
-      await unassignResponse
-
-      await expect(
-        page.getByTestId('assignedTo-value').locator('span')
-      ).toContainText('Not assigned')
     })
 
     test('LR should not have the option to Approve', async () => {

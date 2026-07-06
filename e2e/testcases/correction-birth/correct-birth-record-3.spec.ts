@@ -17,7 +17,12 @@ import {
 import { format, subDays, subYears } from 'date-fns'
 import { formatV2ChildName } from '../birth/helpers'
 import { IdType } from '@countryconfig/events/utils'
-import { ensureAssignedToUser, expectInUrl, selectAction } from '../../utils'
+import {
+  ensureAssignedToUser,
+  expectInUrl,
+  selectAction,
+  waitForCorrectionAction
+} from '../../utils'
 
 test.describe.serial(' Correct record - 3', () => {
   let declaration: DeclarationV2
@@ -1098,7 +1103,17 @@ test.describe.serial(' Correct record - 3', () => {
 
     test('3.8.3 Approve correction', async () => {
       await page.getByRole('button', { name: 'Approve', exact: true }).click()
-      await page.getByRole('button', { name: 'Confirm', exact: true }).click()
+
+      await waitForCorrectionAction(
+        page,
+        'approve',
+        async () => {
+          await page
+            .getByRole('button', { name: 'Confirm', exact: true })
+            .click()
+        },
+        { waitForUnassign: true, eventId }
+      )
 
       await expectInUrl(page, `events/${eventId}`)
     })
