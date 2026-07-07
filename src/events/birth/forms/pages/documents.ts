@@ -20,7 +20,8 @@ import {
   not,
   or,
   PageTypes,
-  TranslationConfig
+  TranslationConfig,
+  user
 } from '@opencrvs/toolkit/events'
 import { requireMotherDetails } from './mother'
 import { requireFatherDetails } from './father'
@@ -96,6 +97,7 @@ export const documents = defineFormPage({
     description: 'Form section title for documents',
     id: 'form.section.documents.title'
   },
+  conditional: not(user.hasRole('HOSPITAL_CLERK')), // Used to test the conditional hiding of a page based on user role
   fields: [
     {
       id: 'documents.proofOfBirth',

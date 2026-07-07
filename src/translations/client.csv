@@ -993,6 +993,11 @@ event.death.action.declare.form.section.deceased.field.dob.label,This is the lab
 event.death.action.declare.form.section.deceased.field.gender.label,This is the label for the field,Sex,Sexe
 event.death.action.declare.form.section.deceased.field.maritalStatus.label,This is the label for the field,Marital Status,État civil
 event.death.action.declare.form.section.deceased.field.name.label,This is the label for the field,Deceased's name,Nom du défunt
+v2.event.death.action.declare.form.section.deceased.field.birthRecordSearch.label,Label for the deceased birth record BRN search field,Search birth record by BRN,Rechercher l'acte de naissance par BRN
+v2.event.death.action.declare.form.section.deceased.field.birthRecordSearch.validation.invalid,Error message for invalid BRN search value,Invalid value: Must be alpha-numeric and 12 characters long,Valeur invalide : doit être alphanumérique et comporter 12 caractères
+v2.event.death.action.declare.form.section.deceased.field.birthRecordSearch.indicators.ok,Indicator shown when a matching birth record is found,Birth record found,Acte de naissance trouvé
+v2.event.death.action.declare.form.section.deceased.field.birthRecordSearch.clearModal.title,Title for the clear confirmation modal,Clear birth record?,Effacer l'acte de naissance ?
+v2.event.death.action.declare.form.section.deceased.field.birthRecordSearch.clearModal.description,Description for the clear confirmation modal,This will remove the linked birth record.,Cela supprimera l'acte de naissance associé.
 event.death.action.declare.form.section.deceased.field.numberOfDependants.label,This is the label for the field,No. of dependants,Nombre de personnes à charge
 event.death.action.declare.form.section.deceased.field.placeOfDeath.label,This is the label for the field,Place of death,Lieu du décès
 event.death.action.declare.form.section.documents.field.proofOfCauseOfDeath.label,This is the label for the field,Proof of cause of death,Preuve de la cause du décès
@@ -1081,6 +1086,10 @@ event.death.action.request-correction.label,This is shown as the action name any
 event.death.action.validate.label,This is shown as the action name anywhere the user can trigger the action from,Validate,Valider
 event.death.custom.action.validate-declaration.label,This is shown as the action name anywhere the user can trigger the action from,Validate,Valider
 event.death.custom.action.validate-declaration.label,This is shown as the action name anywhere the user can trigger the action from,Validate,Valider
+event.death.custom.action.attest.label,This is shown as the action name anywhere the user can trigger the action from,Attest,Attester
+event.death.custom.action.attest.supportingCopy,Supporting copy for the attest action,"Attesting confirms this death was reported at your health facility. Once attested, the notification proceeds to the registration office.","En attestant, vous confirmez que ce décès a été signalé dans votre établissement de santé. Une fois attesté, la notification est transmise au bureau d'enregistrement."
+event.death.custom.action.attest.field.comments.label,Label for the comments field on the attest action,Additional comments,Commentaires supplémentaires
+event.death.custom.action.attest.audit-history-label,Audit history label for the attest action,Attested,Attesté
 event.death.label,This is what this event is referred as in the system,Death,Décès
 event.death.summary.eventDetails.date.empty,This is shown when there is no date of death information,No date of death,Aucune date de décès
 event.death.summary.eventDetails.deathLocation.empty,This is shown when there is no death location information,No place of death,Aucun lieu de décès
@@ -1098,7 +1107,7 @@ event.edit.comment.label,The label for the comment,Comments,Commentaires
 event.edit.declareWithEdits.label,Label for `Declare with edits` in edit action menu,Declare with edits,Déclarer avec modifications
 event.edit.notifyWithEdits.label,Label for `Notify with edits` in edit action menu,Notify with edits,Notifier avec modifications
 event.edit.registerWithEdits.label,Label for `Register with edits` in edit action menu,Register with edits,Enregistrer avec modifications
-event.history.role,Label for the role in event history,"{role, select, LOCAL_REGISTRAR {Registrar} REGISTRATION_AGENT {Registration Officer} HOSPITAL_CLERK {Hospital Official} LOCAL_SYSTEM_ADMIN {Administrator} NATIONAL_REGISTRAR {Registrar General} PERFORMANCE_MANAGER {Operations Manager} NATIONAL_SYSTEM_ADMIN {National Administrator} COMMUNITY_LEADER {Community Leader} PROVINCIAL_REGISTRAR {Provincial Registrar} EMBASSY_OFFICIAL {Embassy Official} other {Unknown}}","{role, select, LOCAL_REGISTRAR {Officier d'état civil local} REGISTRATION_AGENT {Agent d'enregistrement} PERFORMANCE_MANAGER {Responsable des opérations} LOCAL_SYSTEM_ADMIN {Administrateur} NATIONAL_SYSTEM_ADMIN {Administrateur national} NATIONAL_REGISTRAR {Registraire général} HOSPITAL_CLERK {Officiel de l'hôpital} COMMUNITY_LEADER {Responsable communautaire} PROVINCIAL_REGISTRAR {Registraire provincial} EMBASSY_OFFICIAL {Officiel d'ambassade} other {Inconnu}}"
+event.history.role,Label for the role in event history,"{role, select, LOCAL_REGISTRAR {Registrar} REGISTRATION_AGENT {Registration Officer} HOSPITAL_CLERK {Hospital Official} LOCAL_SYSTEM_ADMIN {Administrator} NATIONAL_REGISTRAR {Registrar General} PERFORMANCE_MANAGER {Operations Manager} NATIONAL_SYSTEM_ADMIN {National Administrator} COMMUNITY_LEADER {Community Leader} PROVINCIAL_REGISTRAR {Provincial Registrar} EMBASSY_OFFICIAL {Embassy Official} HEALTH_ADMINISTRATOR {Health Administrator} other {Unknown}}","{role, select, LOCAL_REGISTRAR {Officier d'état civil local} REGISTRATION_AGENT {Agent d'enregistrement} PERFORMANCE_MANAGER {Responsable des opérations} LOCAL_SYSTEM_ADMIN {Administrateur} NATIONAL_SYSTEM_ADMIN {Administrateur national} NATIONAL_REGISTRAR {Registraire général} HOSPITAL_CLERK {Officiel de l'hôpital} COMMUNITY_LEADER {Responsable communautaire} PROVINCIAL_REGISTRAR {Registraire provincial} EMBASSY_OFFICIAL {Officiel d'ambassade} HEALTH_ADMINISTRATOR {Administrateur de santé} other {Inconnu}}"
 event.history.system,Name for system initiated actions in the event history,System,System
 event.history.systemDefaultName,Fallback for system integration name in the event history,System integration,Intégration système
 event.not.downloaded,Shown when user tries to perform an action on event that is not available,Please ensure the event is first assigned and downloaded to the browser.,Veuillez vous assurer que l'événement est d'abord attribué et téléchargé dans le navigateur.
@@ -2214,6 +2223,7 @@ userRole.administrator,Name for user role Administrator,Administrator,Administra
 userRole.communityLeader,Name for user role Community Leader,Community Leader,Leader communautaire
 userRole.embassyOffical,Name for the user role Embassy Official,Embassy Official,Officiel d'ambassade
 userRole.hospitalClerk,Name for user role Hospital Clerk,Hospital Official,Officiel de l'hôpital
+userRole.healthAdministrator,Name for user role Health Administrator,Health Administrator,Administrateur de santé
 userRole.localRegistrar,Name for user role Registrar,Registrar,Registraire
 userRole.localSystemAdmin,Name for user role Local System Admin,Local System Admin,Administrateur système local
 userRole.nationalAdministrator,Name for user role National Administrator,National Administrator,Administrateur national
@@ -2354,6 +2364,7 @@ workqueues.pendingFeedback.title,Title of pending feedback workqueue,Pending fee
 workqueues.pendingIssuance.title,Title of pending issuance workqueue,Pending issuance,En attente d'émission
 workqueues.pendingRegistration.title,Title of pending registration workqueue,Pending registration,Inscription en attente
 workqueues.pendingUpdates.title,Title of pending updates workqueue,Pending updates,Mises à jour en attente
+workqueues.pendingAttestation.title,Title of pending attestation workqueue,Pending attestation,En attente d'attestation
 workqueues.pendingValidation.title,Title of pending validation workqueue,Pending validation,En attente de validation
 workqueues.potentialDuplicate.title,Title of potential duplicate workqueue,Potential duplicate,Duplicata potentiel
 workqueues.recent.title,Title of recent workqueue,Recent,Récent

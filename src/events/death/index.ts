@@ -206,6 +206,7 @@ export const deathEvent = defineConfig({
     ActionType.DECLARE,
     ActionType.EDIT,
     'VALIDATE_DECLARATION',
+    'ATTEST',
     ActionType.MARK_AS_DUPLICATE,
     ActionType.REJECT,
     ActionType.ARCHIVE,
@@ -236,8 +237,7 @@ export const deathEvent = defineConfig({
       flags: [
         {
           id: 'attestation-required',
-          operation: 'add',
-          conditional: user.hasRole('HOSPITAL_CLERK')
+          operation: 'add'
         }
       ]
     },
@@ -268,6 +268,12 @@ export const deathEvent = defineConfig({
             user.hasRole('REGISTRATION_AGENT'),
             user.hasRole('LOCAL_REGISTRAR')
           )
+        }
+      ],
+      conditionals: [
+        {
+          type: ConditionalType.ENABLE,
+          conditional: not(flag('attestation-required'))
         }
       ],
       dialogCopy: {
@@ -369,6 +375,47 @@ export const deathEvent = defineConfig({
         description:
           'The label to show in audit history for the validate action',
         id: 'event.death.custom.action.validate-declaration.audit-history-label'
+      }
+    },
+    {
+      type: ActionType.CUSTOM,
+      customActionType: 'ATTEST',
+      icon: 'Stamp',
+      label: {
+        defaultMessage: 'Attest',
+        description:
+          'This is shown as the action name anywhere the user can trigger the action from',
+        id: 'event.death.custom.action.attest.label'
+      },
+      supportingCopy: {
+        defaultMessage:
+          'Attesting confirms this death was reported at your health facility. Once attested, the notification proceeds to the registration office.',
+        description: 'This is the supporting copy for the Attest action',
+        id: 'event.death.custom.action.attest.supportingCopy'
+      },
+      conditionals: [
+        {
+          type: ConditionalType.SHOW,
+          conditional: flag('attestation-required')
+        }
+      ],
+      flags: [{ id: 'attestation-required', operation: 'remove' }],
+      form: [
+        {
+          id: 'comments',
+          type: 'TEXTAREA',
+          label: {
+            defaultMessage: 'Additional comments',
+            description:
+              'This is the label for the comments field for the attest action',
+            id: 'event.death.custom.action.attest.field.comments.label'
+          }
+        }
+      ],
+      auditHistoryLabel: {
+        defaultMessage: 'Attested',
+        description: 'The label to show in audit history for the attest action',
+        id: 'event.death.custom.action.attest.audit-history-label'
       }
     },
     {
