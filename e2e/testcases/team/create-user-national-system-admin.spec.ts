@@ -75,3 +75,37 @@ test.describe.serial('1. Create user -1', () => {
     })
   })
 })
+
+test('Browser back on the user creation form returns to the team page', async ({
+  page
+}) => {
+  await test.step('Log in', async () => {
+    await login(page, CREDENTIALS.NATIONAL_SYSTEM_ADMIN)
+  })
+
+  await test.step('Open a location team page', async () => {
+    await page.getByRole('button', { name: 'Team' }).click()
+    await expect(
+      page.locator('#location-range-picker-action').getByText('HQ Office')
+    ).toBeVisible()
+
+    await page.getByRole('button', { name: /HQ Office/ }).click()
+    await page.getByTestId('locationSearchInput').fill('Klow')
+    await page.getByText(/Klow Village Hospital/).click()
+
+    await expect(page.locator('#add-user').first()).toBeVisible()
+  })
+
+  await test.step('Open the user creation form', async () => {
+    await page.locator('#add-user').first().click()
+    await expect(page.getByText('User details')).toBeVisible()
+  })
+
+  await test.step('Browser back returns to the team page', async () => {
+    await page.goBack()
+
+    // Back on the team page: the "add user" action is available again and the creation form is gone.
+    await expect(page.locator('#add-user').first()).toBeVisible()
+    await expect(page.getByText('User details')).toBeHidden()
+  })
+})
