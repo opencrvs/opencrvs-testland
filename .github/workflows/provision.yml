@@ -30,7 +30,6 @@ on:
           - backup
           - jump
           - e2e
-          - v17
           - pentest
           - fix-analytics
           - mosip
