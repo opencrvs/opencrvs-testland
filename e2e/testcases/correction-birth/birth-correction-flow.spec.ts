@@ -341,7 +341,7 @@ test.describe.serial('Birth correction flow', () => {
 
       await expect(page.locator('#requester____type')).toHaveText('Select...')
       await expect(page.locator('#reason____option')).toHaveText('Select...')
-      await page.locator('#crcl-btn').click()
+      await page.getByTestId('exit-button')
     })
   })
 })
