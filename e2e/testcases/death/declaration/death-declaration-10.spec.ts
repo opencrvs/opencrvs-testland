@@ -263,6 +263,30 @@ test.describe.serial('10. Death declaration case - 10', () => {
     })
   })
 
+  test.describe('10.1b Attestation by Health Administrator', async () => {
+    test('Health Administrator attests the notification', async () => {
+      await login(page, CREDENTIALS.HEALTH_ADMINISTRATOR)
+
+      await page.getByText('Pending attestation').click()
+      await page
+        .getByRole('button', { name: 'No name provided' })
+        .first()
+        .click()
+
+      await ensureAssignedToUser(page, CREDENTIALS.HEALTH_ADMINISTRATOR)
+      await selectAction(page, 'Attest')
+      await page.locator('#comments').fill('Attested for review')
+
+      const attestResponse = page.waitForResponse(
+        (response) =>
+          response.url().includes('event.actions.custom') &&
+          response.status() === 200
+      )
+      await page.getByRole('button', { name: 'Confirm' }).click()
+      await attestResponse
+    })
+  })
+
   test.describe('10.2 Declaration Review by RO', async () => {
     test('10.2.1 Navigate to the declaration Edit-action', async () => {
       await login(page, CREDENTIALS.REGISTRATION_OFFICER)

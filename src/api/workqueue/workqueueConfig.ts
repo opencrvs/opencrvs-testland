@@ -82,7 +82,7 @@ export const Workqueues = defineWorkqueues([
     query: {
       flags: {
         anyOf: [InherentFlags.INCOMPLETE],
-        noneOf: [InherentFlags.REJECTED]
+        noneOf: [InherentFlags.REJECTED, 'attestation-required']
       },
       updatedAtLocation: {
         type: 'within',
@@ -143,6 +143,20 @@ export const Workqueues = defineWorkqueues([
     query: {
       ...createdInMyAdminArea,
       flags: { anyOf: [InherentFlags.REJECTED] }
+    },
+    action: { type: ActionType.READ }
+  },
+  {
+    slug: 'pending-attestation',
+    icon: 'Handshake',
+    name: {
+      id: 'workqueues.pendingAttestation.title',
+      defaultMessage: 'Pending attestation',
+      description: 'Title of pending attestation workqueue'
+    },
+    query: {
+      ...createdInMyAdminArea,
+      flags: { anyOf: ['attestation-required'] }
     },
     action: { type: ActionType.READ }
   },

@@ -69,11 +69,14 @@ export const connectToMOSIPIdReader = (
   {
     valuePath,
     disableIf,
-    hideIf
+    hideIf,
+    additionalValueSources = []
   }: {
     valuePath: string
     disableIf?: string[]
     hideIf?: string[]
+    // Used by BRN lookup
+    additionalValueSources?: FieldReference[]
   }
 ): FieldConfigInput => {
   const page = fieldInput.id.split('.')[0]
@@ -88,7 +91,8 @@ export const connectToMOSIPIdReader = (
       ...fieldInput,
       value: [
         field(`${page}.verify-nid-http-fetch`).get(valuePath),
-        field(`${page}.id-reader`).get(valuePath)
+        field(`${page}.id-reader`).get(valuePath),
+        ...additionalValueSources
       ]
     },
     { hideIf, disableIf }

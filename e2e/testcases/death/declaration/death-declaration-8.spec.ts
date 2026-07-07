@@ -280,6 +280,32 @@ test.describe.serial('8. Death declaration case - 8', () => {
     })
   })
 
+  test.describe('8.1b Attestation by Health Administrator', async () => {
+    test('Health Administrator attests the notification', async () => {
+      await login(page, CREDENTIALS.HEALTH_ADMINISTRATOR)
+
+      await page.getByText('Pending attestation').click()
+      await openRecordByTitle(
+        page,
+        declaration.deceased.name.firstname +
+          ' ' +
+          declaration.deceased.name.surname
+      )
+
+      await ensureAssignedToUser(page, CREDENTIALS.HEALTH_ADMINISTRATOR)
+      await selectAction(page, 'Attest')
+      await page.locator('#comments').fill('Attested for review')
+
+      const attestResponse = page.waitForResponse(
+        (response) =>
+          response.url().includes('event.actions.custom') &&
+          response.status() === 200
+      )
+      await page.getByRole('button', { name: 'Confirm' }).click()
+      await attestResponse
+    })
+  })
+
   test.describe('8.2 Declaration Review by RO', async () => {
     test('8.2.1 Navigate to the declaration Edit-action', async () => {
       await login(page, CREDENTIALS.REGISTRATION_OFFICER)
