@@ -252,3 +252,72 @@ export async function createDeclaration(
     registrationNumber
   }
 }
+
+/**
+ * Notifies and then declares the same event as the same user, so that
+ * `legalStatuses.NOTIFIED.createdBy` is set to the caller. Roles scoped by
+ * `notifiedBy`/`notifiedIn` (e.g. Hospital Official) need this to retain
+ * `record.read`/`record.edit` access to a record they later declare.
+ */
+export async function notifyAndDeclare(
+  token: string,
+  placeOfBirthType?: 'PRIVATE_HOME' | 'HEALTH_FACILITY'
+): Promise<CreateDeclarationResponse> {
+  const declaration = await getDeclaration({ placeOfBirthType, token })
+
+  const client = createClient(GATEWAY_HOST + '/events', `Bearer ${token}`)
+
+  const createResponse = await client.event.create.mutate({
+    type: 'birth',
+    transactionId: uuidv4()
+  })
+
+  const eventId = createResponse.id as string
+
+  const filename = await uploadFile(getSignatureFile(), token)
+
+  const annotation = {
+    'review.comment': 'My comment',
+    'review.signature': filename
+  }
+
+  await client.event.actions.notify.request.mutate({
+    eventId,
+    transactionId: uuidv4(),
+    declaration,
+    annotation,
+    keepAssignment: true
+  })
+
+  // A NOTIFIED event only allows DECLARE once an EDIT action is the latest
+  // accepted action (sets the EDIT_IN_PROGRESS flag, which unlocks DECLARE).
+  await client.event.actions.edit.request.mutate({
+    eventId,
+    transactionId: uuidv4(),
+    declaration,
+    annotation,
+    content: {},
+    keepAssignmentIfAccepted: true
+  })
+
+  const declareRes = await client.event.actions.declare.request.mutate({
+    eventId,
+    transactionId: uuidv4(),
+    declaration,
+    annotation
+  })
+
+  const declareAction = declareRes.actions.find(
+    (action: ActionDocument) => action.type === ActionType.DECLARE
+  )
+
+  if (!declareAction || !('declaration' in declareAction)) {
+    throw new Error('Declaration info not found in action')
+  }
+
+  return {
+    eventId,
+    declaration: declareAction.declaration as Declaration,
+    trackingId: declareRes.trackingId
+  }
+}
