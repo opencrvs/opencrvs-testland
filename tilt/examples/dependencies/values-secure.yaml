@@ -12,8 +12,5 @@ minio:
 elasticsearch:
   use_default_credentials: false
 
-mongodb:
-  use_default_credentials: false
-
 postgres:
   use_default_credentials: false

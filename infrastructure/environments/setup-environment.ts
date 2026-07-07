@@ -683,20 +683,6 @@ const derivedVariables = [
     scope: 'ENVIRONMENT'
   },
   {
-    name: 'MONGODB_ADMIN_USER',
-    valueLabel: 'MONGODB_ADMIN_USER',
-    valueType: 'SECRET',
-    type: 'disabled',
-    scope: 'ENVIRONMENT'
-  },
-  {
-    name: 'MONGODB_ADMIN_PASSWORD',
-    valueLabel: 'MONGODB_ADMIN_PASSWORD',
-    valueType: 'SECRET',
-    type: 'disabled',
-    scope: 'ENVIRONMENT'
-  },
-  {
     name: 'POSTGRES_USER',
     valueLabel: 'POSTGRES_USER',
     valueType: 'SECRET',
@@ -1238,40 +1224,6 @@ const SPECIAL_NON_APPLICATION_ENVIRONMENTS = ['jump', 'backup']
       ),
       value: findExistingOrDefine(
         'MINIO_ROOT_PASSWORD',
-        'SECRET',
-        'ENVIRONMENT',
-        generateLongPassword()
-      ),
-      scope: 'ENVIRONMENT' as const
-    },
-    {
-      name: 'MONGODB_ADMIN_USER',
-      type: 'SECRET' as const,
-      didExist: findExistingValue(
-        'MONGODB_ADMIN_USER',
-        'SECRET',
-        'ENVIRONMENT',
-        existingValues
-      ),
-      value: findExistingOrDefine(
-        'MONGODB_ADMIN_USER',
-        'SECRET',
-        'ENVIRONMENT',
-        generateLongPassword()
-      ),
-      scope: 'ENVIRONMENT' as const
-    },
-    {
-      name: 'MONGODB_ADMIN_PASSWORD',
-      type: 'SECRET' as const,
-      didExist: findExistingValue(
-        'MONGODB_ADMIN_PASSWORD',
-        'SECRET',
-        'ENVIRONMENT',
-        existingValues
-      ),
-      value: findExistingOrDefine(
-        'MONGODB_ADMIN_PASSWORD',
         'SECRET',
         'ENVIRONMENT',
         generateLongPassword()

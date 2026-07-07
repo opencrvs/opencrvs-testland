@@ -1,9 +1,0 @@
-- name: Copy MongoDB replication security key file to nodes
-  copy: src=/tmp/mongodb-keyfile dest=/mongodb-keyfile mode=0400 force=no
-
-- name: Change access right of key file
-  file:
-    path: /mongodb-keyfile
-    state: file
-    owner: 1000
-    group: 1000

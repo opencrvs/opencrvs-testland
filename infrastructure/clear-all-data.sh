@@ -14,9 +14,6 @@ set -e
 print_usage_and_exit () {
     echo 'Usage: ./clear-all-data.sh REPLICAS'
     echo ""
-    echo "If your MongoDB is password protected, an admin user's credentials can be given as environment variables:"
-    echo "MONGODB_ADMIN_USER=your_user MONGODB_ADMIN_PASSWORD=your_pass"
-    echo ""
     echo "If your Elasticsearch is password protected, an admin user's credentials can be given as environment variables:"
     echo "ELASTICSEARCH_ADMIN_USER=your_user ELASTICSEARCH_ADMIN_PASSWORD=your_pass"
     echo ""
@@ -48,28 +45,11 @@ if ! [[ "$REPLICAS" =~ ^[0-9]+$ ]]; then
 fi
 
 if [ "$REPLICAS" = "0" ]; then
-  HOST=mongo1
   NETWORK=opencrvs_default
   echo "Working with no replicas"
 else
   NETWORK=opencrvs_overlay_net
-  # Construct the HOST string rs0/mongo1,mongo2... based on the number of replicas
-  HOST="rs0/"
-  for (( i=1; i<=REPLICAS; i++ )); do
-    if [ $i -gt 1 ]; then
-      HOST="${HOST},"
-    fi
-    HOST="${HOST}mongo${i}"
-  done
 fi
-
-mongo_credentials() {
-  if [ ! -z ${MONGODB_ADMIN_USER+x} ] || [ ! -z ${MONGODB_ADMIN_PASSWORD+x} ]; then
-    echo "--username $MONGODB_ADMIN_USER --password $MONGODB_ADMIN_PASSWORD --authenticationDatabase admin";
-  else
-    echo "";
-  fi
-}
 
 elasticsearch_host() {
   if [ ! -z ${ELASTICSEARCH_ADMIN_USER+x} ] || [ ! -z ${ELASTICSEARCH_ADMIN_PASSWORD+x} ]; then
@@ -78,27 +58,6 @@ elasticsearch_host() {
     echo "elasticsearch:9200";
   fi
 }
-
-drop_database () {
-  local database=${1}
-  docker run --rm --network=$NETWORK mongo:4.4 mongo $database $(mongo_credentials) --host $HOST --eval "db.dropDatabase()"
-}
-
-# Delete all data from mongo
-#---------------------------
-drop_database hearth-dev;
-
-drop_database events;
-
-drop_database openhim-dev;
-
-drop_database user-mgnt;
-
-drop_database application-config;
-
-drop_database metrics;
-
-drop_database performance;
 
 # Delete all data from elasticsearch
 #-----------------------------------

@@ -39,31 +39,6 @@
     - is_mounted.rc != 0
 
   # Create data directories
-- name: Check mongo data directory
-  stat:
-    path: /data/mongo
-  register: mongo_data
-
-- name: 'Create mongo data directory'
-  file:
-    path: /data/mongo
-    state: directory
-  when: not mongo_data.stat.exists
-
-- name: Check mongo data backup directory
-  stat:
-    path: /data/backups/mongo
-  register: mongo_data_backup
-
-- name: 'Create mongo backup directory'
-  file:
-    path: /data/backups/mongo
-    state: directory
-    group: 1000
-    owner: 1000
-    mode: g+rwx
-  when: not mongo_data_backup.stat.exists
-
 - name: 'Create traefik data directory'
   file:
     path: /data/traefik
@@ -257,8 +232,6 @@
     owner: 1000
     mode: g+rwx
     content: |
-      MONGODB_ADMIN_PASSWORD={{ mongodb_admin_password }}
-      MONGODB_ADMIN_USER={{ mongodb_admin_username }}
       POSTGRES_USER={{ postgres_user }}
       POSTGRES_PASSWORD={{ postgres_password }}
       ELASTICSEARCH_ADMIN_PASSWORD={{elasticsearch_superuser_password}}

@@ -183,69 +183,6 @@ services:
       options:
         gelf-address: 'udp://127.0.0.1:12201'
         tag: 'kibana'
-  # Configure mongo nodes as a replica set
-  mongo1:
-    command: mongod --auth --replSet rs0 --keyFile /etc/mongodb-keyfile
-    hostname: 'mongo1'
-    volumes:
-      - '/data/mongo:/data/db'
-      - '/mongodb-keyfile:/mongodb-keyfile'
-    # https://github.com/docker-library/mongo/issues/475
-    entrypoint:
-      - bash
-      - -c
-      - |
-        cp /mongodb-keyfile /etc/mongodb-keyfile
-        chmod 400 /etc/mongodb-keyfile
-        chown 999:999 /etc/mongodb-keyfile
-        exec docker-entrypoint.sh $$@
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME=${MONGODB_ADMIN_USER}
-      - MONGO_INITDB_ROOT_PASSWORD=${MONGODB_ADMIN_PASSWORD}
-    deploy:
-      replicas: 1
-      labels:
-        - 'traefik.enable=false'
-      placement:
-        constraints:
-          - node.labels.data1 == true
-    networks:
-      - overlay_net
-    logging:
-      driver: gelf
-      options:
-        gelf-address: 'udp://127.0.0.1:12201'
-        tag: 'mongo1'
-  mongo-on-update:
-    image: mongo:4.4
-    command: bash /on-deploy.sh
-    configs:
-      - source: mongo-on-deploy.{{ts}}
-        target: /on-deploy.sh
-    deploy:
-      labels:
-        - traefik.enable=false
-      replicas: 1
-      # If this doesn't get run successfully, both the replica set in mongo and
-      # the user schema remains uninitialized.
-      restart_policy:
-        condition: on-failure
-        delay: 10s
-    environment:
-      - REPLICAS=1
-      - MONGODB_ADMIN_USER=${MONGODB_ADMIN_USER}
-      - MONGODB_ADMIN_PASSWORD=${MONGODB_ADMIN_PASSWORD}
-      - USER_MGNT_MONGODB_PASSWORD=${USER_MGNT_MONGODB_PASSWORD}
-      - HEARTH_MONGODB_PASSWORD=${HEARTH_MONGODB_PASSWORD}
-      - PERFORMANCE_MONGODB_PASSWORD=${PERFORMANCE_MONGODB_PASSWORD}
-      - EVENTS_MONGODB_PASSWORD=${EVENTS_MONGODB_PASSWORD}
-    networks:
-      - overlay_net
-    logging:
-      driver: gelf
-      options:
-        gelf-address: 'udp://127.0.0.1:12201'
-        tag: 'mongo-on-update'
   # Configure redis
   redis:
     command: ['redis-server', '/usr/local/etc/redis/redis.conf']
@@ -543,7 +480,6 @@ services:
       - NODE_ENV=production
       - OPENCRVS_ENVIRONMENT=production
       - AUTH_URL=http://auth:4040
-      - MONGO_URL=mongodb://mongo1/user-mgnt?replicaSet=rs0
       - APN_SERVICE_URL=http://apm-server:8200
       - COUNTRY_CONFIG_URL=https://countryconfig.{{hostname}}
       - LOGIN_URL=https://login.{{hostname}}
@@ -639,8 +575,6 @@ services:
     environment:
       - NODE_ENV=production
       - APN_SERVICE_URL=http://apm-server:8200
-      - EVENTS_MONGO_URL=mongodb://events:${EVENTS_MONGODB_PASSWORD}@mongo1/events?replicaSet=rs0
-      - USER_MGNT_MONGO_URL=mongodb://user-mgnt:${USER_MGNT_MONGODB_PASSWORD}@mongo1/user-mgnt?replicaSet=rs0
       - ES_URL=http://search-user:${ROTATING_SEARCH_ELASTIC_PASSWORD}@elasticsearch:9200
       - EVENTS_POSTGRES_URL=postgres://events_app:${EVENTS_APP_POSTGRES_PASSWORD}@postgres/events
       - CERT_PUBLIC_KEY_PATH=/run/secrets/jwt-public-key.{{ts}}
@@ -720,10 +654,6 @@ services:
         tag: 'documents'
   migration:
     environment:
-      - USER_MGNT_MONGO_URL=mongodb://user-mgnt:${USER_MGNT_MONGODB_PASSWORD}@mongo1/user-mgnt?replicaSet=rs0
-      - DASHBOARD_MONGO_URL=mongodb://performance:${PERFORMANCE_MONGODB_PASSWORD}@mongo1/performance?replicaSet=rs0
-      - HEARTH_MONGO_URL=mongodb://hearth:${HEARTH_MONGODB_PASSWORD}@mongo1/hearth-dev?replicaSet=rs0
-      - EVENTS_MONGO_URL=mongodb://events:${EVENTS_MONGODB_PASSWORD}@mongo1/events?replicaSet=rs0
       - EVENTS_POSTGRES_URL=postgres://events_migrator:${EVENTS_MIGRATOR_POSTGRES_PASSWORD}@postgres/events
       - ES_HOST=search-user:${ROTATING_SEARCH_ELASTIC_PASSWORD}@elasticsearch:9200
       - MINIO_ACCESS_KEY=${MINIO_ROOT_USER}
@@ -746,46 +676,8 @@ services:
         gelf-address: 'udp://127.0.0.1:12201'
         tag: 'migration'
 
-  legacy-data-migration:
-    image: ghcr.io/opencrvs/ocrvs-migration:${VERSION}
-    command:
-      ['/bin/sh', '-c', '/app/wait && yarn start:prod --migrate-legacy-data']
-    environment:
-      - USER_MGNT_MONGO_URL=mongodb://user-mgnt:${USER_MGNT_MONGODB_PASSWORD}@mongo1/user-mgnt?replicaSet=rs0
-      - DASHBOARD_MONGO_URL=mongodb://performance:${PERFORMANCE_MONGODB_PASSWORD}@mongo1/performance?replicaSet=rs0
-      - HEARTH_MONGO_URL=mongodb://hearth:${HEARTH_MONGODB_PASSWORD}@mongo1/hearth-dev?replicaSet=rs0
-      - EVENTS_MONGO_URL=mongodb://events:${EVENTS_MONGODB_PASSWORD}@mongo1/events?replicaSet=rs0
-      - EVENTS_POSTGRES_URL=postgres://events_migrator:${EVENTS_MIGRATOR_POSTGRES_PASSWORD}@postgres/events
-      - EVENTS_SUPERUSER_POSTGRES_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres/events
-      - ES_HOST=search-user:${ROTATING_SEARCH_ELASTIC_PASSWORD}@elasticsearch:9200
-      - WAIT_HOSTS=mongo1:27017,minio:9000,elasticsearch:9200
-      - MINIO_ACCESS_KEY=${MINIO_ROOT_USER}
-      - MINIO_SECRET_KEY=${MINIO_ROOT_PASSWORD}
-      - MINIO_HOST=minio
-      - MINIO_PORT=9000
-      - MINIO_BUCKET=ocrvs
-      - SUPER_USER_PASSWORD=${SUPER_USER_PASSWORD}
-      - MONGO_HOST=mongo1
-      - MONGO_PORT=27017
-      - MONGO_USERNAME=${MONGODB_ADMIN_USER}
-      - MONGO_PASSWORD=${MONGODB_ADMIN_PASSWORD}
-      - MONGO_REPLICA_SET=rs0
-    deploy:
-      labels:
-        - 'traefik.enable=false'
-      replicas: 1
-      restart_policy:
-        condition: on-failure
-    networks:
-      - overlay_net
-    logging:
-      driver: gelf
-      options:
-        gelf-address: 'udp://127.0.0.1:12201'
-        tag: 'legacy-data-migration'
-
   postgres:
-    image: docker.io/chumaky/postgres_mongo_fdw:17.6_fdw5.5.2
+    image: postgres:17.6
     networks:
       - overlay_net
     restart: unless-stopped
@@ -1024,16 +916,12 @@ secrets:
   jwt-private-key.{{ts}}:
     external: true
 configs:
-  hearth-check-dupe-plugin.{{ts}}:
-    file: /opt/opencrvs/infrastructure/hearth-plugins/checkDuplicateTask.js
   hearth-queryparam-extensions-conf.{{ts}}:
     file: /opt/opencrvs/infrastructure/hearth-queryparam-extensions.json
   metricbeat-conf.{{ts}}:
     file: /opt/opencrvs/infrastructure/monitoring/metricbeat/metricbeat.yml
   filebeat.{{ts}}:
     file: /opt/opencrvs/infrastructure/monitoring/filebeat/filebeat.yml
-  mongo-on-deploy.{{ts}}:
-    file: /opt/opencrvs/infrastructure/mongodb/on-deploy.sh
   postgres-on-deploy.{{ts}}:
     file: /opt/opencrvs/infrastructure/postgres/on-deploy.sh
   postgres-analytics-on-deploy.{{ts}}:

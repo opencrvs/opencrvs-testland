@@ -16,9 +16,6 @@ backup:
 restore:
   enabled: false
 
-mongodb:
-  use_default_credentials: false
-
 postgres:
   enabled: false
 

@@ -4,7 +4,6 @@ def copy_secrets(dependencies_namespace, opencrvs_namespace):
         "elasticsearch-admin-user",
         "redis-opencrvs-users",
         "minio-opencrvs-users",
-        "mongodb-admin-user",
         "postgres-admin-user",
     ]
     k8s_resource(

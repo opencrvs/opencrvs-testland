@@ -11,8 +11,6 @@
 - name: 'Check mandatory variables are defined'
   assert:
     that:
-      - mongodb_admin_username is defined
-      - mongodb_admin_password is defined
       - elasticsearch_superuser_password is defined
       - encrypted_disk_size is defined
 
