@@ -11,6 +11,8 @@
 - name: 'Check mandatory variables are defined'
   assert:
     that:
+      - postgres_user is defined
+      - postgres_password is defined
       - elasticsearch_superuser_password is defined
       - encrypted_disk_size is defined
 
