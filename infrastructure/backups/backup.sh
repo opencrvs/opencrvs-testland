@@ -44,10 +44,6 @@ for i in "$@"; do
     REMOTE_DIR="${i#*=}"
     shift
     ;;
-  --replicas=*)
-    REPLICAS="${i#*=}"
-    shift
-    ;;
   --label=*)
     LABEL="${i#*=}"
     shift
@@ -61,7 +57,7 @@ for i in "$@"; do
 done
 
 print_usage_and_exit() {
-  echo 'Usage: ./backup.sh --passphrase=XXX --ssh_user=XXX --ssh_host=XXX --ssh_port=XXX --remote_dir=XXX --replicas=XXX --label=XXX'
+  echo 'Usage: ./backup.sh --passphrase=XXX --ssh_user=XXX --ssh_host=XXX --ssh_port=XXX --remote_dir=XXX --label=XXX'
   echo "Script must receive SSH details and a target directory of a remote server to copy backup files to."
   echo "Optionally a LABEL i.e. 'v1.0.1' can be provided to be appended to the backup file labels"
   echo "7 days of backup data will be retained in the manager node"
@@ -70,12 +66,6 @@ print_usage_and_exit() {
   echo "ELASTICSEARCH_ADMIN_USER=your_user ELASTICSEARCH_ADMIN_PASSWORD=your_pass"
   exit 1
 }
-
-# Check if REPLICAS is a number and greater than 0
-if ! [[ "$REPLICAS" =~ ^[0-9]+$ ]]; then
-  echo "Script must be passed a positive integer number of replicas"
-  exit 1
-fi
 
 if [ "$IS_LOCAL" = false ]; then
   ROOT_PATH=${ROOT_PATH:-/data}
@@ -93,10 +83,6 @@ if [ "$IS_LOCAL" = false ]; then
   fi
   if [ -z "$REMOTE_DIR" ]; then
     echo "Error: Argument for the --remote_dir is required."
-    print_usage_and_exit
-  fi
-  if [ -z "$REPLICAS" ]; then
-    echo "Error: Argument for the --replicas is required."
     print_usage_and_exit
   fi
   if [ -z "$PASSPHRASE" ]; then
@@ -139,9 +125,6 @@ chown -R 1000:1000 $ROOT_PATH/backups
 if [ "$IS_LOCAL" = true ]; then
   NETWORK=opencrvs_default
   echo "Working in a local environment"
-elif [ "$REPLICAS" = "0" ]; then
-  NETWORK=opencrvs_default
-  echo "Working with no replicas"
 else
   NETWORK=opencrvs_overlay_net
 fi

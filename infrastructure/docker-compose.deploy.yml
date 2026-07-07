@@ -916,8 +916,6 @@ secrets:
   jwt-private-key.{{ts}}:
     external: true
 configs:
-  hearth-queryparam-extensions-conf.{{ts}}:
-    file: /opt/opencrvs/infrastructure/hearth-queryparam-extensions.json
   metricbeat-conf.{{ts}}:
     file: /opt/opencrvs/infrastructure/monitoring/metricbeat/metricbeat.yml
   filebeat.{{ts}}:

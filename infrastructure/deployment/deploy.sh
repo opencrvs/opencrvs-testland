@@ -51,11 +51,6 @@ for i in "$@"; do
         export COUNTRY_CONFIG_VERSION="${i#*=}"
         shift
         ;;
-    --replicas=*)
-        # Exported so that it can be used in the docker-compose files
-        export REPLICAS="${i#*=}"
-        shift
-        ;;
     *) ;;
 
     esac
@@ -89,12 +84,11 @@ function trapint {
 }
 
 print_usage_and_exit () {
-  echo 'Usage: ./deploy.sh --host --environment --ssh_host --ssh_port --ssh_user --version --country_config_version --replicas'
+  echo 'Usage: ./deploy.sh --host --environment --ssh_host --ssh_port --ssh_user --version --country_config_version'
   echo "  --environment can be 'production', 'development', 'qa' or similar"
   echo '  --host    is the server to deploy to'
   echo "  --version can be any OpenCRVS Core docker image tag or 'latest'"
   echo "  --country_config_version can be any OpenCRVS Country Configuration docker image tag or 'latest'"
-  echo "  --replicas number of replicas in your deployment.  Can be 1, 3 or 5"
   exit 1
 }
 
@@ -131,11 +125,6 @@ validate_options() {
 
   if [ -z "$COUNTRY_CONFIG_VERSION" ] ; then
     echo 'Error: Argument --country_config_version is required.'
-    print_usage_and_exit
-  fi
-
-  if [ -z "$REPLICAS" ] ; then
-    echo 'Error: Argument --replicas is required in position 8.'
     print_usage_and_exit
   fi
 }

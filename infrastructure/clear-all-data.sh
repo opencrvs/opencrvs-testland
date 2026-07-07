@@ -12,7 +12,7 @@
 set -e
 
 print_usage_and_exit () {
-    echo 'Usage: ./clear-all-data.sh REPLICAS'
+    echo 'Usage: ./clear-all-data.sh'
     echo ""
     echo "If your Elasticsearch is password protected, an admin user's credentials can be given as environment variables:"
     echo "ELASTICSEARCH_ADMIN_USER=your_user ELASTICSEARCH_ADMIN_PASSWORD=your_pass"
@@ -32,24 +32,7 @@ if [ -z "${POSTGRES_PASSWORD:-}" ]; then
     print_usage_and_exit
 fi
 
-if [ -z "$1" ] ; then
-    echo 'Error: Argument REPLICAS is required in position 1.'
-    print_usage_and_exit
-fi
-
-
-REPLICAS=$1
-if ! [[ "$REPLICAS" =~ ^[0-9]+$ ]]; then
-  echo "Script must be passed a positive integer number of replicas. Got '$REPLICAS'"
-  print_usage_and_exit
-fi
-
-if [ "$REPLICAS" = "0" ]; then
-  NETWORK=opencrvs_default
-  echo "Working with no replicas"
-else
-  NETWORK=opencrvs_overlay_net
-fi
+NETWORK=opencrvs_overlay_net
 
 elasticsearch_host() {
   if [ ! -z ${ELASTICSEARCH_ADMIN_USER+x} ] || [ ! -z ${ELASTICSEARCH_ADMIN_PASSWORD+x} ]; then

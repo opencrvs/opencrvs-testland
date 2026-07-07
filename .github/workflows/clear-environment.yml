@@ -59,7 +59,6 @@ jobs:
           SSH_USER: ${{ secrets.SSH_USER }}
           SSH_HOST: ${{ vars.SSH_HOST }}
           SSH_PORT: ${{ vars.SSH_PORT }}
-          REPLICAS: ${{ vars.REPLICAS }}
           ELASTICSEARCH_SUPERUSER_PASSWORD: ${{ secrets.ELASTICSEARCH_SUPERUSER_PASSWORD }}
           MINIO_ROOT_USER: ${{ secrets.MINIO_ROOT_USER }}
           MINIO_ROOT_PASSWORD: ${{ secrets.MINIO_ROOT_PASSWORD }}
@@ -74,7 +73,7 @@ jobs:
             MINIO_ROOT_PASSWORD=$MINIO_ROOT_PASSWORD \
             POSTGRES_USER=$POSTGRES_USER \
             POSTGRES_PASSWORD=$POSTGRES_PASSWORD \
-            /opt/opencrvs/infrastructure/clear-all-data.sh $REPLICAS"
+            /opt/opencrvs/infrastructure/clear-all-data.sh"
 
           echo "Running migrations..."
           echo

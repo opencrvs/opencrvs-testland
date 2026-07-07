@@ -23,10 +23,6 @@ fi
 # Reading Named parameters
 for i in "$@"; do
   case $i in
-  --replicas=*)
-    REPLICAS="${i#*=}"
-    shift
-    ;;
   --label=*)
     LABEL="${i#*=}"
     shift
@@ -36,7 +32,7 @@ for i in "$@"; do
 done
 
 print_usage_and_exit() {
-  echo 'Usage: ./restore.sh --replicas=XXX'
+  echo 'Usage: ./restore.sh'
   echo "This script CLEARS ALL DATA and RESTORES A SPECIFIC DAY'S or label's data. This process is irreversible, so USE WITH CAUTION."
   echo "Script must receive a label parameter to restore data from that specific day in format +%Y-%m-%d i.e. 2019-01-01 or that label"
   echo "The Elasticsearch backup folder /data/backups/elasticsearch must exist with all previous snapshots and indices. All files are required"
@@ -50,19 +46,9 @@ if [ -z "$LABEL" ]; then
   LABEL=$(date +%Y-%m-%d)
 fi
 
-# Check if REPLICAS is a number and greater than 0
-if ! [[ "$REPLICAS" =~ ^[0-9]+$ ]]; then
-  echo "Script must be passed a positive integer number of replicas"
-  exit 1
-fi
-
 if [ "$IS_LOCAL" = false ]; then
   ROOT_PATH=${ROOT_PATH:-/data}
 
-  if [ -z "$REPLICAS" ]; then
-    echo "Error: Argument for the --replicas is required."
-    print_usage_and_exit
-  fi
   # In this example, we load the ELASTICSEARCH_ADMIN_USER & ELASTICSEARCH_ADMIN_PASSWORD database access secrets from a file.
   # We recommend that the secrets are served via a secure API from a Hardware Security Module
   source /data/secrets/opencrvs.secrets
@@ -82,9 +68,6 @@ fi
 if [ "$IS_LOCAL" = true ]; then
   NETWORK=opencrvs_default
   echo "Working in local environment"
-elif [ "$REPLICAS" = "0" ]; then
-  NETWORK=opencrvs_default
-  echo "Working with no replicas"
 else
   NETWORK=opencrvs_overlay_net
 fi
