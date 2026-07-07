@@ -43,6 +43,7 @@ type Workqueue =
   | 'Notifications'
   | 'Potential duplicate'
   | 'Pending updates'
+  | 'Pending attestation'
   | 'Pending approval'
   | 'Escalated'
   | 'Pending registration'
@@ -80,6 +81,7 @@ export async function selectAction(
     | 'Approve'
     | 'Edit'
     | 'Escalate'
+    | 'Attest'
     | 'Registrar general feedback'
     | 'Provincial registrar feedback'
     | 'Revoke registration'
@@ -103,6 +105,7 @@ export async function selectAction(
 
 const usernameToFullNameMap = {
   'k.cwalya': 'Kalusha Cwalya',
+  'h.habazoka': 'Hakainde Habazoka',
   'k.bwalya': 'Kalusha Bwalya',
   'g.phiri': 'Gift Phiri',
   'f.katongo': 'Felix Katongo',

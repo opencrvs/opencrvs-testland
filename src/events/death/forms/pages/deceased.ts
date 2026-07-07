@@ -18,7 +18,8 @@ import {
   AddressType,
   PageTypes,
   field,
-  user
+  user,
+  defineConditional
 } from '@opencrvs/toolkit/events'
 import { not, never } from '@opencrvs/toolkit/conditionals'
 import {
@@ -76,6 +77,76 @@ export const deceased = defineFormPage({
     id: 'form.death.deceased.title'
   },
   fields: [
+    {
+      id: 'deceased.birthRecordSearch',
+      type: FieldType.SEARCH,
+      label: {
+        defaultMessage: 'Search birth record by BRN',
+        description: 'Label for the deceased birth record BRN search field',
+        id: 'v2.event.death.action.declare.form.section.deceased.field.birthRecordSearch.label'
+      },
+      configuration: {
+        query: {
+          type: 'and',
+          clauses: [
+            {
+              'legalStatuses.REGISTERED.registrationNumber': {
+                term: '{term}',
+                type: 'exact'
+              }
+            },
+            {
+              eventType: 'birth'
+            }
+          ]
+        },
+        limit: 10,
+        offset: 0,
+        validation: {
+          validator: defineConditional({
+            type: 'string',
+            pattern: '^[A-Za-z0-9]{12}$',
+            description: 'Must be alpha-numeric and 12 characters long'
+          }),
+          message: {
+            defaultMessage:
+              'Invalid value: Must be alpha-numeric and 12 characters long',
+            description: 'Error message for invalid BRN search value',
+            id: 'v2.event.death.action.declare.form.section.deceased.field.birthRecordSearch.validation.invalid'
+          }
+        },
+        indicators: {
+          ok: {
+            defaultMessage: 'Birth record found',
+            description:
+              'Indicator shown when a matching birth record is found',
+            id: 'v2.event.death.action.declare.form.section.deceased.field.birthRecordSearch.indicators.ok'
+          },
+          clearModal: {
+            title: {
+              defaultMessage: 'Clear birth record?',
+              description: 'Title for the clear confirmation modal',
+              id: 'v2.event.death.action.declare.form.section.deceased.field.birthRecordSearch.clearModal.title'
+            },
+            description: {
+              defaultMessage: 'This will remove the linked birth record.',
+              description: 'Description for the clear confirmation modal',
+              id: 'v2.event.death.action.declare.form.section.deceased.field.birthRecordSearch.clearModal.description'
+            }
+          }
+        }
+      },
+      conditionals: [
+        {
+          type: ConditionalType.SHOW,
+          conditional: field('deceased.nationality').isEqualTo('FAR')
+        },
+        {
+          type: ConditionalType.DISPLAY_ON_REVIEW,
+          conditional: never()
+        }
+      ]
+    },
     // fields:
     // deceased.verified, deceased.query-params, deceased.verify-nid-http-fetch,
     // deceased.fetch-loader, deceased.id-reader
@@ -90,6 +161,8 @@ export const deceased = defineFormPage({
         configuration: farajalandNameConfig,
         required: true,
         hideLabel: true,
+        // Also fill from a birth record matched via the BRN search below.
+        parent: field('deceased.birthRecordSearch'),
         label: {
           defaultMessage: "Deceased's name",
           description: 'This is the label for the field',
@@ -99,7 +172,15 @@ export const deceased = defineFormPage({
       },
       {
         valuePath: 'data.name',
-        disableIf: ['pending', 'verified', 'authenticated']
+        disableIf: ['pending', 'verified', 'authenticated'],
+        additionalValueSources: [
+          field('deceased.birthRecordSearch').getByPath([
+            'data',
+            'firstResult',
+            'declaration',
+            'child.name'
+          ])
+        ]
       }
     ),
     connectToMOSIPIdReader(
@@ -107,6 +188,7 @@ export const deceased = defineFormPage({
         id: 'deceased.gender',
         type: FieldType.SELECT,
         required: true,
+        parent: field('deceased.birthRecordSearch'),
         label: {
           defaultMessage: 'Sex',
           description: 'This is the label for the field',
@@ -116,7 +198,15 @@ export const deceased = defineFormPage({
       },
       {
         valuePath: 'data.gender',
-        disableIf: ['pending', 'verified', 'authenticated']
+        disableIf: ['pending', 'verified', 'authenticated'],
+        additionalValueSources: [
+          field('deceased.birthRecordSearch').getByPath([
+            'data',
+            'firstResult',
+            'declaration',
+            'child.gender'
+          ])
+        ]
       }
     ),
     connectToMOSIPIdReader(
@@ -145,6 +235,7 @@ export const deceased = defineFormPage({
               .date(field('eventDetails.date'))
           }
         ],
+        parent: field('deceased.birthRecordSearch'),
         label: {
           defaultMessage: 'Date of birth',
           description: 'This is the label for the field',
@@ -159,7 +250,15 @@ export const deceased = defineFormPage({
       },
       {
         valuePath: 'data.birthDate',
-        disableIf: ['pending', 'verified', 'authenticated']
+        disableIf: ['pending', 'verified', 'authenticated'],
+        additionalValueSources: [
+          field('deceased.birthRecordSearch').getByPath([
+            'data',
+            'firstResult',
+            'declaration',
+            'child.dob'
+          ])
+        ]
       }
     ),
     connectToMOSIPIdReader(

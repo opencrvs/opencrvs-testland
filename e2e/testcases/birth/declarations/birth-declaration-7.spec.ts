@@ -87,44 +87,13 @@ test.describe.serial('7. Birth declaration case - 7', () => {
     test("7.1.4 Fill father's details", async () => {
       await page.getByLabel("Father's details are not available").check()
       await page.locator('#father____reason').fill(declaration.father.reason)
-      await continueForm(page)
     })
 
-    test('7.1.5 Add supporting documents', async () => {
-      await goToSection(page, 'documents')
-      await uploadImage(
-        page,
-        page.locator('button[name="documents____proofOfBirth"]')
-      )
-
-      /*
-       * Expected result:
-       * As mother and father's details are not given, upload document for mother and father should not be visible
-       */
-      await expect(page.locator('#documents____proofOfMother')).toBeHidden()
-
-      await uploadImageToSection({
-        page,
-        sectionLocator: page.locator('#documents____proofOfInformant'),
-        sectionTitle: 'Birth Certificate',
-        buttonLocator: page.locator(
-          'button[name="documents____proofOfInformant"]'
-        )
-      })
-
-      await uploadImageToSection({
-        page,
-        sectionLocator: page.locator('#documents____proofOther'),
-        sectionTitle: 'Proof of legal guardianship',
-        buttonLocator: page.locator('button[name="documents____proofOther"]')
-      })
+    test('7.1.5 Hospital official should skip Documents page', async () => {
+      await page.getByRole('button', { name: 'Continue' }).click()
     })
 
-    test('7.1.6 Go to review', async () => {
-      await goToSection(page, 'review')
-    })
-
-    test('7.1.7 Verify information on review page', async () => {
+    test('7.1.6 Verify information on review page', async () => {
       /*
        * Expected result: should include
        * - Child's First Name
@@ -217,7 +186,7 @@ test.describe.serial('7. Birth declaration case - 7', () => {
       )
     })
 
-    test('7.1.8 Fill up informant signature', async () => {
+    test('7.1.7 Fill up informant signature', async () => {
       await page.locator('#review____comment').fill(faker.lorem.sentence())
       await page.getByRole('button', { name: 'Sign', exact: true }).click()
       await drawSignature(page, 'review____signature_canvas_element', false)
@@ -229,7 +198,7 @@ test.describe.serial('7. Birth declaration case - 7', () => {
       await expect(page.getByRole('dialog')).not.toBeVisible()
     })
 
-    test('7.1.9 Notify', async () => {
+    test('7.1.8 Notify', async () => {
       await triggerDeclarationAction(page, 'Notify')
 
       await page.getByText('Recent').click()
