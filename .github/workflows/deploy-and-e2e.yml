@@ -203,6 +203,7 @@ jobs:
       - name: Run Playwright Tests
         run: npx playwright test --shard=${{ matrix.shard }}/20
         env:
+          DASHBOARD_E2E: 'true'
           DOMAIN: '${{ vars.DOMAIN }}'
 
       - id: ctrf_check
