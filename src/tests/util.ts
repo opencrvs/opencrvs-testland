@@ -11,5 +11,6 @@
 export function createServerWithEnvironment(env: any) {
   jest.resetModules()
   process.env = { ...process.env, ...env }
+  // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires -- must re-require after resetModules to pick up the patched env
   return require('../').createServer()
 }

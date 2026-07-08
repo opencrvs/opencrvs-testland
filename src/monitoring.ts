@@ -8,6 +8,7 @@
  *
  * Copyright (C) The OpenCRVS Authors located at https://github.com/opencrvs/opencrvs-core/blob/master/AUTHORS.
  */
+/* eslint-disable @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires -- APM must be lazily/conditionally required (dynamic module path, production-only init) */
 import pkgUp from 'pkg-up'
 
 function init() {

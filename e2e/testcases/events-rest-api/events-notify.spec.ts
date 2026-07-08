@@ -13,8 +13,7 @@ import {
   validateActionMenuButton
 } from '../../helpers'
 import { ensureAssignedToUser, expectInUrl, selectAction } from '../../utils'
-import { getAdministrativeAreas, getIdByName } from '../birth/helpers'
-import { formatV2ChildName, REQUIRED_VALIDATION_ERROR } from '../birth/helpers'
+import { getAdministrativeAreas, getIdByName , formatV2ChildName, REQUIRED_VALIDATION_ERROR } from '../birth/helpers'
 import { getDeclaration } from '../test-data/birth-declaration'
 import {
   openRecordByTitle,

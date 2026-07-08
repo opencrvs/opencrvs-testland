@@ -9,11 +9,10 @@ import {
   login,
   switchEventTab,
   expectRowValue
-} from '../../../helpers'
+, triggerDeclarationAction } from '../../../helpers'
 import { faker } from '@faker-js/faker'
 import { CREDENTIALS } from '../../../constants'
 import { fillDate, validateAddress } from '../helpers'
-import { triggerDeclarationAction } from '../../../helpers'
 import { ensureAssignedToUser } from '../../../utils'
 import { openRecordByTitle } from '../../print-certificate/birth/helpers'
 

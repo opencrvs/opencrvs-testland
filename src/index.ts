@@ -8,8 +8,11 @@
  *
  * Copyright (C) The OpenCRVS Authors located at https://github.com/opencrvs/opencrvs-core/blob/master/AUTHORS.
  */
+// eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
 require('app-module-path').addPath(require('path').join(__dirname))
+// eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
 require('dotenv').config()
+// eslint-disable-next-line import/no-unassigned-import
 import './monitoring'
 
 import path from 'path'
@@ -86,6 +89,7 @@ import {
 } from './analytics/analytics'
 import { getClient } from './analytics/postgres'
 import { createClient } from '@opencrvs/toolkit/api'
+import { getBearerToken } from '@countryconfig/utils'
 import { getGovernmentPortalApiRoutes } from './government-portal-api/routes'
 import { Event } from './events/utils/types'
 import { syncReferenceData } from './data-seeding/reference-data/reference-data'
@@ -274,7 +278,7 @@ export async function createServer() {
   server.route({
     method: 'GET',
     path: '/ping',
-    // eslint-disable-next-line no-unused-vars
+
     handler: (request: any, h: any) => {
       // Perform any health checks and return true or false for success prop
       return {
@@ -561,7 +565,7 @@ export async function createServer() {
     }
   })
 
-  server.route({
+  server.route<{ Payload: EventDocument }>({
     method: 'POST',
     path: `/trigger/events/{event}/actions/${ActionType.CUSTOM}`,
     handler: onCustomActionHandler,
@@ -571,7 +575,7 @@ export async function createServer() {
     }
   })
 
-  server.route({
+  server.route<{ Payload: EventDocument }>({
     method: 'POST',
     path: '/trigger/events/{event}/actions/{action}',
     handler: onAnyActionHandler,
@@ -581,7 +585,7 @@ export async function createServer() {
     }
   })
 
-  server.route({
+  server.route<{ Payload: EventDocument }>({
     method: 'POST',
     path: `/trigger/events/birth/actions/${ActionType.APPROVE_CORRECTION}`,
     handler: onBirthCorrectionActionHandler,
@@ -591,7 +595,7 @@ export async function createServer() {
     }
   })
 
-  server.route({
+  server.route<{ Payload: EventDocument }>({
     method: 'POST',
     path: '/trigger/events/birth/actions/{action}',
     handler: onBirthActionHandler,
@@ -601,7 +605,7 @@ export async function createServer() {
     }
   })
 
-  server.route({
+  server.route<{ Payload: EventDocument }>({
     method: 'POST',
     path: '/trigger/events/death/actions/{action}',
     handler: onDeathActionHandler,
@@ -611,7 +615,7 @@ export async function createServer() {
     }
   })
 
-  server.route({
+  server.route<{ Payload: EventDocument }>({
     method: 'POST',
     path: `/trigger/events/${Event.TENNIS_CLUB_MEMBERSHIP}/actions/${ActionType.REGISTER}`,
     handler: onRegisterHandler,
@@ -621,7 +625,7 @@ export async function createServer() {
     }
   })
 
-  server.route({
+  server.route<{ Payload: EventDocument }>({
     method: 'POST',
     path: `/trigger/events/${Event.Birth}/actions/${ActionType.REGISTER}`,
     handler: onMosipBirthRegisterHandler,
@@ -631,7 +635,7 @@ export async function createServer() {
     }
   })
 
-  server.route({
+  server.route<{ Payload: EventDocument }>({
     method: 'POST',
     path: `/trigger/events/${Event.Death}/actions/${ActionType.REGISTER}`,
     handler: onMosipDeathRegisterHandler,
@@ -779,7 +783,10 @@ export async function createServer() {
     // Sync locations at most once per hour rather than every call
     if (now - lastLocationSyncAt > ONE_HOUR_MS) {
       const url = new URL('events', GATEWAY_URL).toString()
-      const apiClient = createClient(url, req.headers.authorization)
+      const apiClient = createClient(
+        url,
+        getBearerToken(req.headers.authorization)
+      )
       const locations = await apiClient.locations.list.query()
       const administrativeAreas =
         await apiClient.administrativeAreas.list.query()

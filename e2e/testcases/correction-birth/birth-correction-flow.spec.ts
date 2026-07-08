@@ -69,6 +69,7 @@ test.describe.serial('Birth correction flow', () => {
   })
 
   test('Fill in the supporting documents form', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
     const path = require('path')
     const attachmentPath = path.join(__dirname, '../test-data/image.png')
     const inputFile = await page.locator(

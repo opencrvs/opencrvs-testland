@@ -1,22 +1,14 @@
-FROM node:22.22.3-alpine AS deps
-WORKDIR /usr/src/app
-ENV NPM_CONFIG_LOGLEVEL=warn
+ARG  BRANCH=develop
+FROM ghcr.io/opencrvs/ocrvs-base:${BRANCH}
 
-# Install dependencies
-COPY package.json yarn.lock ./
-RUN yarn install --frozen-lockfile --production
+USER node
 
-FROM node:22-alpine AS runner
-WORKDIR /usr/src/app
-ENV NPM_CONFIG_LOGLEVEL=warn
+WORKDIR /app/packages/testland
+COPY --chown=node:node packages/testland/*.json /app/packages/testland/
 
-# Copy dependencies from deps stage
-COPY --from=deps /usr/src/app/node_modules ./node_modules
-
-# Copy application files
-COPY package.json yarn.lock tsconfig.json ./
-COPY src ./src
+RUN yarn install --frozen-lockfile
+COPY --chown=node:node packages/testland /app/packages/testland
 
 EXPOSE 3040
 
-CMD ["yarn", "start:prod"]
+CMD [ "yarn", "start:prod" ]

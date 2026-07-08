@@ -71,7 +71,9 @@ test.describe.serial('Correct record - 4', () => {
     col3?: string
   ) => {
     await expect(_page.getByText(col1, { exact: true })).toBeVisible()
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions -- conditional assertion
     col2 && (await expect(_page.getByText(col2, { exact: true })).toBeVisible())
+    // eslint-disable-next-line @typescript-eslint/no-unused-expressions -- conditional assertion
     col3 && (await expect(_page.getByText(col3, { exact: true })).toBeVisible())
   }
 

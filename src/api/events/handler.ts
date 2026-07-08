@@ -11,7 +11,10 @@
 import * as Hapi from '@hapi/hapi'
 import { eventConfigs } from '@countryconfig/events'
 import { sendInformantNotification } from '../notification/informantNotification'
-import { ActionConfirmationRequest } from '../registration'
+import {
+  ActionConfirmationRefs,
+  ActionConfirmationRequest
+} from '../registration'
 import { createMosipInteropClient } from '@opencrvs/mosip/api'
 import {
   Action,
@@ -36,7 +39,7 @@ export function getEventsHandler(_: Hapi.Request, h: Hapi.ResponseToolkit) {
 
 export async function onCustomActionHandler(
   _: ActionConfirmationRequest,
-  h: Hapi.ResponseToolkit
+  h: Hapi.ResponseToolkit<ActionConfirmationRefs>
 ) {
   return h.response().code(200)
 }
@@ -46,7 +49,7 @@ export async function onCustomActionHandler(
  */
 export async function onAnyActionHandler(
   request: ActionConfirmationRequest,
-  h: Hapi.ResponseToolkit
+  h: Hapi.ResponseToolkit<ActionConfirmationRefs>
 ) {
   const token = request.auth.artifacts.token as string
   const event = request.payload
@@ -58,7 +61,7 @@ export async function onAnyActionHandler(
 
 export async function onBirthActionHandler(
   request: ActionConfirmationRequest,
-  h: Hapi.ResponseToolkit
+  h: Hapi.ResponseToolkit<ActionConfirmationRefs>
 ) {
   // Used in local development to disable MOSIP registration dependency
   if (NO_MOSIP) {
@@ -139,7 +142,7 @@ const getAcceptedBirthRegistrationNumber = (actions: Action[]) => {
 
 export async function onBirthCorrectionActionHandler(
   request: ActionConfirmationRequest,
-  h: Hapi.ResponseToolkit
+  h: Hapi.ResponseToolkit<ActionConfirmationRefs>
 ) {
   // Used in local development to disable MOSIP registration dependency
   if (NO_MOSIP) {
@@ -263,7 +266,7 @@ export async function onBirthCorrectionActionHandler(
 
 export async function onDeathActionHandler(
   request: ActionConfirmationRequest,
-  h: Hapi.ResponseToolkit
+  h: Hapi.ResponseToolkit<ActionConfirmationRefs>
 ) {
   // Used in local development to disable MOSIP registration dependency
   if (NO_MOSIP) {

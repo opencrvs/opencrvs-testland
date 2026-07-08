@@ -11,8 +11,7 @@
 
 import { callingCountries } from 'country-data'
 import csv2json from 'csv2json'
-import { createReadStream } from 'fs'
-import fs from 'fs'
+import fs, { createReadStream } from 'fs'
 import { PhoneNumberFormat, PhoneNumberUtil } from 'google-libphonenumber'
 import { build } from 'esbuild'
 import { memoize } from 'lodash'
@@ -291,4 +290,19 @@ export function createUniqueRegistrationNumberFromBundle(bundle: fhir.Bundle) {
       ]
     })
   }
+}
+
+/**
+ * Hapi 21 types `request.headers.authorization` as `string | string[] | undefined`.
+ * The toolkit API client (`createClient`) and downstream credential issuer services
+ * expect a single `Bearer ...` token. Normalize the header to that shape.
+ */
+export function getBearerToken(
+  authorization: string | string[] | undefined
+): `Bearer ${string}` {
+  const token = Array.isArray(authorization) ? authorization[0] : authorization
+  if (!token) {
+    throw new Error('Missing authorization header')
+  }
+  return token as `Bearer ${string}`
 }

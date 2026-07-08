@@ -925,7 +925,7 @@ const SPECIAL_NON_APPLICATION_ENVIRONMENTS = ['jump', 'backup']
           'If connecting to the server requires a VPN connection, please connect your VPN client before trying again.',
           'If your connection is via a jump server, please specify the jump server in the SSH_ARGS variable.'
         )
-        error('Reason:', err.message)
+        error('Reason:', err instanceof Error ? err.message : String(err))
         process.exit(1)
       }
       success(

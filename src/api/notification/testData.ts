@@ -1,13 +1,12 @@
 import { Recipient, TriggerEvent } from '@opencrvs/toolkit/notification'
-import { UUID, DocumentPath } from '@opencrvs/toolkit/events'
-import { TriggerEventPayloadPair } from './handler'
-import {
+import { UUID, DocumentPath ,
   Action,
   ActionStatus,
   ActionType,
   CreatedAction,
   EventDocument
 } from '@opencrvs/toolkit/events'
+import { TriggerEventPayloadPair } from './handler'
 import { Event } from '@countryconfig/events/utils'
 
 const recipient: Recipient = {

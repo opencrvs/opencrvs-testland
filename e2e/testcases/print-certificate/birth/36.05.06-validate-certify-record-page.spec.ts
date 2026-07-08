@@ -1,7 +1,6 @@
 import { expect, test, type Page } from '@playwright/test'
 import { CREDENTIALS } from '../../../constants'
-import { login } from '../../../helpers'
-import { getToken } from '../../../helpers'
+import { login, getToken } from '../../../helpers'
 import {
   createDeclaration,
   Declaration
@@ -14,8 +13,10 @@ import {
   openRecordByTitle
 } from './helpers'
 import { ensureAssignedToUser, type, expectInUrl } from '../../../utils'
-import { REQUIRED_VALIDATION_ERROR } from '../../birth/helpers'
-import { formatV2ChildName } from '../../birth/helpers'
+import {
+  REQUIRED_VALIDATION_ERROR,
+  formatV2ChildName
+} from '../../birth/helpers'
 
 async function selectIdType(page: Page, idType: string) {
   await page.locator('#collector____OTHER____idType').click()
@@ -117,6 +118,7 @@ test.describe.serial('Validate collect payment page', () => {
   })
 
   test('5.7 Should be able to add file and navigate to the payment page', async () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
     const path = require('path')
     const attachmentPath = path.resolve(__dirname, './528KB-random.png')
     const inputFile = await page.locator(

@@ -9,7 +9,7 @@ import {
 } from '@opencrvs/toolkit/events'
 
 // Example of a column that is used in the workqueue config
-// eslint-disable-next-line no-unused-vars
+ 
 const DATE_OF_EVENT_COLUMN = {
   label: {
     id: 'workqueues.dateOfEvent',

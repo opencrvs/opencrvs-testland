@@ -1,7 +1,6 @@
 import { test, type Page, expect } from '@playwright/test'
 import { CREDENTIALS } from '../../../constants'
-import { login } from '../../../helpers'
-import { getToken } from '../../../helpers'
+import { login , getToken } from '../../../helpers'
 import {
   createDeclaration,
   Declaration

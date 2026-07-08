@@ -30,11 +30,10 @@ import {
 } from '@countryconfig/events/mosip'
 import { InformantType as DeathInformantType } from '@countryconfig/events/death/forms/pages/informant'
 
-export interface ActionConfirmationRequest extends Hapi.Request {
-  payload: EventDocument
-}
+export type ActionConfirmationRefs = { Payload: EventDocument }
+export type ActionConfirmationRequest = Hapi.Request<ActionConfirmationRefs>
 
-/* eslint-disable no-unused-vars */
+ 
 
 /**
  * Handler for event registration confirmation.
@@ -62,7 +61,7 @@ export interface ActionConfirmationRequest extends Hapi.Request {
  */
 export async function onRegisterHandler(
   request: ActionConfirmationRequest,
-  h: Hapi.ResponseToolkit
+  h: Hapi.ResponseToolkit<ActionConfirmationRefs>
 ) {
   const token = request.auth.artifacts.token as string
   const event = request.payload
@@ -155,7 +154,7 @@ async function rejectRequestedRegistration(
 
 export async function onMosipBirthRegisterHandler(
   request: ActionConfirmationRequest,
-  h: Hapi.ResponseToolkit
+  h: Hapi.ResponseToolkit<ActionConfirmationRefs>
 ) {
   const token = request.auth.artifacts.token as string
   const event = request.payload
@@ -224,7 +223,7 @@ export async function onMosipBirthRegisterHandler(
 
 export async function onMosipDeathRegisterHandler(
   request: ActionConfirmationRequest,
-  h: Hapi.ResponseToolkit
+  h: Hapi.ResponseToolkit<ActionConfirmationRefs>
 ) {
   const token = request.auth.artifacts.token as string
   const event = request.payload

@@ -10,8 +10,7 @@ import {
 import { getToken, login } from '../../helpers'
 import { CREDENTIALS, GATEWAY_HOST } from '../../constants'
 import { createDeclaration } from '../test-data/birth-declaration-with-mother-father'
-import { formatV2ChildName } from '../birth/helpers'
-import {
+import { formatV2ChildName ,
   getAdministrativeAreas,
   getLocations,
   getIdByName

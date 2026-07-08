@@ -208,7 +208,7 @@ export async function createDeclaration(
 
   if (action === ActionType.DECLARE) {
     const declareAction = declareRes.actions.find(
-      (action: ActionDocument) => action.type === 'DECLARE'
+      (action) => action.type === 'DECLARE'
     )
 
     if (!declareAction || !('declaration' in declareAction)) {

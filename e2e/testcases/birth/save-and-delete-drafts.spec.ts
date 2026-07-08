@@ -1,8 +1,7 @@
 import { expect, Page, test } from '@playwright/test'
-import { goToSection, login, logout } from '../../helpers'
+import { goToSection, login, logout , triggerDeclarationAction } from '../../helpers'
 import { CREDENTIALS } from '../../constants'
 import { fillChildDetails, openBirthDeclaration } from './helpers'
-import { triggerDeclarationAction } from '../../helpers'
 import { selectAction } from '../../utils'
 import { openRecordByTitle } from '../print-certificate/birth/helpers'
 
