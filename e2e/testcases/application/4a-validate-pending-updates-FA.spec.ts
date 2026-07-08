@@ -7,8 +7,7 @@ import {
   formatName
 } from '../../helpers'
 import { CREDENTIALS } from '../../constants'
-import { createDeclaration, Declaration } from '../test-data/birth-declaration'
-import { ActionType } from '@opencrvs/toolkit/events'
+import { notifyAndDeclare, Declaration } from '../test-data/birth-declaration'
 import { formatV2ChildName } from '../birth/helpers'
 import {
   ensureAssignedToUser,
@@ -30,12 +29,7 @@ test.describe.serial('4(a) Validate "Pending updates"-workqueue for HO', () => {
 
   test.beforeAll(async ({ browser }) => {
     const token = await getToken(CREDENTIALS.HOSPITAL_OFFICIAL)
-    const res = await createDeclaration(
-      token,
-      undefined,
-      ActionType.DECLARE,
-      'HEALTH_FACILITY'
-    )
+    const res = await notifyAndDeclare(token, 'HEALTH_FACILITY')
     declaration = res.declaration
     eventId = res.eventId
     formattedChildName = formatV2ChildName(declaration)
