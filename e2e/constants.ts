@@ -43,6 +43,7 @@ export const TEST_USER_PASSWORD = 'test'
 
 export const CREDENTIALS = {
   HOSPITAL_OFFICIAL: 'k.cwalya',
+  HOSPITAL_OFFICIAL_OTHER: 'k.bwalya',
   HEALTH_ADMINISTRATOR: 'h.habazoka',
   COMMUNITY_LEADER: 'g.phiri',
   REGISTRATION_OFFICER: 'f.katongo',

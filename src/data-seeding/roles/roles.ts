@@ -213,10 +213,10 @@ export const roles: Role[] = [
       { type: 'record.search', options: { placeOfEvent: 'location' } },
       { type: 'workqueue', options: { ids: ['assigned-to-you', 'recent', 'pending-attestation', 'pending-updates'] } },
       { type: 'record.create', options: { placeOfEvent: 'location' } },
-      { type: 'record.read', options: { placeOfEvent: 'location' } },
+      { type: 'record.read', options: { event: ['birth', 'death'], notifiedIn: 'location' } },
       { type: 'record.declare', options: { placeOfEvent: 'location' } },
       { type: 'record.notify', options: { placeOfEvent: 'location' } },
-      { type: 'record.edit', options: { placeOfEvent: 'location', declaredBy: 'user' } },
+      { type: 'record.edit', options: { event: ['birth', 'death'], notifiedBy: 'user' } },
       { type: 'record.print-certified-copies', options: { templates: ['v2.tennis-club-membership-certificate-alpha'], registeredIn: 'location' } }
     ])
   },

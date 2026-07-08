@@ -1,8 +1,13 @@
 import { Page, expect, test } from '@playwright/test'
+import { v4 as uuidv4 } from 'uuid'
+import decode from 'jwt-decode'
+import { faker } from '@faker-js/faker'
 import { createClient } from '@opencrvs/toolkit/api'
+import { ActionType } from '@opencrvs/toolkit/events'
 import {
   continueForm,
   drawSignature,
+  getToken,
   goToSection,
   login,
   triggerDeclarationAction
@@ -33,8 +38,8 @@ async function openBirthDeclarationAndCaptureEventId(page: Page) {
   return eventId
 }
 
-async function authenticateMotherWithESignet(page: Page, nid: string) {
-  await page.locator('#mother____verify').click()
+async function authenticateFatherWithESignet(page: Page, nid: string) {
+  await page.locator('#father____verify').click()
 
   await expect(page).toHaveURL(/authorize/)
   await page.locator('#id-input').fill(nid)
@@ -44,7 +49,11 @@ async function authenticateMotherWithESignet(page: Page, nid: string) {
 
 async function fillChildDetails(page: Page) {
   await page.locator('#firstname').fill('E2E PSUT Child')
-  await page.locator('#surname').fill('Persistence')
+  // Randomized to avoid duplicate-detection false positives across reruns,
+  // since the rest of the child's identity fields below are fixed.
+  await page
+    .locator('#surname')
+    .fill(`Persistence-${faker.string.alphanumeric(8)}`)
 
   await page.locator('#child____gender').click()
   await page.getByText('Female', { exact: true }).click()
@@ -69,7 +78,6 @@ async function fillChildDetails(page: Page) {
 
 test.describe('E-Signet PSUT persistence', () => {
   let page: Page
-  let token: string
 
   test.beforeAll(async ({ browser }) => {
     page = await browser.newPage()
@@ -79,10 +87,10 @@ test.describe('E-Signet PSUT persistence', () => {
     await page.close()
   })
 
-  test('Declare birth with mother E-Signet and confirm `sub` in backend payload', async () => {
+  test('Declare birth with father E-Signet and confirm `sub` in backend payload', async () => {
     test.setTimeout(180_000)
 
-    token = await login(page, CREDENTIALS.HOSPITAL_OFFICIAL)
+    await login(page, CREDENTIALS.HOSPITAL_OFFICIAL)
 
     const eventId = await openBirthDeclarationAndCaptureEventId(page)
 
@@ -90,34 +98,33 @@ test.describe('E-Signet PSUT persistence', () => {
     await continueForm(page)
 
     await page.locator('#informant____relation').click()
-    await page.getByText('Mother', { exact: true }).click()
-    await page.locator('#informant____email').fill('psut-mother@example.com')
+    await page.getByText('Father', { exact: true }).click()
+    await page.locator('#informant____email').fill('psut-father@example.com')
     await continueForm(page)
 
-    await authenticateMotherWithESignet(page, MOCK_NID)
+    await page.getByLabel("Mother's details are not available").check()
+    await page.locator('#mother____reason').fill('Mother details not available')
+    await continueForm(page)
+
+    await authenticateFatherWithESignet(page, MOCK_NID)
 
     await expect(page.getByText('ID Authenticated')).toBeVisible({
       timeout: 60_000
     })
 
-    if (await page.locator('#mother____addressSameAs_YES').isVisible()) {
-      await page.locator('#mother____addressSameAs_YES').check()
+    if (await page.locator('#father____addressSameAs_YES').isVisible()) {
+      await page.locator('#father____addressSameAs_YES').check()
     }
 
-    if (await page.locator('#mother____maritalStatus').isVisible()) {
-      await page.locator('#mother____maritalStatus').click()
+    if (await page.locator('#father____maritalStatus').isVisible()) {
+      await page.locator('#father____maritalStatus').click()
       await page.getByText('Single', { exact: true }).click()
     }
 
-    if (await page.locator('#mother____educationalAttainment').isVisible()) {
-      await page.locator('#mother____educationalAttainment').click()
+    if (await page.locator('#father____educationalAttainment').isVisible()) {
+      await page.locator('#father____educationalAttainment').click()
       await page.getByText('No schooling', { exact: true }).click()
     }
-
-    await continueForm(page)
-
-    await page.getByLabel("Father's details are not available").check()
-    await page.locator('#father____reason').fill('Father details not available')
 
     await goToSection(page, 'review')
 
@@ -128,7 +135,28 @@ test.describe('E-Signet PSUT persistence', () => {
 
     await triggerDeclarationAction(page, 'Declare')
 
-    const client = createClient(GATEWAY_HOST + '/events', `Bearer ${token}`)
+    // Hospital Official's `record.read` scope is gated by `notifiedIn`, and
+    // this record was declared directly without a prior NOTIFY action, so
+    // read it back with a role whose `record.read` isn't notify-scoped.
+    const registrationOfficerToken = await getToken(
+      CREDENTIALS.REGISTRATION_OFFICER
+    )
+    const client = createClient(
+      GATEWAY_HOST + '/events',
+      `Bearer ${registrationOfficerToken}`
+    )
+
+    // `father.verify-nid-http-fetch` is a `secured` field, only visible to an
+    // assignee, so the reader must assign themselves before it appears.
+    const { sub: registrationOfficerId } = decode<{ sub: string }>(
+      registrationOfficerToken
+    )
+    await client.event.actions.assignment.assign.mutate({
+      eventId,
+      transactionId: uuidv4(),
+      type: ActionType.ASSIGN,
+      assignedTo: registrationOfficerId
+    })
 
     await expect
       .poll(
@@ -145,7 +173,7 @@ test.describe('E-Signet PSUT persistence', () => {
             sub:
               declareAction &&
               'declaration' in declareAction &&
-              declareAction.declaration?.['mother.verify-nid-http-fetch']?.data
+              declareAction.declaration?.['father.verify-nid-http-fetch']?.data
                 ?.sub
           }
         },
