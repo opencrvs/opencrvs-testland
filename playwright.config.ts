@@ -48,6 +48,15 @@ export default defineConfig({
     ignoreHTTPSErrors
   },
 
+  /*
+   * Dashboard specs only run when DASHBOARD_E2E=true (set by farajaland's
+   * deploy-and-e2e workflow); everywhere else they are excluded by default.
+   */
+  testIgnore:
+    process.env.DASHBOARD_E2E === 'true'
+      ? undefined
+      : /testcases\/dashboard\//,
+
   /* Configure projects for major browsers */
   projects: [
     {
