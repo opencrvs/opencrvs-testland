@@ -39,32 +39,15 @@
     - is_mounted.rc != 0
 
   # Create data directories
-- name: Check legacy mongo data directory
-  stat:
-    path: /data/mongo
-  register: mongo_data
-
-# Backups in /data/backups/mongo are intentionally kept as a rollback
-# safety net until the Postgres migration has been verified in production
 - name: 'Delete legacy mongo data directory if exists'
   file:
     path: /data/mongo
     state: absent
-  when: mongo_data.stat.exists
-
-- name: Check legacy mongo data backup directory
-  stat:
-    path: /data/backups/mongo
-  register: mongo_data_backup
 
 - name: 'Delete legacy mongo backup directory if exists'
   file:
     path: /data/backups/mongo
     state: absent
-    group: 1000
-    owner: 1000
-    mode: g+rwx
-  when: not mongo_data_backup.stat.exists
 
 - name: 'Create traefik data directory'
   file:
@@ -99,21 +82,10 @@
     mode: ugo+rwx
   when: not elasticsearch_data_backup.stat.exists
 
-- name: Check metabase data directory
-  stat:
-    path: /data/metabase
-  register: metabase_data
-
 - name: 'Delete metabase data directory if exists'
   file:
     path: /data/metabase
     state: absent
-  when: metabase_data.stat.exists
-
-- name: Check metabase data backup directory
-  stat:
-    path: /data/backups/metabase
-  register: metabase_data_backup
 
 - name: 'Delete metabase backup directory if exists'
   file:
@@ -121,32 +93,15 @@
     state: absent
   when: metabase_data_backup.stat.exists
 
-- name: Check legacy influxdb data directory
-  stat:
-    path: /data/influxdb
-  register: influxdb_data
-
-# Backups in /data/backups/influxdb are intentionally kept as a rollback
-# safety net until the removal has been verified in production
 - name: 'Delete legacy influxdb data directory if exists'
   file:
     path: /data/influxdb
     state: absent
-  when: influxdb_data.stat.exists
-
-- name: Check legacy influxdb data backup directory
-  stat:
-    path: /data/backups/influxdb
-  register: influxdb_data_backup
 
 - name: 'Delete legacy influxdb backup directory if exists'
   file:
     path: /data/backups/influxdb
     state: absent
-    group: 1000
-    owner: 1000
-    mode: g+rwx
-  when: not influxdb_data_backup.stat.exists
 
 - name: Check Postgres data directory
   stat:
