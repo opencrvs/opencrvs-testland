@@ -234,6 +234,18 @@ export const deathEvent = defineConfig({
           'This is shown as the action name anywhere the user can trigger the action from',
         id: 'event.death.action.notify.label'
       },
+      form: [
+        {
+          id: 'comments',
+          type: 'TEXTAREA',
+          label: {
+            defaultMessage: 'Additional comments',
+            description:
+              'This is the label for the additional comments field on the notify action dialog',
+            id: 'event.death.action.notify.field.comments.label'
+          }
+        }
+      ],
       flags: [
         {
           id: 'attestation-required',

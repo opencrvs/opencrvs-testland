@@ -291,6 +291,27 @@ export const birthEvent = defineConfig({
       review: BIRTH_DECLARATION_REVIEW
     },
     {
+      type: ActionType.NOTIFY,
+      label: {
+        defaultMessage: 'Notify',
+        description:
+          'This is shown as the action name anywhere the user can trigger the action from',
+        id: 'event.birth.action.notify.label'
+      },
+      form: [
+        {
+          id: 'comments',
+          type: 'TEXTAREA',
+          label: {
+            defaultMessage: 'Additional comments',
+            description:
+              'This is the label for the additional comments field on the notify action dialog',
+            id: 'event.birth.action.notify.field.comments.label'
+          }
+        }
+      ]
+    },
+    {
       type: ActionType.DECLARE,
       label: {
         defaultMessage: 'Declare',
