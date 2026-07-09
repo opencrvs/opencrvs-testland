@@ -62,6 +62,36 @@ test.describe('Death form - place of death jurisdiction restrictions', () => {
     await expect(options).toHaveCount(1)
   })
 
+  test('Embassy Official should not be able to choose Health Institution as place of death', async () => {
+    await login(page, CREDENTIALS.EMBASSY_OFFICIAL)
+    await openDeathDeclaration(page)
+
+    await page.locator('#eventDetails____placeOfDeath').click()
+
+    await expect(
+      page.getByText('Health Institution', { exact: true })
+    ).toBeHidden()
+    await expect(
+      page.getByText("Deceased's usual place of residence", { exact: true })
+    ).toBeVisible()
+    await expect(page.getByText('Other', { exact: true })).toBeVisible()
+  })
+
+  test('Community Leader should not be able to choose Health Institution as place of death', async () => {
+    await login(page, CREDENTIALS.COMMUNITY_LEADER)
+    await openDeathDeclaration(page)
+
+    await page.locator('#eventDetails____placeOfDeath').click()
+
+    await expect(
+      page.getByText('Health Institution', { exact: true })
+    ).toBeHidden()
+    await expect(
+      page.getByText("Deceased's usual place of residence", { exact: true })
+    ).toBeVisible()
+    await expect(page.getByText('Other', { exact: true })).toBeVisible()
+  })
+
   test('Registrar should be able to choose all place of death options', async () => {
     await login(page, CREDENTIALS.REGISTRAR)
     await openDeathDeclaration(page)
