@@ -880,6 +880,59 @@ export const birthEvent = defineConfig({
         defaultMessage:
           "Registering this birth event will create an official civil registration record. Please ensure all details are correct before proceeding.<br></br><br></br><strong>WARNING!</strong>: By clicking 'Register', you confirm that you have reviewed the record alongside supporting documentation in the Record tab. The record will proceed to be <strong>legally registered</strong> via the outbox. Further amends after registration can only be made via a legal correction process."
       },
+      form: [
+        {
+          id: 'documents-verified',
+          type: 'SELECT',
+          required: true,
+          label: {
+            defaultMessage: 'Supporting documents reviewed?',
+            description:
+              'This is the label for the supporting documents verification field on the register action dialog',
+            id: 'event.birth.action.register.field.documents-verified.label'
+          },
+          options: [
+            {
+              value: 'YES',
+              label: {
+                defaultMessage: 'Yes',
+                description:
+                  'Option label for supporting documents reviewed: yes',
+                id: 'event.birth.action.register.field.documents-verified.option.yes.label'
+              }
+            },
+            {
+              value: 'NOT_APPLICABLE',
+              label: {
+                defaultMessage: 'Not applicable',
+                description:
+                  'Option label for supporting documents reviewed: not applicable',
+                id: 'event.birth.action.register.field.documents-verified.option.not-applicable.label'
+              }
+            }
+          ]
+        },
+        {
+          id: 'book-number',
+          type: 'TEXT',
+          label: {
+            defaultMessage: 'Register book number',
+            description:
+              'This is the label for the register book number field on the register action dialog',
+            id: 'event.birth.action.register.field.book-number.label'
+          }
+        },
+        {
+          id: 'page-number',
+          type: 'TEXT',
+          label: {
+            defaultMessage: 'Register page number',
+            description:
+              'This is the label for the register page number field on the register action dialog',
+            id: 'event.birth.action.register.field.page-number.label'
+          }
+        }
+      ],
       flags: [
         { id: 'validated', operation: 'remove' },
         { id: 'pending-first-certificate-issuance', operation: 'add' }
