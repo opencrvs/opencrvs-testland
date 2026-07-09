@@ -9,12 +9,7 @@
  * Copyright (C) The OpenCRVS Authors located at https://github.com/opencrvs/opencrvs-core/blob/master/AUTHORS.
  */
 import { expect, test } from '@playwright/test'
-import {
-  getToken,
-  login,
-  triggerDeclarationAction,
-  validateActionMenuButton
-} from '../../helpers'
+import { getToken, login, validateActionMenuButton } from '../../helpers'
 import { CREDENTIALS } from '../../constants'
 import {
   ensureAssignedToUser,
@@ -75,8 +70,11 @@ test('Death notified at a health facility is held for attestation, then reaches 
     await validateActionMenuButton(page, 'Notify with edits', true)
     await validateActionMenuButton(page, 'Declare with edits', false)
 
+    // Exit and unassign
     await page.getByRole('button', { name: 'Action' }).click()
-    await page.getByRole('button', { name: '' }).click()
+    await page.getByText('Cancel edits').click()
+    await selectAction(page, 'Unassign')
+    await page.getByRole('button', { name: 'Unassign' }).click()
   })
 
   await test.step('Health Administrator sees the record in Pending attestation and attests it', async () => {
