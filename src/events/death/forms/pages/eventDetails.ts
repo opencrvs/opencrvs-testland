@@ -135,7 +135,16 @@ const placeOfDeathMessageDescriptors = {
 const placeOfDeathOptions = [
   {
     value: PlaceOfDeath.HEALTH_FACILITY,
-    label: placeOfDeathMessageDescriptors.HEALTH_FACILITY
+    label: placeOfDeathMessageDescriptors.HEALTH_FACILITY,
+    conditionals: [
+      {
+        type: ConditionalType.SHOW,
+        conditional: and(
+          not(user.hasRole('EMBASSY_OFFICIAL')),
+          not(user.hasRole('COMMUNITY_LEADER'))
+        )
+      }
+    ]
   },
   {
     value: PlaceOfDeath.DECEASED_USUAL_RESIDENCE,
