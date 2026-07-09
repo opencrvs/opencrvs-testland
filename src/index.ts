@@ -775,24 +775,32 @@ export async function createServer() {
 
     const event = request.payload as EventDocument
 
-    const eventWithOptimisticallyApprovedLastAction = {
-      ...event,
-      actions: event.actions.map((action, index) =>
-        index === event.actions.length - 1
-          ? {
-              ...action,
-              status: ActionStatus.Accepted,
-              ...(actionType === ActionType.REGISTER
+    const wasActionAcceptedImmediately = response.statusCode === 200
+
+    // A deferred confirmation (HTTP 202, e.g. pending MOSIP) has no response
+    // body, so the last action must stay as-is — reading registrationNumber
+    // from response.source would crash on null
+    const eventWithOptimisticallyApprovedLastAction =
+      wasActionAcceptedImmediately
+        ? {
+            ...event,
+            actions: event.actions.map((action, index) =>
+              index === event.actions.length - 1
                 ? {
-                    registrationNumber: (
-                      response.source as { registrationNumber: string }
-                    ).registrationNumber
+                    ...action,
+                    status: ActionStatus.Accepted,
+                    ...(actionType === ActionType.REGISTER
+                      ? {
+                          registrationNumber: (
+                            response.source as { registrationNumber: string }
+                          ).registrationNumber
+                        }
+                      : {})
                   }
-                : {})
-            }
-          : action
-      ) as ActionDocument[]
-    }
+                : action
+            ) as ActionDocument[]
+          }
+        : event
     /*
      * Forward event to integration / process management platforms
      */
@@ -815,8 +823,6 @@ export async function createServer() {
         )
       }
     }
-
-    const wasActionAcceptedImmediately = response.statusCode === 200
 
     if (wasRequestForActionConfirmation && wasActionAcceptedImmediately) {
       /*
