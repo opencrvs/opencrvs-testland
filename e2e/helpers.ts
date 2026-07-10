@@ -406,6 +406,7 @@ export async function validateActionMenuButton(
     | 'Notify'
     | 'Approve'
     | 'Register'
+    | 'Notify with edits'
     | 'Declare with edits'
     | 'Register with edits',
   isEnabled = true

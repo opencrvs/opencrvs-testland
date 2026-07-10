@@ -307,6 +307,16 @@ export const deathEvent = defineConfig({
         id: 'actions.edit'
       },
       flags: [{ id: 'validated', operation: 'remove' }],
+      conditionals: [
+        {
+          type: ConditionalType.ENABLE,
+          // Only Hospital Official should be able to edit records which are pending attestation
+          conditional: or(
+            not(flag('attestation-required')),
+            user.hasRole('HOSPITAL_CLERK')
+          )
+        }
+      ],
       dialogCopy: {
         notify: {
           id: 'event.death.action.edit.notify.copy',
