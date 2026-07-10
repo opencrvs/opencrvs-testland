@@ -210,6 +210,7 @@ export const deathEvent = defineConfig({
     ActionType.MARK_AS_DUPLICATE,
     ActionType.REJECT,
     ActionType.ARCHIVE,
+    ActionType.UNARCHIVE,
     ActionType.DELETE,
     ActionType.PRINT_CERTIFICATE,
     ActionType.REQUEST_CORRECTION,
@@ -504,6 +505,21 @@ export const deathEvent = defineConfig({
         defaultMessage:
           'This will remove the declaration from the workqueue and change the status to Archive. To revert this change you will need to search for the declaration.',
         description: 'Confirmation body for archiving a declaration'
+      }
+    },
+    {
+      type: ActionType.UNARCHIVE,
+      label: {
+        defaultMessage: 'Unarchive',
+        description:
+          'This is shown as the action name anywhere the user can trigger the action from',
+        id: 'event.birth.action.unarchive.label'
+      },
+      supportingCopy: {
+        id: 'recordAudit.unarchive.confirmation.body',
+        defaultMessage:
+          'This record will become active again and will be able to progress through registration.',
+        description: 'Confirmation body for unarchiving a declaration'
       }
     }
   ],
