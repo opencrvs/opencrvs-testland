@@ -518,6 +518,27 @@ export async function waitForActionResponses(
 }
 
 /**
+ * The birth REGISTER confirmation dialog contains a required
+ * "Supporting documents reviewed?" select (see `documents-verified` in the
+ * birth event config), which keeps the confirm button disabled until answered.
+ * Fills it with "Yes" when present. No-op for dialogs without the field
+ * (e.g. death registration), at the cost of a short wait for the select.
+ */
+export async function fillRegisterDialogRequiredFields(page: Page) {
+  const documentsVerified = page.locator('#documents-verified')
+  const appeared = await documentsVerified
+    .waitFor({ state: 'visible', timeout: 3000 })
+    .then(() => true)
+    .catch(() => false)
+
+  if (appeared) {
+    await documentsVerified.click()
+    // react-select options render as plain divs (no option role)
+    await page.locator('.react-select__option', { hasText: /^Yes$/ }).click()
+  }
+}
+
+/**
  * Triggers and confirms an action from the action menu and waits for the expected API calls to respond before completing.
  * Offline requirement forces us to not await for the responses in client, so we are by design flaky.
  * @param page
@@ -550,6 +571,10 @@ export async function triggerDeclarationAction(
     page,
     urls,
     async () => {
+      if (action === 'Register' || action === 'Register with edits') {
+        await fillRegisterDialogRequiredFields(page)
+      }
+
       const confirmBtn = page.getByRole('button', { name: 'Confirm' })
 
       if ((await confirmBtn.count()) > 0) {
