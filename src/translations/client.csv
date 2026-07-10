@@ -102,6 +102,7 @@ buttons.settings,Menu item settings,Settings,Paramètres
 buttons.start,Label of start button,Start,Démarrer
 buttons.status,Label of status button,Status,Statut
 buttons.submitCorrectionRequest,Submit correction request button text,Submit correction request,Soumettre une demande de correction
+buttons.unarchive,Unarchive button text,Unarchive,Désarchiver
 buttons.unassign,Unassign button label,Unassign,Désaffecter
 buttons.update,The title of update button for draft declaration,Update,Mise à jour
 buttons.upload,Upload buttton,Upload,Télécharger
@@ -688,6 +689,7 @@ event.birth.action.registrar-general-feedback.label,This is shown when the regis
 event.birth.action.registrar-general-feedback.supportingCopy,Confirmation text for registrar general feedback action,Your feedback will be officially recorded and may influence the final decision on the declaration.,Votre retour sera officiellement enregistré et pourra influencer la décision finale concernant la déclaration.
 event.birth.action.reject.label,This is the label for the reject action,Reject,Rejeter
 event.birth.action.request-correction.label,This is shown as the action name anywhere the user can trigger the action from,Correct,Corriger
+event.birth.action.unarchive.label,Label for unarchive record button in dropdown menu,Unarchive,Désarchiver
 event.birth.custom.action.approve.field.collector.label,Label for collector field,Collector,le collectionneur
 event.birth.custom.action.approve.field.notes.label,This is the label for the field for a custom action,Comments,Commentaires
 event.birth.custom.action.issue-vc.field.accepted-vc-offer.error,Validation message for citizen acceptance checkbox,Please confirm that the citizen has accepted the verifiable credential offer,Veuillez confirmer que le citoyen a accepté l’offre d’attestation vérifiable
