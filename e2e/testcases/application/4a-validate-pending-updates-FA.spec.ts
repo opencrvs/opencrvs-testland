@@ -114,7 +114,7 @@ test.describe.serial('4(a) Validate "Pending updates"-workqueue for HO', () => {
 
     const row = getRowByTitle(page, formattedChildName)
 
-    await row.getByRole('button', { name: 'Review' }).click()
+    await row.getByRole('button', { name: 'Read' }).click()
     await selectAction(page, 'Edit')
 
     const newSurname = faker.person.lastName('female')
