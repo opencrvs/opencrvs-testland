@@ -324,7 +324,7 @@ test.describe.serial('Basic Archival flow', () => {
     const options = await page
       .locator('#action-Dropdown-Content li')
       .allTextContents()
-    expect(options).toStrictEqual(['Assign', 'Escalate'])
+    expect(options).toStrictEqual(['Assign', 'Escalate', 'Unarchive'])
   })
 })
 
