@@ -91,7 +91,6 @@
   file:
     path: /data/backups/metabase
     state: absent
-  when: metabase_data_backup.stat.exists
 
 - name: 'Delete legacy influxdb data directory if exists'
   file:
