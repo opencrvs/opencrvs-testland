@@ -940,10 +940,10 @@ export const birthEvent = defineConfig({
     {
       type: ActionType.REQUEST_CORRECTION,
       label: {
-        id: 'event.birth.action.declare.form.review.title',
-        defaultMessage:
-          '{child.name.firstname, select, __EMPTY__ {Birth declaration} other {{child.name.surname, select, __EMPTY__ {Birth declaration for {child.name.firstname}} other {Birth declaration for {child.name.firstname} {child.name.surname}}}}}',
-        description: 'Title of the form to show in review page'
+        id: 'event.birth.action.request-correction.label',
+        defaultMessage: 'Correct',
+        description:
+          'This is shown as the action name anywhere the user can trigger the action from'
       },
       conditionals: [
         { type: ConditionalType.SHOW, conditional: not(flag('revoked')) }
