@@ -82,10 +82,4 @@ userSetup.securityQuestions.firstChildName,,What is your first child's name?,Que
 userSetup.securityQuestions.hightSchool,,What is the name of your high school?,Quel est le nom de votre école secondaire ?
 userSetup.securityQuestions.motherName,,What is your mother's name?,Quel est le nom de votre mère ?
 validations.emailAddressFormat,The error message that appears on email address,Must be a valid email address,Doit être une adresse e-mail valide
-validations.minLength,The error message that appears on fields with a minimum length,Must be {min} characters or more,Doit comporter {min} caractères ou plus
-validations.mobileNumberFormat,The format of the mobile number that appears in an error message,07123456789,7123456789
-validations.mobilePhoneRegex,The regular expression to use when validating a local mobile phone number,"0[0-9]{9,10}","0[0-9]{9,10}"
-validations.numberRequired,The error message that appears on fields where the value must be number,Must be number,Doit être un numéro
 validations.phoneNumberFormat,The error message that appears on phone numbers where the first character must be a 0,Enter a valid mobile phone number,"Doit être un numéro de téléphone mobile valide. Commençant par 0. Par exemple, {example}"
-validations.required,The error message that appears on required fields,required,requis
-validations.requiredSymbol,A blank error message. Used for highlighting a required field without showing an error,,
