@@ -77,7 +77,7 @@ test.describe
 
     await type(page, '#searchText', trackingId)
     await page.locator('#searchIconButton').click()
-    await page.getByRole('button', { name: 'Review' }).click()
+    await page.getByRole('button', { name: 'Read' }).click()
 
     await selectAction(page, 'Assign')
     await page.getByRole('button', { name: 'Assign', exact: true }).click()
