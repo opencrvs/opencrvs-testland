@@ -48,7 +48,8 @@ test.describe.serial('11. Death declaration case - 11', () => {
       causeOfDeathEstablished: true,
       sourceCauseDeath: 'Verbal autopsy',
       description: 'Hanging from ceiling',
-      placeOfDeath: "Deceased's usual place of residence"
+      placeOfDeath: 'Health Institution',
+      deathLocation: 'Klow Village Hospital'
     },
     informant: {
       relation: 'Daughter',
@@ -193,6 +194,12 @@ test.describe.serial('11. Death declaration case - 11', () => {
       await page
         .getByText(declaration.eventDetails.placeOfDeath, { exact: true })
         .click()
+
+      await page.locator('#eventDetails____deathLocation').fill('Klow Village')
+      await expect(
+        page.getByText(declaration.eventDetails.deathLocation)
+      ).toBeVisible()
+      await page.getByText(declaration.eventDetails.deathLocation).click()
 
       await continueForm(page)
     })
