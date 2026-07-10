@@ -66,7 +66,6 @@ services:
   migration:
     environment:
       - EVENTS_POSTGRES_URL=postgres://events_migrator:${EVENTS_MIGRATOR_POSTGRES_PASSWORD}@postgres/events
-      - WAIT_HOSTS=minio:9000,elasticsearch:9200,postgres:5432
 
   traefik:
     # These templates use an Automatic Certificate Management Environment (Let's Encrypt).
