@@ -76,6 +76,7 @@ export async function selectAction(
     | 'Delete'
     | 'Correct'
     | 'Archive'
+    | 'Unarchive'
     | 'Reject'
     | 'Review correction request'
     | 'Approve'
