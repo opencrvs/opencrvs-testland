@@ -3,6 +3,7 @@ import { test, expect, type Page } from '@playwright/test'
 import {
   continueForm,
   drawSignature,
+  fillRegisterDialogRequiredFields,
   formatName,
   getRandomDate,
   goToSection,
@@ -320,6 +321,7 @@ test.describe.serial('1. Workqueue flow - 1', () => {
 
       await ensureAssignedToUser(page, CREDENTIALS.REGISTRAR)
       await selectAction(page, 'Register')
+      await fillRegisterDialogRequiredFields(page)
       await page.getByRole('button', { name: 'Confirm' }).click()
 
       await assertRecordInWorkqueue({

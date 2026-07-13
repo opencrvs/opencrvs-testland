@@ -2,6 +2,7 @@ import { test, expect, type Page } from '@playwright/test'
 import {
   continueForm,
   drawSignature,
+  fillRegisterDialogRequiredFields,
   formatName,
   getRandomDate,
   goToSection,
@@ -292,6 +293,7 @@ test.describe.serial('Add mother details on review', () => {
       )
 
       await page.getByTestId('edit-comment').fill(comment)
+      await fillRegisterDialogRequiredFields(page)
 
       await page.getByRole('button', { name: 'Confirm' }).click()
 
