@@ -25,7 +25,7 @@ async function getPlaceOfDeath(
     const locationId = getIdByName(locations, 'Klow Village Hospital')
 
     return {
-      'deceased.deathLocation': locationId,
+      'eventDetails.deathLocation': locationId,
       'eventDetails.deathLocationId': locationId
     }
   }
@@ -141,6 +141,28 @@ export async function createDeclaration(
   const annotation = {
     'review.comment': 'My comment',
     'review.signature': filename
+  }
+
+  if (action === ActionType.NOTIFY) {
+    const notifyRes = await client.event.actions.notify.request.mutate({
+      eventId: eventId,
+      transactionId: uuidv4(),
+      declaration,
+      annotation
+    })
+
+    const declareAction = notifyRes.actions.find(
+      (action: ActionDocument) => action.type === ActionType.NOTIFY
+    )
+
+    if (!declareAction || !('declaration' in declareAction)) {
+      throw new Error('Declaration info not found in action')
+    }
+
+    return {
+      eventId,
+      declaration: declareAction?.declaration as Declaration
+    }
   }
 
   const declareRes = await client.event.actions.declare.request.mutate({

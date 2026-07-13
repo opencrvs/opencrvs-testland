@@ -210,6 +210,7 @@ export const deathEvent = defineConfig({
     ActionType.MARK_AS_DUPLICATE,
     ActionType.REJECT,
     ActionType.ARCHIVE,
+    ActionType.UNARCHIVE,
     ActionType.DELETE,
     ActionType.PRINT_CERTIFICATE,
     ActionType.REQUEST_CORRECTION,
@@ -306,6 +307,16 @@ export const deathEvent = defineConfig({
         id: 'actions.edit'
       },
       flags: [{ id: 'validated', operation: 'remove' }],
+      conditionals: [
+        {
+          type: ConditionalType.ENABLE,
+          // Only Hospital Official should be able to edit records which are pending attestation
+          conditional: or(
+            not(flag('attestation-required')),
+            user.hasRole('HOSPITAL_CLERK')
+          )
+        }
+      ],
       dialogCopy: {
         notify: {
           id: 'event.death.action.edit.notify.copy',
@@ -504,6 +515,21 @@ export const deathEvent = defineConfig({
         defaultMessage:
           'This will remove the declaration from the workqueue and change the status to Archive. To revert this change you will need to search for the declaration.',
         description: 'Confirmation body for archiving a declaration'
+      }
+    },
+    {
+      type: ActionType.UNARCHIVE,
+      label: {
+        defaultMessage: 'Unarchive',
+        description:
+          'This is shown as the action name anywhere the user can trigger the action from',
+        id: 'event.birth.action.unarchive.label'
+      },
+      supportingCopy: {
+        id: 'recordAudit.unarchive.confirmation.body',
+        defaultMessage:
+          'This record will become active again and will be able to progress through registration.',
+        description: 'Confirmation body for unarchiving a declaration'
       }
     }
   ],

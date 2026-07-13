@@ -19,6 +19,7 @@ import {
   not,
   or,
   PageTypes,
+  SelectOption,
   TranslationConfig,
   user
 } from '@opencrvs/toolkit/events'
@@ -131,10 +132,41 @@ const placeOfDeathMessageDescriptors = {
   }
 } satisfies Record<keyof typeof PlaceOfDeath, TranslationConfig>
 
-const placeOfDeathOptions = createSelectOptions(
-  PlaceOfDeath,
-  placeOfDeathMessageDescriptors
-)
+const placeOfDeathOptions = [
+  {
+    value: PlaceOfDeath.HEALTH_FACILITY,
+    label: placeOfDeathMessageDescriptors.HEALTH_FACILITY,
+    conditionals: [
+      {
+        type: ConditionalType.SHOW,
+        conditional: and(
+          not(user.hasRole('EMBASSY_OFFICIAL')),
+          not(user.hasRole('COMMUNITY_LEADER'))
+        )
+      }
+    ]
+  },
+  {
+    value: PlaceOfDeath.DECEASED_USUAL_RESIDENCE,
+    label: placeOfDeathMessageDescriptors.DECEASED_USUAL_RESIDENCE,
+    conditionals: [
+      {
+        type: ConditionalType.SHOW,
+        conditional: not(user.hasRole('HOSPITAL_CLERK'))
+      }
+    ]
+  },
+  {
+    value: PlaceOfDeath.OTHER,
+    label: placeOfDeathMessageDescriptors.OTHER,
+    conditionals: [
+      {
+        type: ConditionalType.SHOW,
+        conditional: not(user.hasRole('HOSPITAL_CLERK'))
+      }
+    ]
+  }
+] satisfies SelectOption[]
 
 export const eventDetails = defineFormPage({
   id: 'eventDetails',

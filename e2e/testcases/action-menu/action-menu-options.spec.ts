@@ -155,13 +155,13 @@ test.describe('Action menu options', () => {
     test('Registrar', async () => {
       await login(page, CREDENTIALS.REGISTRAR)
       const options = await getActionMenuOptions(page, declaration)
-      expect(options).toStrictEqual(['Assign', 'Escalate'])
+      expect(options).toStrictEqual(['Assign', 'Escalate', 'Unarchive'])
     })
 
     test('Registration Officer', async () => {
       await login(page, CREDENTIALS.REGISTRATION_OFFICER)
       const options = await getActionMenuOptions(page, declaration)
-      expect(options).toStrictEqual(['Assign', 'Escalate'])
+      expect(options).toStrictEqual(['Assign', 'Escalate', 'Unarchive'])
     })
   })
 })
