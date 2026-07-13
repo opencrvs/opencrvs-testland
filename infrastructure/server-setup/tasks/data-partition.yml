@@ -39,15 +39,6 @@
     - is_mounted.rc != 0
 
   # Create data directories
-- name: 'Delete legacy mongo data directory if exists'
-  file:
-    path: /data/mongo
-    state: absent
-
-- name: 'Delete legacy mongo backup directory if exists'
-  file:
-    path: /data/backups/mongo
-    state: absent
 
 - name: 'Create traefik data directory'
   file:
@@ -90,16 +81,6 @@
 - name: 'Delete metabase backup directory if exists'
   file:
     path: /data/backups/metabase
-    state: absent
-
-- name: 'Delete legacy influxdb data directory if exists'
-  file:
-    path: /data/influxdb
-    state: absent
-
-- name: 'Delete legacy influxdb backup directory if exists'
-  file:
-    path: /data/backups/influxdb
     state: absent
 
 - name: Check Postgres data directory
