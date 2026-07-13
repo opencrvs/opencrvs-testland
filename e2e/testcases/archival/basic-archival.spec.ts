@@ -324,7 +324,7 @@ test.describe.serial('Basic Archival flow', () => {
     const options = await page
       .locator('#action-Dropdown-Content li')
       .allTextContents()
-    expect(options).toStrictEqual(['Assign', 'Escalate'])
+    expect(options).toStrictEqual(['Assign', 'Escalate', 'Unarchive'])
   })
 })
 
@@ -459,6 +459,68 @@ test('Archival of rejected declaration', async ({ page }) => {
     const options = await page
       .locator('#action-Dropdown-Content li')
       .allTextContents()
-    expect(options).toStrictEqual(['Assign', 'Escalate'])
+    expect(options).toStrictEqual(['Assign', 'Escalate', 'Unarchive'])
+  })
+})
+
+test('Archival and unarchival of a notified declaration', async ({ page }) => {
+  let declaration: Declaration
+
+  await test.step('Initialise a notified birth record via API', async () => {
+    // LOCAL_REGISTRAR does not hold record.notify, so a Community Leader
+    // notifies it instead.
+    const communityLeaderToken = await getToken(CREDENTIALS.COMMUNITY_LEADER)
+
+    const notifyRes = await createDeclaration(
+      communityLeaderToken,
+      undefined,
+      ActionType.NOTIFY
+    )
+    declaration = notifyRes.declaration
+  })
+
+  // A record that has only been notified (never declared) has no
+  // legalStatuses.DECLARED, so LOCAL_REGISTRAR's declaredIn-scoped
+  // record.archive/unarchive can't match and would be denied. REGISTRAR_GENERAL
+  // (NATIONAL_REGISTRAR) holds both scopes unrestricted, so use that role here.
+  await test.step('Login as Registrar General', async () => {
+    await login(page, CREDENTIALS.REGISTRAR_GENERAL)
+  })
+
+  await test.step('Archive the notified declaration', async () => {
+    await searchFromSearchBar(page, formatV2ChildName(declaration))
+    await ensureAssignedToUser(page, CREDENTIALS.REGISTRAR_GENERAL)
+
+    await expect(page.getByTestId('status-value')).toHaveText('Notified')
+
+    await selectAction(page, 'Archive')
+
+    const archiveResponse = page.waitForResponse(
+      (res) => res.url().includes('event.actions.archive') && res.ok()
+    )
+    await page.getByRole('button', { name: 'Archive', exact: true }).click()
+    await archiveResponse
+  })
+
+  await test.step('Archived declaration shows Archived status', async () => {
+    await searchFromSearchBar(page, formatV2ChildName(declaration))
+    await expect(page.getByTestId('status-value')).toHaveText('Archived')
+  })
+
+  await test.step('Unarchive the declaration', async () => {
+    await ensureAssignedToUser(page, CREDENTIALS.REGISTRAR_GENERAL)
+
+    await selectAction(page, 'Unarchive')
+
+    const unarchiveResponse = page.waitForResponse(
+      (res) => res.url().includes('event.actions.unarchive') && res.ok()
+    )
+    await page.getByRole('button', { name: 'Unarchive', exact: true }).click()
+    await unarchiveResponse
+  })
+
+  await test.step('Unarchived declaration reverts to Notified status', async () => {
+    await searchFromSearchBar(page, formatV2ChildName(declaration))
+    await expect(page.getByTestId('status-value')).toHaveText('Notified')
   })
 })

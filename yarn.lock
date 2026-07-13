@@ -1890,10 +1890,10 @@
   dependencies:
     zod "^4.1.12"
 
-"@opencrvs/toolkit@2.0.0-rc.ed0aa22":
-  version "2.0.0-rc.ed0aa22"
-  resolved "https://registry.yarnpkg.com/@opencrvs/toolkit/-/toolkit-2.0.0-rc.ed0aa22.tgz#f5b2a82a0e5c3d13320a5c54cb88e1b429cd76ea"
-  integrity sha512-mAs5QC0uyQQbSdx2DyUjaEjJm5YjKotpnDnBdWNde/M0TlR6eN2dCgppzLGrxzE4k+S17vvyqwwfOgTLFU8bNw==
+"@opencrvs/toolkit@2.1.0-rc.8d76997":
+  version "2.1.0-rc.8d76997"
+  resolved "https://registry.yarnpkg.com/@opencrvs/toolkit/-/toolkit-2.1.0-rc.8d76997.tgz#0b926806e58908afa5c889e618d82fa0cf42546b"
+  integrity sha512-pecWUcZ6PCrkqYMYlPipbyUfTC9c+XOLgpJu+lih7lf1KnzN1UiZSJjhLRwjHlsMZPcAdzIjp88H9w/opecCAg==
   dependencies:
     "@inquirer/prompts" "^8.3.0"
     "@octokit/core" "4.2.1"
