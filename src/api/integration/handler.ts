@@ -11,7 +11,7 @@
 import * as Hapi from '@hapi/hapi'
 import fetch from 'node-fetch'
 import { logger } from '@countryconfig/logger'
-import { USER_MGMT_URL } from '@countryconfig/constants'
+import { USER_MANAGEMENT_URL } from '@countryconfig/constants'
 
 interface RecordScope {
   type: string
@@ -55,7 +55,7 @@ export async function systemReadyHandler(
   for (const integration of INTEGRATIONS) {
     try {
       const res = await fetch(
-        new URL('/createIntegration', USER_MGMT_URL).toString(),
+        new URL('/createIntegration', USER_MANAGEMENT_URL).toString(),
         {
           method: 'POST',
           headers: {

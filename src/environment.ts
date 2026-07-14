@@ -30,7 +30,7 @@ export const env = cleanEnv(process.env, {
   CONFIRM_REGISTRATION_URL: url({
     devDefault: 'http://localhost:5050/confirm/registration'
   }),
-  USER_MGMT_URL: url({ devDefault: 'http://localhost:3030' }),
+  USER_MANAGEMENT_URL: url({ devDefault: 'http://localhost:3030' }),
   QA_ENV: bool({ default: false }),
   ESIGNET_REDIRECT_URL: url({ devDefault: 'http://localhost:20260/authorize' }),
   OPENID_PROVIDER_CLIENT_ID: str({ devDefault: 'mock-client_id' }),
