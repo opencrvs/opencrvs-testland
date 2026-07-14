@@ -51,11 +51,6 @@ for i in "$@"; do
         export COUNTRY_CONFIG_VERSION="${i#*=}"
         shift
         ;;
-    --replicas=*)
-        # Exported so that it can be used in the docker-compose files
-        export REPLICAS="${i#*=}"
-        shift
-        ;;
     *) ;;
 
     esac
@@ -89,12 +84,11 @@ function trapint {
 }
 
 print_usage_and_exit () {
-  echo 'Usage: ./deploy.sh --host --environment --ssh_host --ssh_port --ssh_user --version --country_config_version --replicas'
+  echo 'Usage: ./deploy.sh --host --environment --ssh_host --ssh_port --ssh_user --version --country_config_version'
   echo "  --environment can be 'production', 'development', 'qa' or similar"
   echo '  --host    is the server to deploy to'
   echo "  --version can be any OpenCRVS Core docker image tag or 'latest'"
   echo "  --country_config_version can be any OpenCRVS Country Configuration docker image tag or 'latest'"
-  echo "  --replicas number of supported mongo databases in your replica set.  Can be 1, 3 or 5"
   exit 1
 }
 
@@ -131,11 +125,6 @@ validate_options() {
 
   if [ -z "$COUNTRY_CONFIG_VERSION" ] ; then
     echo 'Error: Argument --country_config_version is required.'
-    print_usage_and_exit
-  fi
-
-  if [ -z "$REPLICAS" ] ; then
-    echo 'Error: Argument --replicas is required in position 8.'
     print_usage_and_exit
   fi
 }
@@ -193,7 +182,6 @@ configured_ssh() {
   ssh $SSH_USER@$SSH_HOST -p $SSH_PORT $SSH_ARGS "export $(get_environment_variables); $@"
 }
 
-# Rotate MongoDB credentials
 # https://unix.stackexchange.com/a/230676
 generate_password() {
   local password=`openssl rand -base64 25 | tr -cd '[:alnum:]._-' ; echo ''`
@@ -327,19 +315,6 @@ docker_stack_deploy() {
 
 validate_options
 
-# Create new passwords for all MongoDB users created in
-# infrastructure/mongodb/docker-entrypoint-initdb.d/create-mongo-users.sh
-#
-# If you're adding a new MongoDB user, you'll need to also create a new update statement in
-# infrastructure/mongodb/on-deploy.sh
-
-export USER_MGNT_MONGODB_PASSWORD=`generate_password`
-export HEARTH_MONGODB_PASSWORD=`generate_password`
-export METRICS_MONGODB_PASSWORD=`generate_password`
-export PERFORMANCE_MONGODB_PASSWORD=`generate_password`
-export OPENHIM_MONGODB_PASSWORD=`generate_password`
-export EVENTS_MONGODB_PASSWORD=`generate_password`
-
 export DEFAULT_REDIS_PASSWORD=`generate_password`
 export GATEWAY_REDIS_USERNAME=`generate_password`
 export GATEWAY_REDIS_PASSWORD=`generate_password`
@@ -421,7 +396,7 @@ docker_stack_deploy
 echo
 echo "This script doesnt ensure that all docker containers successfully start, just that docker_stack_deploy ran successfully."
 echo
-echo "Waiting 2 mins for mongo to deploy before working with data. Please note it can take up to 10 minutes for the entire stack to deploy in some scenarios."
+echo "Waiting 2 mins for databases to deploy before working with data. Please note it can take up to 10 minutes for the entire stack to deploy in some scenarios."
 echo
 
 echo 'Setting up elastalert indices'

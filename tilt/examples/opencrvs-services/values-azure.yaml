@@ -42,12 +42,6 @@ minio:
   host: minio-0.minio.opencrvs-deps-qa.svc.cluster.local
   users_secret: minio-opencrvs-users
 
-mongodb:
-  auth_mode: auto
-  # Copy mongodb-admin-user from opencrvs-deps-qa namespace into opencrvs-qa namespace
-  admin_user_secret_name: mongodb-admin-user
-  host: mongodb-0.mongodb.opencrvs-deps-qa.svc.cluster.local
-
 redis:
   auth_mode: use_secret
   # Create redis-opencrvs-users secret in opencrvs-qa namespace with Redis credentials

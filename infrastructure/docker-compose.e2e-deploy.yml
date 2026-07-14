@@ -7,7 +7,6 @@ services:
     environment:
       - NODE_ENV=production
       - CHECK_INVALID_TOKEN=true
-      - MONGO_URL=mongodb://mongo1/user-mgnt?replicaSet=rs0
       - SENTRY_DSN=${SENTRY_DSN:-}
       - SENDER_EMAIL_ADDRESS=${SENDER_EMAIL_ADDRESS}
       - REFERENCE_DATA_DATABASE_URL=${REFERENCE_DATA_DATABASE_URL}

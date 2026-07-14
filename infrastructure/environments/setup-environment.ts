@@ -410,17 +410,6 @@ const infrastructureQuestions = [
     valueLabel: 'DOMAIN',
     initial: process.env.DOMAIN,
     scope: 'ENVIRONMENT' as const
-  },
-  {
-    name: 'replicas',
-    type: 'number' as const,
-    message:
-      'What is the number of servers? Note: This should be 1 for qa, staging and backup environments. For "production" environment server cluster should consists of 2, 3 or 5 servers.',
-    valueType: 'VARIABLE' as const,
-    validate: notEmpty,
-    valueLabel: 'REPLICAS',
-    initial: process.env.REPLICAS ? parseInt(process.env.REPLICAS, 10) : 1,
-    scope: 'ENVIRONMENT' as const
   }
 ]
 
@@ -678,20 +667,6 @@ const derivedVariables = [
   {
     name: 'MINIO_ROOT_PASSWORD',
     valueLabel: 'MINIO_ROOT_PASSWORD',
-    valueType: 'SECRET',
-    type: 'disabled',
-    scope: 'ENVIRONMENT'
-  },
-  {
-    name: 'MONGODB_ADMIN_USER',
-    valueLabel: 'MONGODB_ADMIN_USER',
-    valueType: 'SECRET',
-    type: 'disabled',
-    scope: 'ENVIRONMENT'
-  },
-  {
-    name: 'MONGODB_ADMIN_PASSWORD',
-    valueLabel: 'MONGODB_ADMIN_PASSWORD',
     valueType: 'SECRET',
     type: 'disabled',
     scope: 'ENVIRONMENT'
@@ -1238,40 +1213,6 @@ const SPECIAL_NON_APPLICATION_ENVIRONMENTS = ['jump', 'backup']
       ),
       value: findExistingOrDefine(
         'MINIO_ROOT_PASSWORD',
-        'SECRET',
-        'ENVIRONMENT',
-        generateLongPassword()
-      ),
-      scope: 'ENVIRONMENT' as const
-    },
-    {
-      name: 'MONGODB_ADMIN_USER',
-      type: 'SECRET' as const,
-      didExist: findExistingValue(
-        'MONGODB_ADMIN_USER',
-        'SECRET',
-        'ENVIRONMENT',
-        existingValues
-      ),
-      value: findExistingOrDefine(
-        'MONGODB_ADMIN_USER',
-        'SECRET',
-        'ENVIRONMENT',
-        generateLongPassword()
-      ),
-      scope: 'ENVIRONMENT' as const
-    },
-    {
-      name: 'MONGODB_ADMIN_PASSWORD',
-      type: 'SECRET' as const,
-      didExist: findExistingValue(
-        'MONGODB_ADMIN_PASSWORD',
-        'SECRET',
-        'ENVIRONMENT',
-        existingValues
-      ),
-      value: findExistingOrDefine(
-        'MONGODB_ADMIN_PASSWORD',
         'SECRET',
         'ENVIRONMENT',
         generateLongPassword()
