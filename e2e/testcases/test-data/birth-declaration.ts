@@ -296,7 +296,6 @@ export async function notifyAndDeclare(
     transactionId: uuidv4(),
     declaration,
     annotation,
-    content: {},
     keepAssignmentIfAccepted: true
   })
 
