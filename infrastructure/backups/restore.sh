@@ -23,10 +23,6 @@ fi
 # Reading Named parameters
 for i in "$@"; do
   case $i in
-  --replicas=*)
-    REPLICAS="${i#*=}"
-    shift
-    ;;
   --label=*)
     LABEL="${i#*=}"
     shift
@@ -36,14 +32,10 @@ for i in "$@"; do
 done
 
 print_usage_and_exit() {
-  echo 'Usage: ./restore.sh --replicas=XXX'
+  echo 'Usage: ./restore.sh'
   echo "This script CLEARS ALL DATA and RESTORES A SPECIFIC DAY'S or label's data. This process is irreversible, so USE WITH CAUTION."
   echo "Script must receive a label parameter to restore data from that specific day in format +%Y-%m-%d i.e. 2019-01-01 or that label"
-  echo "The Hearth, Events and User db backup zips you would like to restore from: hearth-dev-{label}.gz, events-{label}.gz, user-mgnt-{label}.gz must exist in /data/backups/mongo/ folder"
   echo "The Elasticsearch backup folder /data/backups/elasticsearch must exist with all previous snapshots and indices. All files are required"
-  echo ""
-  echo "If your MongoDB is password protected, an admin user's credentials can be given as environment variables:"
-  echo "MONGODB_ADMIN_USER=your_user MONGODB_ADMIN_PASSWORD=your_pass"
   echo ""
   echo "If your Elasticsearch is password protected, an admin user's credentials can be given as environment variables:"
   echo "ELASTICSEARCH_ADMIN_USER=your_user ELASTICSEARCH_ADMIN_PASSWORD=your_pass"
@@ -54,20 +46,10 @@ if [ -z "$LABEL" ]; then
   LABEL=$(date +%Y-%m-%d)
 fi
 
-# Check if REPLICAS is a number and greater than 0
-if ! [[ "$REPLICAS" =~ ^[0-9]+$ ]]; then
-  echo "Script must be passed a positive integer number of replicas"
-  exit 1
-fi
-
 if [ "$IS_LOCAL" = false ]; then
   ROOT_PATH=${ROOT_PATH:-/data}
 
-  if [ -z "$REPLICAS" ]; then
-    echo "Error: Argument for the --replicas is required."
-    print_usage_and_exit
-  fi
-  # In this example, we load the MONGODB_ADMIN_USER, MONGODB_ADMIN_PASSWORD, ELASTICSEARCH_ADMIN_USER & ELASTICSEARCH_ADMIN_PASSWORD database access secrets from a file.
+  # In this example, we load the ELASTICSEARCH_ADMIN_USER & ELASTICSEARCH_ADMIN_PASSWORD database access secrets from a file.
   # We recommend that the secrets are served via a secure API from a Hardware Security Module
   source /data/secrets/opencrvs.secrets
 else
@@ -81,37 +63,14 @@ else
   ROOT_PATH=$(cd "$ROOT_PATH" && pwd)
 fi
 
-# Select docker network and replica set in production
+# Select docker network in production
 #----------------------------------------------------
 if [ "$IS_LOCAL" = true ]; then
-  HOST=mongo1
   NETWORK=opencrvs_default
   echo "Working in local environment"
-elif [ "$REPLICAS" = "0" ]; then
-  HOST=mongo1
-  NETWORK=opencrvs_default
-  echo "Working with no replicas"
 else
   NETWORK=opencrvs_overlay_net
-  # Construct the HOST string rs0/mongo1,mongo2... based on the number of replicas
-  HOST="rs0/"
-  for (( i=1; i<=REPLICAS; i++ )); do
-    if [ $i -gt 1 ]; then
-      HOST="${HOST},"
-    fi
-    HOST="${HOST}mongo${i}"
-  done
 fi
-
-
-
-mongo_credentials() {
-  if [ ! -z ${MONGODB_ADMIN_USER+x} ] || [ ! -z ${MONGODB_ADMIN_PASSWORD+x} ]; then
-    echo "--username $MONGODB_ADMIN_USER --password $MONGODB_ADMIN_PASSWORD --authenticationDatabase admin"
-  else
-    echo ""
-  fi
-}
 
 elasticsearch_host() {
   if [ ! -z ${ELASTICSEARCH_ADMIN_USER+x} ] || [ ! -z ${ELASTICSEARCH_ADMIN_PASSWORD+x} ]; then
@@ -179,20 +138,6 @@ rm -rf $ROOT_PATH/vsexport
 mkdir -p $ROOT_PATH/vsexport
 
 ##
-# ------ MONGODB -------
-##
-
-# Delete all data from Hearth, Events, User and any other service related Mongo databases
-#-----------------------------------------------------------------------------------
-
-docker run --rm --network=$NETWORK mongo:4.4 mongo $(mongo_credentials) --host $HOST --eval "\
-db.getSiblingDB('hearth-dev').dropDatabase();\
-db.getSiblingDB('events').dropDatabase();\
-db.getSiblingDB('user-mgnt').dropDatabase();\
-db.getSiblingDB('metrics').dropDatabase();\
-db.getSiblingDB('performance').dropDatabase();"
-
-##
 # ------ POSTGRESQL -------
 ##
 
@@ -217,17 +162,6 @@ fi
 #
 #
 #####
-
-##
-# ------ MONGODB -------
-##
-
-# Restore all data from a backup into Hearth, Events, User and any other service related Mongo databases
-#--------------------------------------------------------------------------------------------------
-docker run --rm -v $ROOT_PATH/backups/mongo:/data/backups/mongo --network=$NETWORK mongo:4.4 bash \
--c "for db in hearth-dev events user-mgnt metrics performance; \
-      do mongorestore $(mongo_credentials) --host $HOST --drop --gzip --archive=/data/backups/mongo/\${db}-$LABEL.gz; \
-    done"
 
 ##
 # ------ POSTGRESQL -------

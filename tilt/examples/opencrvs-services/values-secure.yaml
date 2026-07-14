@@ -33,9 +33,6 @@ hpa:
 pdb:
   enabled: false
 
-mongodb:
-  auth_mode: auto
-
 postgres:
   auth_mode: auto
 

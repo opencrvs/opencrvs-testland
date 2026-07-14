@@ -44,10 +44,6 @@ for i in "$@"; do
     REMOTE_DIR="${i#*=}"
     shift
     ;;
-  --replicas=*)
-    REPLICAS="${i#*=}"
-    shift
-    ;;
   --label=*)
     LABEL="${i#*=}"
     shift
@@ -61,24 +57,15 @@ for i in "$@"; do
 done
 
 print_usage_and_exit() {
-  echo 'Usage: ./backup.sh --passphrase=XXX --ssh_user=XXX --ssh_host=XXX --ssh_port=XXX --remote_dir=XXX --replicas=XXX --label=XXX'
+  echo 'Usage: ./backup.sh --passphrase=XXX --ssh_user=XXX --ssh_host=XXX --ssh_port=XXX --remote_dir=XXX --label=XXX'
   echo "Script must receive SSH details and a target directory of a remote server to copy backup files to."
   echo "Optionally a LABEL i.e. 'v1.0.1' can be provided to be appended to the backup file labels"
   echo "7 days of backup data will be retained in the manager node"
-  echo ""
-  echo "If your MongoDB is password protected, an admin user's credentials can be given as environment variables:"
-  echo "MONGODB_ADMIN_USER=your_user MONGODB_ADMIN_PASSWORD=your_pass"
   echo ""
   echo "If your Elasticsearch is password protected, an admin user's credentials can be given as environment variables:"
   echo "ELASTICSEARCH_ADMIN_USER=your_user ELASTICSEARCH_ADMIN_PASSWORD=your_pass"
   exit 1
 }
-
-# Check if REPLICAS is a number and greater than 0
-if ! [[ "$REPLICAS" =~ ^[0-9]+$ ]]; then
-  echo "Script must be passed a positive integer number of replicas"
-  exit 1
-fi
 
 if [ "$IS_LOCAL" = false ]; then
   ROOT_PATH=${ROOT_PATH:-/data}
@@ -98,15 +85,11 @@ if [ "$IS_LOCAL" = false ]; then
     echo "Error: Argument for the --remote_dir is required."
     print_usage_and_exit
   fi
-  if [ -z "$REPLICAS" ]; then
-    echo "Error: Argument for the --replicas is required."
-    print_usage_and_exit
-  fi
   if [ -z "$PASSPHRASE" ]; then
     echo "Error: Argument for the --passphrase is required."
     print_usage_and_exit
   fi
-  # In this example, we load the MONGODB_ADMIN_USER, MONGODB_ADMIN_PASSWORD, ELASTICSEARCH_ADMIN_USER & ELASTICSEARCH_ADMIN_PASSWORD database access secrets from a file.
+  # In this example, we load the ELASTICSEARCH_ADMIN_USER & ELASTICSEARCH_ADMIN_PASSWORD database access secrets from a file.
   # We recommend that the secrets are served via a secure API from a Hardware Security Module
   source /data/secrets/opencrvs.secrets
 else
@@ -129,7 +112,6 @@ done
 
 mkdir -p $ROOT_PATH/backups/elasticsearch
 mkdir -p $ROOT_PATH/backups/elasticsearch/indices
-mkdir -p $ROOT_PATH/backups/mongo
 mkdir -p $ROOT_PATH/backups/minio
 mkdir -p $ROOT_PATH/backups/vsexport
 mkdir -p $ROOT_PATH/backups/sqlite
@@ -138,35 +120,14 @@ mkdir -p $ROOT_PATH/backups/postgres
 # This enables root-created directory to be writable by the docker user
 chown -R 1000:1000 $ROOT_PATH/backups
 
-# Select docker network and replica set in production
+# Select docker network in production
 #----------------------------------------------------
 if [ "$IS_LOCAL" = true ]; then
-  HOST=mongo1
   NETWORK=opencrvs_default
   echo "Working in a local environment"
-elif [ "$REPLICAS" = "0" ]; then
-  HOST=mongo1
-  NETWORK=opencrvs_default
-  echo "Working with no replicas"
 else
   NETWORK=opencrvs_overlay_net
-  # Construct the HOST string rs0/mongo1,mongo2... based on the number of replicas
-  HOST="rs0/"
-  for (( i=1; i<=REPLICAS; i++ )); do
-    if [ $i -gt 1 ]; then
-      HOST="${HOST},"
-    fi
-    HOST="${HOST}mongo${i}"
-  done
 fi
-
-mongo_credentials() {
-  if [ ! -z ${MONGODB_ADMIN_USER+x} ] || [ ! -z ${MONGODB_ADMIN_PASSWORD+x} ]; then
-    echo "--username $MONGODB_ADMIN_USER --password $MONGODB_ADMIN_PASSWORD --authenticationDatabase admin"
-  else
-    echo ""
-  fi
-}
 
 elasticsearch_host() {
   if [ ! -z ${ELASTICSEARCH_ADMIN_USER+x} ] || [ ! -z ${ELASTICSEARCH_ADMIN_PASSWORD+x} ]; then
@@ -194,20 +155,6 @@ get_target_indices() {
 #-----------------------------------
 BACKUP_DATE=$(date +%Y-%m-%d)
 REMOTE_DIR="$REMOTE_DIR/${LABEL:-$BACKUP_DATE}"
-
-# Backup Hearth, User, Application-config and any other service related Mongo databases into a mongo sub folder
-# ---------------------------------------------------------------------------------------------
-dbs=(
-  'hearth-dev'
-  'events'
-  'user-mgnt'
-  'metrics'
-  'performance'
-)
-for db in "${dbs[@]}"; do
-  command='docker run --rm -v $ROOT_PATH/backups/mongo:/data/backups/mongo --network=$NETWORK mongo:4.4 bash -c "mongodump $(mongo_credentials) --host $HOST -d ${db} --gzip --archive=/data/backups/mongo/${db}-${LABEL:-$BACKUP_DATE}.gz"'
-  output="$(eval "$command" 2>&1)" || echo "Failed to backup MongoDB: $output"
-done
 
 # Backup PostgreSQL
 # -----------------
@@ -319,12 +266,6 @@ cp -r $ROOT_PATH/backups/elasticsearch/ $BACKUP_RAW_FILES_DIR/elasticsearch/
 
 mkdir -p $BACKUP_RAW_FILES_DIR/minio/ && cp $ROOT_PATH/backups/minio/ocrvs-${LABEL:-$BACKUP_DATE}.tar.gz $BACKUP_RAW_FILES_DIR/minio/
 mkdir -p $BACKUP_RAW_FILES_DIR/vsexport/ && cp $ROOT_PATH/backups/vsexport/ocrvs-${LABEL:-$BACKUP_DATE}.tar.gz $BACKUP_RAW_FILES_DIR/vsexport/
-mkdir -p $BACKUP_RAW_FILES_DIR/mongo/ && cp $ROOT_PATH/backups/mongo/hearth-dev-${LABEL:-$BACKUP_DATE}.gz $BACKUP_RAW_FILES_DIR/mongo/
-mkdir -p $BACKUP_RAW_FILES_DIR/mongo/ && cp $ROOT_PATH/backups/mongo/events-${LABEL:-$BACKUP_DATE}.gz $BACKUP_RAW_FILES_DIR/mongo/
-mkdir -p $BACKUP_RAW_FILES_DIR/mongo/ && cp $ROOT_PATH/backups/mongo/user-mgnt-${LABEL:-$BACKUP_DATE}.gz $BACKUP_RAW_FILES_DIR/mongo/
-mkdir -p $BACKUP_RAW_FILES_DIR/mongo/ && cp $ROOT_PATH/backups/mongo/metrics-${LABEL:-$BACKUP_DATE}.gz $BACKUP_RAW_FILES_DIR/mongo/
-mkdir -p $BACKUP_RAW_FILES_DIR/mongo/ && cp $ROOT_PATH/backups/mongo/performance-${LABEL:-$BACKUP_DATE}.gz $BACKUP_RAW_FILES_DIR/mongo/
-mkdir -p $BACKUP_RAW_FILES_DIR/sqlite/ && cp $ROOT_PATH/backups/sqlite/mosip-api-${LABEL:-$BACKUP_DATE}.sqlite $BACKUP_RAW_FILES_DIR/sqlite/
 mkdir -p $BACKUP_RAW_FILES_DIR/postgres/ && cp $ROOT_PATH/backups/postgres/events-${LABEL:-$BACKUP_DATE}.dump $BACKUP_RAW_FILES_DIR/postgres/
 
 tar -czf /tmp/${LABEL:-$BACKUP_DATE}.tar.gz -C "$BACKUP_RAW_FILES_DIR" .

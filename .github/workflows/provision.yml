@@ -30,7 +30,6 @@ on:
           - backup
           - jump
           - e2e
-          - v17
           - pentest
           - fix-analytics
           - mosip
@@ -52,7 +51,6 @@ on:
           - elasticsearch
           - fail2ban
           - jump
-          - mongodb
           - swap
           - swarm
           - tools
@@ -151,8 +149,6 @@ jobs:
           disk_encryption_key: ${{ secrets.ENCRYPTION_KEY }}
           dockerhub_username: ${{ secrets.DOCKER_USERNAME }}
           dockerhub_password: ${{ secrets.DOCKER_TOKEN }}
-          mongodb_admin_username: ${{ secrets.MONGODB_ADMIN_USER }}
-          mongodb_admin_password: ${{ secrets.MONGODB_ADMIN_PASSWORD }}
           postgres_user: ${{ secrets.POSTGRES_USER }}
           postgres_password: ${{ secrets.POSTGRES_PASSWORD }}
           backup_encryption_passphrase: ${{ secrets.BACKUP_ENCRYPTION_PASSPHRASE }}

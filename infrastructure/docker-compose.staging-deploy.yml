@@ -65,15 +65,7 @@ services:
 
   migration:
     environment:
-      - USER_MGNT_MONGO_URL=mongodb://user-mgnt:${USER_MGNT_MONGODB_PASSWORD}@mongo1/user-mgnt?replicaSet=rs0
-      - DASHBOARD_MONGO_URL=mongodb://performance:${PERFORMANCE_MONGODB_PASSWORD}@mongo1/performance?replicaSet=rs0
-      - HEARTH_MONGO_URL=mongodb://hearth:${HEARTH_MONGODB_PASSWORD}@mongo1/hearth-dev?replicaSet=rs0
       - EVENTS_POSTGRES_URL=postgres://events_migrator:${EVENTS_MIGRATOR_POSTGRES_PASSWORD}@postgres/events
-      - WAIT_HOSTS=mongo1:27017,minio:9000,elasticsearch:9200,postgres:5432
-
-  mongo-on-update:
-    environment:
-      - REPLICAS=1
 
   traefik:
     # These templates use an Automatic Certificate Management Environment (Let's Encrypt).

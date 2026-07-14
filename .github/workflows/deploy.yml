@@ -161,8 +161,7 @@ jobs:
           --ssh_port=${{ vars.SSH_PORT || secrets.SSH_PORT }} \
           --ssh_user=${{ secrets.SSH_USER }} \
           --version=${{ inputs.core-image-tag }} \
-          --country_config_version=${{ env.image_tag }} \
-          --replicas=${{ vars.REPLICAS }}
+          --country_config_version=${{ env.image_tag }}
   seed-data:
     needs:
       - reset
