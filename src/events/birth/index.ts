@@ -132,6 +132,15 @@ export const birthEvent = defineConfig({
         id: 'event.birth.flag.vc-issued'
       },
       requiresAction: false
+    },
+    {
+      id: 'corrected-record',
+      label: {
+        id: 'event.birth.flag.corrected-record',
+        defaultMessage: 'Corrected record',
+        description: 'Flag label for corrected record'
+      },
+      requiresAction: false
     }
   ],
   summary: {
@@ -1046,6 +1055,26 @@ export const birthEvent = defineConfig({
         { type: ConditionalType.SHOW, conditional: not(flag('revoked')) }
       ],
       correctionForm: CORRECTION_FORM
+    },
+    {
+      type: ActionType.APPROVE_CORRECTION,
+      label: {
+        defaultMessage: 'Approve correction',
+        description:
+          'This is shown as the action name anywhere the user can trigger the action from',
+        id: 'event.birth.action.approve-correction.label'
+      },
+      flags: [{ id: 'corrected-record', operation: 'add' }]
+    },
+    {
+      type: ActionType.MARK_AS_DUPLICATE,
+      label: {
+        defaultMessage: 'Review potential duplicates',
+        description:
+          'Label for review potential duplicate button in dropdown menu',
+        id: 'event.birth.action.mark-as-duplicate.label'
+      },
+      flags: [{ id: 'validated', operation: 'remove' }]
     },
     {
       type: ActionType.ARCHIVE,
