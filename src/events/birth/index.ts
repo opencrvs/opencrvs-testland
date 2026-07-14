@@ -329,6 +329,18 @@ export const birthEvent = defineConfig({
           'This is shown as the action name anywhere the user can trigger the action from',
         id: 'event.birth.action.declare.label'
       },
+      form: [
+        {
+          id: 'comments',
+          type: 'TEXTAREA',
+          label: {
+            defaultMessage: 'Additional comments',
+            description:
+              'This is the label for the additional comments field on the declare action dialog',
+            id: 'event.birth.action.declare.field.comments.label'
+          }
+        }
+      ],
       review: BIRTH_DECLARATION_REVIEW,
       deduplication: {
         id: 'birth-deduplication',
@@ -961,6 +973,16 @@ export const birthEvent = defineConfig({
             description:
               'This is the label for the register page number field on the register action dialog',
             id: 'event.birth.action.register.field.page-number.label'
+          }
+        },
+        {
+          id: 'comments',
+          type: 'TEXTAREA',
+          label: {
+            defaultMessage: 'Additional comments',
+            description:
+              'This is the label for the additional comments field on the register action dialog',
+            id: 'event.birth.action.register.field.comments.label'
           }
         }
       ],

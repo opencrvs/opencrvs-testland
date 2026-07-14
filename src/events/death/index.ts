@@ -262,6 +262,18 @@ export const deathEvent = defineConfig({
           'This is shown as the action name anywhere the user can trigger the action from',
         id: 'event.death.action.declare.label'
       },
+      form: [
+        {
+          id: 'comments',
+          type: 'TEXTAREA',
+          label: {
+            defaultMessage: 'Additional comments',
+            description:
+              'This is the label for the additional comments field on the declare action dialog',
+            id: 'event.death.action.declare.field.comments.label'
+          }
+        }
+      ],
       review: DEATH_DECLARATION_REVIEW,
       deduplication: {
         id: 'death-deduplication',
@@ -470,6 +482,18 @@ export const deathEvent = defineConfig({
         defaultMessage:
           'Registering this death event will create an official civil registration record. Please ensure all details are correct before proceeding.'
       },
+      form: [
+        {
+          id: 'comments',
+          type: 'TEXTAREA',
+          label: {
+            defaultMessage: 'Additional comments',
+            description:
+              'This is the label for the additional comments field on the register action dialog',
+            id: 'event.death.action.register.field.comments.label'
+          }
+        }
+      ],
       flags: [
         { id: 'validated', operation: 'remove' },
         { id: 'pending-first-certificate-issuance', operation: 'add' }
