@@ -292,7 +292,7 @@ test.describe.serial('Add mother details on review', () => {
         page.waitForResponse((res) => res.url().includes(url) && res.ok())
       )
 
-      await page.getByTestId('edit-comment').fill(comment)
+      await page.locator('#comments').fill(comment)
       await fillRegisterDialogRequiredFields(page)
 
       await page.getByRole('button', { name: 'Confirm' }).click()
@@ -329,8 +329,6 @@ test.describe.serial('Add mother details on review', () => {
       await switchEventTab(page, 'Audit')
       await page.getByRole('button', { name: 'Edited', exact: true }).click()
 
-      await expect(page.getByText('Comments: ' + comment)).toBeVisible()
-
       await expect(
         page.getByText(
           "Mother's name" + '-' + formatName(declaration.mother.name)
@@ -356,6 +354,8 @@ test.describe.serial('Add mother details on review', () => {
       await page
         .getByRole('button', { name: 'Registered', exact: true })
         .click()
+
+      await expect(page.getByText(comment)).toBeVisible()
 
       await page.locator('#close-dialog').click()
     })
