@@ -1,4 +1,4 @@
-name: Deploy (development)
+name: Deploy (farajaland-qa)
 run-name: 'Deploy to ${{ inputs.environment }} with (core: ${{ inputs.core-image-tag }}, country config: ${{ inputs.countryconfig-image-tag }}, reset: ${{ inputs.reset }})'
 on:
   workflow_call:
@@ -34,10 +34,7 @@ on:
         required: true
         default: 'development'
         options:
-          - development
           - qa
-          - e2e
-          - staging
       core-image-tag:
         description: Core image tag
         required: true

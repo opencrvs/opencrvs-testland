@@ -1,4 +1,4 @@
-name: Provision environment
+name: Provision (farajaland-qa)
 run-name: Provision ${{ inputs.environment }}
 on:
   workflow_call:
@@ -23,17 +23,7 @@ on:
         default: qa
         required: true
         options:
-          - development
-          - staging
           - qa
-          - production
-          - backup
-          - jump
-          - e2e
-          - pentest
-          - fix-analytics
-          - mosip
-          - openfn
       tag:
         type: choice
         description: Select group tag you want to execute
