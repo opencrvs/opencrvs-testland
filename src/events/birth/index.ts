@@ -1168,6 +1168,10 @@ export const birthEvent = defineConfig({
       form: [],
       conditionals: [
         {
+          type: ConditionalType.SHOW,
+          conditional: not(flag(InherentFlags.SEALED))
+        },
+        {
           type: ConditionalType.ENABLE,
           conditional: not(flag(InherentFlags.SEALED))
         }
