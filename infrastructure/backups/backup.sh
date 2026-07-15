@@ -149,6 +149,27 @@ docker run --rm \
   alpine sh -c "apk add --no-cache sqlite && \
   sqlite3 /data/sqlite/mosip-api.db \".backup '/data/backup/mosip-api-${LABEL:-$BACKUP_DATE}.sqlite'\""
 
+
+# Backup Minio
+# ---------------------------------------------------------------------------------------------
+echo "Creating a backup for Minio"
+
+LOCAL_MINIO_BACKUP=$ROOT_PATH/backups/minio/ocrvs-${LABEL:-$BACKUP_DATE}.tar.gz
+cd $ROOT_PATH/minio && tar -zcvf $LOCAL_MINIO_BACKUP . && cd /
+
+echo "Creating a backup for VSExport"
+
+# Backup VSExport
+# ---------------------------------------------------------------------------------------------
+LOCAL_VSEXPORT_BACKUP=$ROOT_PATH/backups/vsexport/ocrvs-${LABEL:-$BACKUP_DATE}.tar.gz
+cd $ROOT_PATH/vsexport && tar -zcvf $LOCAL_VSEXPORT_BACKUP . && cd /
+
+if [[ "$IS_LOCAL" = true ]]; then
+  echo $WORKING_DIR
+  cd $ROOT_PATH/backups && tar -zcvf $WORKING_DIR/ocrvs-${LABEL:-$BACKUP_DATE}.tar.gz .
+  exit 0
+fi
+
 # Copy the backups to an offsite server in production
 #----------------------------------------------------
 
