@@ -157,10 +157,10 @@ echo "Creating a backup for Minio"
 LOCAL_MINIO_BACKUP=$ROOT_PATH/backups/minio/ocrvs-${LABEL:-$BACKUP_DATE}.tar.gz
 cd $ROOT_PATH/minio && tar -zcvf $LOCAL_MINIO_BACKUP . && cd /
 
-echo "Creating a backup for VSExport"
 
 # Backup VSExport
 # ---------------------------------------------------------------------------------------------
+echo "Creating a backup for VSExport"
 LOCAL_VSEXPORT_BACKUP=$ROOT_PATH/backups/vsexport/ocrvs-${LABEL:-$BACKUP_DATE}.tar.gz
 cd $ROOT_PATH/vsexport && tar -zcvf $LOCAL_VSEXPORT_BACKUP . && cd /
 
