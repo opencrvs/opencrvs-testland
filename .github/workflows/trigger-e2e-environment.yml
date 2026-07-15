@@ -88,7 +88,7 @@ jobs:
 
       - name: Trigger E2E Workflow
         id: dispatch_e2e
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           github-token: ${{ secrets.E2E_WORKFLOWS_TOKEN }}
           script: |
@@ -162,7 +162,7 @@ jobs:
           E2E_RUN_LINK="https://github.com/opencrvs/e2e/actions/runs/${{ steps.dispatch_e2e.outputs.runId }}"
 
       - name: Wait for Environment Deployment (Deploy Job)
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           github-token: ${{ secrets.E2E_WORKFLOWS_TOKEN }}
           script: |
@@ -254,7 +254,7 @@ jobs:
             }
 
       - name: Wait for E2E Workflow Completion
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           github-token: ${{ secrets.E2E_WORKFLOWS_TOKEN }}
           script: |

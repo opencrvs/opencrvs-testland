@@ -93,7 +93,7 @@ jobs:
           CORE_IMAGE_TAG: ${{ inputs.core-image-tag || needs.get-core-commit.outputs.latest_commit_sha }}
           COUNTRYCONFIG_IMAGE_TAG: ${{ inputs.countryconfig-image-tag || needs.get-country-config-commit.outputs.short_sha }}
         id: trigger_e2e
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           github-token: ${{ secrets.TESTLAND_WORKFLOW_TOKEN }}
           script: |
@@ -150,7 +150,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - name: Wait for Environment Deployment (Deploy Job)
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           github-token: ${{ secrets.TESTLAND_WORKFLOW_TOKEN }}
           script: |
