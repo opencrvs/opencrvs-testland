@@ -62,8 +62,6 @@ print_usage_and_exit() {
   echo "Optionally a LABEL i.e. 'v1.0.1' can be provided to be appended to the backup file labels"
   echo "7 days of backup data will be retained in the manager node"
   echo ""
-  echo "If your Elasticsearch is password protected, an admin user's credentials can be given as environment variables:"
-  echo "ELASTICSEARCH_ADMIN_USER=your_user ELASTICSEARCH_ADMIN_PASSWORD=your_pass"
   exit 1
 }
 
@@ -89,7 +87,6 @@ if [ "$IS_LOCAL" = false ]; then
     echo "Error: Argument for the --passphrase is required."
     print_usage_and_exit
   fi
-  # In this example, we load the ELASTICSEARCH_ADMIN_USER & ELASTICSEARCH_ADMIN_PASSWORD database access secrets from a file.
   # We recommend that the secrets are served via a secure API from a Hardware Security Module
   source /data/secrets/opencrvs.secrets
 else
@@ -152,83 +149,6 @@ docker run --rm \
   -v $ROOT_PATH/backups/sqlite:/data/backup \
   alpine sh -c "apk add --no-cache sqlite && \
   sqlite3 /data/sqlite/mosip-api.db \".backup '/data/backup/mosip-api-${LABEL:-$BACKUP_DATE}.sqlite'\""
-
-
-#-------------------------------------------------------------------------------------
-
-echo ""
-echo "Delete all currently existing snapshots"
-echo ""
-# Get list of snapshots as a simple array
-snapshots=$(docker run --rm --network="$NETWORK" appropriate/curl \
-  -s "http://$(elasticsearch_host)/_snapshot/ocrvs/_all" | jq -r '.snapshots[].snapshot' || true)
-echo "Found snapshots:"
-echo "$snapshots" | sed 's/^/ - /'
-
-for snap in $snapshots; do
-  echo "Deleting snapshot: $snap"
-  docker run --rm --network="$NETWORK" appropriate/curl \
-    -s -X DELETE -H "Content-Type: application/json;charset=UTF-8" \
-    "http://$(elasticsearch_host)/_snapshot/ocrvs/${snap}?wait_for_completion=true&pretty"
-done
-docker run --rm --network=$NETWORK appropriate/curl curl -sS -X DELETE -H "Content-Type: application/json;charset=UTF-8" "http://$(elasticsearch_host)/_snapshot/ocrvs"
-echo "Waiting for snapshots to be removed"
-sleep 30
-#-------------------------------------------------------------------------------------
-echo ""
-echo "Register backup folder as an Elasticsearch repository for backing up the search data"
-echo ""
-
-create_elasticsearch_snapshot_repository() {
-  OUTPUT=$(docker run --rm --network=$NETWORK appropriate/curl curl -sS -X PUT -H "Content-Type: application/json;charset=UTF-8" "http://$(elasticsearch_host)/_snapshot/ocrvs" -d '{ "type": "fs", "settings": { "location": "/data/backups/elasticsearch", "compress": true }}' 2>/dev/null)
-  while [ "$OUTPUT" != '{"acknowledged":true}' ]; do
-    echo "Failed to register backup folder as an Elasticsearch repository. Trying again in..."
-    sleep 1
-    create_elasticsearch_snapshot_repository
-  done
-}
-
-create_elasticsearch_snapshot_repository
-
-#---------------------------------------------------------------------------------
-
-echo ""
-echo "Backup Elasticsearch as a set of snapshot files into an elasticsearch sub folder"
-echo ""
-
-create_elasticsearch_backup() {
-  indices=$(get_target_indices)
-  echo "List indices for backup: $indices"
-  OUTPUT=""
-  json_payload="{\"indices\": \"${indices}\"}"
-  OUTPUT=$(docker run --rm --network=$NETWORK appropriate/curl curl -sS -X PUT -H "Content-Type: application/json;charset=UTF-8" "http://$(elasticsearch_host)/_snapshot/ocrvs/snapshot_${LABEL:-$BACKUP_DATE}?wait_for_completion=true&pretty" -d "$json_payload" 2>/dev/null) || true
-
-  if echo $OUTPUT | jq -e '.snapshot.state == "SUCCESS"' > /dev/null; then
-    echo "Snapshot state is SUCCESS"
-  else
-    echo $OUTPUT
-    echo "Failed to backup Elasticsearch. Trying again in..."
-    create_elasticsearch_backup
-  fi
-}
-
-create_elasticsearch_backup
-
-echo "Creating a backup for Minio"
-
-LOCAL_MINIO_BACKUP=$ROOT_PATH/backups/minio/ocrvs-${LABEL:-$BACKUP_DATE}.tar.gz
-cd $ROOT_PATH/minio && tar -zcvf $LOCAL_MINIO_BACKUP . && cd /
-
-echo "Creating a backup for VSExport"
-
-LOCAL_VSEXPORT_BACKUP=$ROOT_PATH/backups/vsexport/ocrvs-${LABEL:-$BACKUP_DATE}.tar.gz
-cd $ROOT_PATH/vsexport && tar -zcvf $LOCAL_VSEXPORT_BACKUP . && cd /
-
-if [[ "$IS_LOCAL" = true ]]; then
-  echo $WORKING_DIR
-  cd $ROOT_PATH/backups && tar -zcvf $WORKING_DIR/ocrvs-${LABEL:-$BACKUP_DATE}.tar.gz .
-  exit 0
-fi
 
 # Copy the backups to an offsite server in production
 #----------------------------------------------------
