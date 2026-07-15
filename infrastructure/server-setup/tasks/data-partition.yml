@@ -59,20 +59,6 @@
     mode: g+rwx
   when: not elasticsearch_data.stat.exists
 
-- name: Check elasticsearch data backup directory
-  stat:
-    path: /data/backups/elasticsearch
-  register: elasticsearch_data_backup
-
-- name: 'Create elasticsearch backup directory'
-  file:
-    path: /data/backups/elasticsearch
-    state: directory
-    group: 1000
-    owner: 1000
-    mode: ugo+rwx
-  when: not elasticsearch_data_backup.stat.exists
-
 - name: 'Delete metabase data directory if exists'
   file:
     path: /data/metabase

@@ -110,8 +110,6 @@ for BACKUP_DIR in $ROOT_PATH/backups/*; do
   fi
 done
 
-mkdir -p $ROOT_PATH/backups/elasticsearch
-mkdir -p $ROOT_PATH/backups/elasticsearch/indices
 mkdir -p $ROOT_PATH/backups/minio
 mkdir -p $ROOT_PATH/backups/vsexport
 mkdir -p $ROOT_PATH/backups/sqlite
@@ -128,28 +126,6 @@ if [ "$IS_LOCAL" = true ]; then
 else
   NETWORK=opencrvs_overlay_net
 fi
-
-elasticsearch_host() {
-  if [ ! -z ${ELASTICSEARCH_ADMIN_USER+x} ] || [ ! -z ${ELASTICSEARCH_ADMIN_PASSWORD+x} ]; then
-    echo "$ELASTICSEARCH_ADMIN_USER:$ELASTICSEARCH_ADMIN_PASSWORD@elasticsearch:9200"
-  else
-    echo "elasticsearch:9200"
-  fi
-}
-
-get_target_indices() {
-  docker run --rm --network=$NETWORK appropriate/curl curl -s "http://$(elasticsearch_host)/_cat/indices?h=index" \
-    | grep -E '^(ocrvs-|events_)' \
-    | paste -sd, - \
-    | sed 's/\,$//'
-}
-
-get_target_indices() {
-  docker run --rm --network=$NETWORK appropriate/curl curl -s "http://$(elasticsearch_host)/_cat/indices?h=index" \
-    | grep -E '^(ocrvs-|events_)' \
-    | paste -sd, - \
-    | sed 's/\,$//'
-}
 
 # Today's date is used for filenames if LABEL is not provided
 #-----------------------------------
@@ -262,8 +238,6 @@ BACKUP_RAW_FILES_DIR=/tmp/backup-${LABEL:-$BACKUP_DATE}/
 mkdir -p $BACKUP_RAW_FILES_DIR
 
 # Copy full directories to the temporary directory
-cp -r $ROOT_PATH/backups/elasticsearch/ $BACKUP_RAW_FILES_DIR/elasticsearch/
-
 mkdir -p $BACKUP_RAW_FILES_DIR/minio/ && cp $ROOT_PATH/backups/minio/ocrvs-${LABEL:-$BACKUP_DATE}.tar.gz $BACKUP_RAW_FILES_DIR/minio/
 mkdir -p $BACKUP_RAW_FILES_DIR/vsexport/ && cp $ROOT_PATH/backups/vsexport/ocrvs-${LABEL:-$BACKUP_DATE}.tar.gz $BACKUP_RAW_FILES_DIR/vsexport/
 mkdir -p $BACKUP_RAW_FILES_DIR/postgres/ && cp $ROOT_PATH/backups/postgres/events-${LABEL:-$BACKUP_DATE}.dump $BACKUP_RAW_FILES_DIR/postgres/

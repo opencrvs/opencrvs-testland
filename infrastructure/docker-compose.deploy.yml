@@ -207,7 +207,6 @@ services:
     image: ghcr.io/opencrvs/elasticsearch:8.16.4
     volumes:
       - '/data/elasticsearch:/usr/share/elasticsearch/data'
-      - '/data/backups/elasticsearch:/data/backups/elasticsearch'
     configs:
       - source: jvm-options.{{ts}}
         target: /usr/share/elasticsearch/config/jvm.options.d/jvm.options
@@ -223,7 +222,6 @@ services:
           - node.labels.data1 == true
     environment:
       - ELASTIC_PASSWORD=${ELASTICSEARCH_SUPERUSER_PASSWORD}
-      - path.repo=/data/backups/elasticsearch
       - cluster.name=docker-cluster
       - network.host=0.0.0.0
       - discovery.type=single-node
