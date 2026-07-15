@@ -81,9 +81,9 @@ export const Workqueues = defineWorkqueues([
     },
     query: {
       flags: {
-        anyOf: [InherentFlags.INCOMPLETE],
         noneOf: [InherentFlags.REJECTED, 'attestation-required']
       },
+      status: { type: 'exact', term: EventStatus.enum.NOTIFIED },
       updatedAtLocation: {
         type: 'within',
         location: user('administrativeAreaId')
