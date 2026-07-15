@@ -61,7 +61,6 @@ print_usage_and_exit() {
   echo "Script must receive SSH details and a target directory of a remote server to copy backup files to."
   echo "Optionally a LABEL i.e. 'v1.0.1' can be provided to be appended to the backup file labels"
   echo "7 days of backup data will be retained in the manager node"
-  echo ""
   exit 1
 }
 
