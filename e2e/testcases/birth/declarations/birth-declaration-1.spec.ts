@@ -8,8 +8,9 @@ import {
   goToSection,
   login,
   switchEventTab,
-  expectRowValue
-, triggerDeclarationAction } from '../../../helpers'
+  expectRowValue,
+  triggerDeclarationAction
+} from '../../../helpers'
 import { faker } from '@faker-js/faker'
 import { CREDENTIALS } from '../../../constants'
 import { fillDate, validateAddress } from '../helpers'

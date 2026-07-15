@@ -1,12 +1,16 @@
 import { expect, test, type Page } from '@playwright/test'
-import { Declaration , createDeclaration } from '../../test-data/birth-declaration'
-import { login , getToken } from '../../../helpers'
+import {
+  Declaration,
+  createDeclaration
+} from '../../test-data/birth-declaration'
+import { login, getToken } from '../../../helpers'
 import { CREDENTIALS } from '../../../constants'
 import {
   navigateToCertificatePrintAction,
   printAndExpectPopup,
-  selectRequesterType
-, selectCertificationType } from './helpers'
+  selectRequesterType,
+  selectCertificationType
+} from './helpers'
 import { expectInUrl } from '../../../utils'
 
 test.describe.serial('10.0 Validate "Review" page', () => {

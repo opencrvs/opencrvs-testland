@@ -5,8 +5,9 @@ import {
   formatName,
   goToSection,
   login,
-  switchEventTab
-, triggerDeclarationAction } from '../../../helpers'
+  switchEventTab,
+  triggerDeclarationAction
+} from '../../../helpers'
 import { faker } from '@faker-js/faker'
 import { CREDENTIALS } from '../../../constants'
 import { REQUIRED_VALIDATION_ERROR } from '../helpers'

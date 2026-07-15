@@ -1,12 +1,16 @@
 import { test, type Page, expect } from '@playwright/test'
-import { Declaration , createDeclaration } from '../../test-data/birth-declaration'
-import { login , getToken } from '../../../helpers'
+import {
+  Declaration,
+  createDeclaration
+} from '../../test-data/birth-declaration'
+import { login, getToken } from '../../../helpers'
 import { CREDENTIALS } from '../../../constants'
 import {
   navigateToCertificatePrintAction,
   openRecordByTitle,
-  selectRequesterType
-, selectCertificationType } from './helpers'
+  selectRequesterType,
+  selectCertificationType
+} from './helpers'
 import { ensureAssignedToUser, selectAction } from '../../../utils'
 import { formatV2ChildName } from '../../birth/helpers'
 

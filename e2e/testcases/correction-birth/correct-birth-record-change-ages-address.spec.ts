@@ -13,7 +13,11 @@ import {
   getPlaceOfBirth
 } from '../test-data/birth-declaration'
 import { CREDENTIALS } from '../../constants'
-import { formatV2ChildName, getAdministrativeAreas , getIdByName } from '../birth/helpers'
+import {
+  formatV2ChildName,
+  getAdministrativeAreas,
+  getIdByName
+} from '../birth/helpers'
 import {
   ensureAssignedToUser,
   expectInUrl,

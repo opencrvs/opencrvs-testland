@@ -190,7 +190,6 @@ export async function ensureLoginPageReady(page: Page) {
    */
   await page.waitForSelector('#Box img', { state: 'attached' })
   await page.waitForFunction(() => {
-     
     const img = document.querySelector<HTMLImageElement>('#Box img')!
     return img && img.src && img.src.trim() !== ''
   })

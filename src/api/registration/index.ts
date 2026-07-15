@@ -33,8 +33,6 @@ import { InformantType as DeathInformantType } from '@countryconfig/events/death
 export type ActionConfirmationRefs = { Payload: EventDocument }
 export type ActionConfirmationRequest = Hapi.Request<ActionConfirmationRefs>
 
- 
-
 /**
  * Handler for event registration confirmation.
  *
@@ -249,8 +247,7 @@ export async function onMosipDeathRegisterHandler(
     )
 
     const deceasedName = declaration['deceased.name'] as
-      | NameFieldValue
-      | undefined
+      NameFieldValue | undefined
 
     const deathInformantSection =
       declaration['informant.relation'] === DeathInformantType.SPOUSE

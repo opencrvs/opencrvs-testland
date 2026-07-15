@@ -1,6 +1,6 @@
 import { test, type Page, expect } from '@playwright/test'
 import { login, logout } from '../../helpers'
-import { CREDENTIALS , LOGIN_URL } from '../../constants'
+import { CREDENTIALS, LOGIN_URL } from '../../constants'
 import { setMobileViewport } from '../../mobile-helpers'
 
 test.describe('Desktop', () => {

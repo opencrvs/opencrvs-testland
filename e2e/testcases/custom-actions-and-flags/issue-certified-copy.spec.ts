@@ -7,7 +7,7 @@ import {
   selectAction
 } from '../../utils'
 import { Declaration, createDeclaration } from '../test-data/birth-declaration'
-import { REQUIRED_VALIDATION_ERROR , formatV2ChildName } from '../birth/helpers'
+import { REQUIRED_VALIDATION_ERROR, formatV2ChildName } from '../birth/helpers'
 import {
   openRecordByTitle,
   printAndExpectPopup

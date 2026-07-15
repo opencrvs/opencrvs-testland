@@ -7,8 +7,10 @@ import {
   goToSection,
   login,
   switchEventTab,
-  validateActionMenuButton
-, getEventIdFromUrl, triggerDeclarationAction } from '../../helpers'
+  validateActionMenuButton,
+  getEventIdFromUrl,
+  triggerDeclarationAction
+} from '../../helpers'
 import { faker } from '@faker-js/faker'
 import { CREDENTIALS } from '../../constants'
 import { ensureAssignedToUser, selectAction } from '../../utils'

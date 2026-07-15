@@ -8,7 +8,11 @@ import {
   triggerDeclarationAction
 } from '../../helpers'
 import { faker } from '@faker-js/faker'
-import { fillChildDetails, openBirthDeclaration , REQUIRED_VALIDATION_ERROR } from '../birth/helpers'
+import {
+  fillChildDetails,
+  openBirthDeclaration,
+  REQUIRED_VALIDATION_ERROR
+} from '../birth/helpers'
 import { CLIENT_URL, CREDENTIALS } from '../../constants'
 import { createDeclaration, Declaration } from '../test-data/birth-declaration'
 import { selectAction, type } from '../../utils'

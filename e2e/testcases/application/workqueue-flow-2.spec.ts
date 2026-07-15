@@ -6,8 +6,9 @@ import {
   formatName,
   getRandomDate,
   goToSection,
-  login
-, triggerDeclarationAction } from '../../helpers'
+  login,
+  triggerDeclarationAction
+} from '../../helpers'
 import { CREDENTIALS } from '../../constants'
 import { ensureAssignedToUser, selectAction } from '../../utils'
 import { assertRecordInWorkqueue, fillDate } from '../birth/helpers'

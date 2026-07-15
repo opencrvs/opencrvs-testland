@@ -9,8 +9,9 @@ import {
   login,
   switchEventTab,
   expectRowValue,
-  validateActionMenuButton
-, triggerDeclarationAction } from '../../../helpers'
+  validateActionMenuButton,
+  triggerDeclarationAction
+} from '../../../helpers'
 import { faker } from '@faker-js/faker'
 import { CREDENTIALS } from '../../../constants'
 import { validateAddress } from '../helpers'

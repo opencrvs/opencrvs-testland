@@ -10,8 +10,9 @@ import {
   logout,
   switchEventTab,
   uploadImage,
-  uploadImageToSection
-, triggerDeclarationAction } from '../../../helpers'
+  uploadImageToSection,
+  triggerDeclarationAction
+} from '../../../helpers'
 import { faker } from '@faker-js/faker'
 import { CREDENTIALS } from '../../../constants'
 import { fillDate, validateAddress } from '../helpers'

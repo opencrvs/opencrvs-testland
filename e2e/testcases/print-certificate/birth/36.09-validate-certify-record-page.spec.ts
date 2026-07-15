@@ -1,7 +1,10 @@
 import { expect, test, type Page } from '@playwright/test'
 
-import { Declaration , createDeclaration } from '../../test-data/birth-declaration'
-import { getToken , login } from '../../../helpers'
+import {
+  Declaration,
+  createDeclaration
+} from '../../test-data/birth-declaration'
+import { getToken, login } from '../../../helpers'
 import { CREDENTIALS } from '../../../constants'
 import {
   navigateToCertificatePrintAction,
