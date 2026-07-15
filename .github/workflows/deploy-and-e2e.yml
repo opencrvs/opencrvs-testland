@@ -7,7 +7,7 @@
 #
 # Copyright (C) The OpenCRVS Authors located at https://github.com/opencrvs/opencrvs-core/blob/master/AUTHORS.
 name: Deploy & run E2E
-run-name: "Triggered by ${{ github.actor }} (core: ${{ inputs.core-image-tag }}, countryconfig: ${{ inputs.countryconfig-image-tag }}) to e2e"
+run-name: "Triggered by ${{ github.actor }} (core: ${{ inputs.core-image-tag || 'n/a'}}, countryconfig: ${{ inputs.countryconfig-image-tag || 'n/a' }}) to e2e"
 on:
   repository_dispatch:
     types: [run_e2e]
