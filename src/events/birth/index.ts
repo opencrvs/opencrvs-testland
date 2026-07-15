@@ -146,11 +146,33 @@ export const birthEvent = defineConfig({
   summary: {
     fields: [
       {
+        id: 'fpfp',
+        value: {
+          defaultMessage: 'THIS RECORD IS SEALED!',
+          description: 'Label for place of birth',
+          id: 'event.birth.summary.child.placgdffgdeOfBirth.label'
+        },
+        label: {
+          defaultMessage: 'Sealed?',
+          description: 'Label for place of birth',
+          id: 'event.bisdfsdrth.summary.child.placeOfBirth.label'
+        },
+        conditionals: [
+          {
+            type: ConditionalType.SHOW,
+            conditional: flag(InherentFlags.SEALED)
+          }
+        ]
+      },
+      {
         fieldId: 'child.nid',
         conditionals: [
           {
             type: ConditionalType.SHOW,
-            conditional: not(field('child.nid').isFalsy())
+            conditional: and(
+              not(field('child.nid').isFalsy()),
+              not(flag(InherentFlags.SEALED))
+            )
           }
         ]
       },
@@ -160,7 +182,13 @@ export const birthEvent = defineConfig({
           defaultMessage: 'No date of birth',
           description: 'This is shown when there is no child information',
           id: 'event.birth.summary.child.dob.empty'
-        }
+        },
+        conditionals: [
+          {
+            type: ConditionalType.SHOW,
+            conditional: not(flag(InherentFlags.SEALED))
+          }
+        ]
       },
       // Render the 'fallback value' when selection has not been made.
       // This hides the default values of the field when no selection has been made. (e.g. when address is prefilled with user's details, we don't want to show the address before selecting the option)
@@ -179,7 +207,10 @@ export const birthEvent = defineConfig({
         conditionals: [
           {
             type: ConditionalType.SHOW,
-            conditional: field('child.placeOfBirth').isFalsy()
+            conditional: and(
+              not(flag(InherentFlags.SEALED)),
+              field('child.placeOfBirth').isFalsy()
+            )
           }
         ]
       },
@@ -198,8 +229,11 @@ export const birthEvent = defineConfig({
         conditionals: [
           {
             type: ConditionalType.SHOW,
-            conditional: field('child.placeOfBirth').isEqualTo(
-              PlaceOfBirth.HEALTH_FACILITY
+            conditional: and(
+              not(flag(InherentFlags.SEALED)),
+              field('child.placeOfBirth').isEqualTo(
+                PlaceOfBirth.HEALTH_FACILITY
+              )
             )
           }
         ]
@@ -219,8 +253,9 @@ export const birthEvent = defineConfig({
         conditionals: [
           {
             type: ConditionalType.SHOW,
-            conditional: field('child.placeOfBirth').isEqualTo(
-              PlaceOfBirth.PRIVATE_HOME
+            conditional: and(
+              not(flag(InherentFlags.SEALED)),
+              field('child.placeOfBirth').isEqualTo(PlaceOfBirth.PRIVATE_HOME)
             )
           }
         ]
@@ -240,8 +275,9 @@ export const birthEvent = defineConfig({
         conditionals: [
           {
             type: ConditionalType.SHOW,
-            conditional: field('child.placeOfBirth').isEqualTo(
-              PlaceOfBirth.OTHER
+            conditional: and(
+              not(flag(InherentFlags.SEALED)),
+              field('child.placeOfBirth').isEqualTo(PlaceOfBirth.OTHER)
             )
           }
         ]
@@ -262,7 +298,13 @@ export const birthEvent = defineConfig({
           defaultMessage: '{informant.phoneNo} {informant.email}',
           description: 'This is the contact value of the informant',
           id: 'event.birth.summary.informant.contact.value'
-        }
+        },
+        conditionals: [
+          {
+            type: ConditionalType.SHOW,
+            conditional: not(flag(InherentFlags.SEALED))
+          }
+        ]
       }
     ]
   },
@@ -1106,7 +1148,71 @@ export const birthEvent = defineConfig({
         description: 'Confirmation body for unarchiving a declaration'
       }
     },
-    verifiableCredentialActions.issueBirthCredentialAction
+    verifiableCredentialActions.issueBirthCredentialAction,
+    {
+      type: ActionType.CUSTOM,
+      customActionType: 'SEAL',
+      icon: 'Lock',
+      label: {
+        defaultMessage: 'Seal',
+        description:
+          'This is shown as the action name anywhere the user can trigger the action from',
+        id: 'event.birth.custom.action.seal.label'
+      },
+      supportingCopy: {
+        defaultMessage: 'TODO',
+        description:
+          'This is the supporting copy for the Seal declaration -action',
+        id: 'event.birth.custom.action.seal.supportingCopy'
+      },
+      form: [],
+      conditionals: [
+        {
+          type: ConditionalType.ENABLE,
+          conditional: not(flag(InherentFlags.SEALED))
+        }
+      ],
+      flags: [{ id: InherentFlags.SEALED, operation: 'add' }],
+      auditHistoryLabel: {
+        defaultMessage: 'Sealed',
+        description: 'The label to show in audit history for the seal action',
+        id: 'event.birth.custom.action.seal.audit-history-label'
+      }
+    },
+    {
+      type: ActionType.CUSTOM,
+      customActionType: 'UNSEAL',
+      icon: 'Unlock',
+      label: {
+        defaultMessage: 'Unseal',
+        description:
+          'This is shown as the action name anywhere the user can trigger the action from',
+        id: 'event.birth.custom.action.unseal.label'
+      },
+      auditHistoryLabel: {
+        defaultMessage: 'Unsealed',
+        description: 'The label to show in audit history for the seal action',
+        id: 'event.birth.custom.action.seal.audit-history-label'
+      },
+      form: [],
+      supportingCopy: {
+        defaultMessage: 'TODO',
+        description:
+          'This is the supporting copy for the Unseal declaration -action',
+        id: 'event.birth.custom.action.unseal.supportingCopy'
+      },
+      flags: [{ id: InherentFlags.SEALED, operation: 'remove' }],
+      conditionals: [
+        {
+          type: ConditionalType.SHOW,
+          conditional: flag(InherentFlags.SEALED)
+        },
+        {
+          type: ConditionalType.ENABLE,
+          conditional: flag(InherentFlags.SEALED)
+        }
+      ]
+    }
   ],
   advancedSearch: advancedSearchBirth
 })
