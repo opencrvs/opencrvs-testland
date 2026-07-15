@@ -1,5 +1,13 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+#
+# OpenCRVS is also distributed under the terms of the Civil Registration
+# & Healthcare Disclaimer located at http://opencrvs.org/license.
+#
+# Copyright (C) The OpenCRVS Authors located at https://github.com/opencrvs/opencrvs-core/blob/master/AUTHORS.
 name: Deploy & run E2E
-run-name: Deploy & E2E, triggered by ${{ github.event.client_payload.actor || github.actor }} to ${{ github.event.inputs.environment || 'e2e' }}
+run-name: "Triggered by ${{ github.actor }} (core: ${{ inputs.core-image-tag }}, countryconfig: ${{ inputs.countryconfig-image-tag }}) to e2e"
 on:
   repository_dispatch:
     types: [run_e2e]
@@ -8,38 +16,31 @@ on:
       - develop
   workflow_dispatch:
     inputs:
-      environment:
-        type: choice
-        description: Environment to deploy to
-        required: true
-        default: 'e2e'
-        options:
-          - e2e
       core-image-tag:
         description: Core image tag
         required: true
-        default: 'v1.6.0'
+        default: 'v2.0.0'
       countryconfig-image-tag:
         description: Your Country Config image tag
         required: true
-        default: 'v1.6.0'
+        default: 'v2.0.0'
 
 concurrency:
   group: ci-build
   cancel-in-progress: false
 
 jobs:
-  wait-30s:
-    # Avoid a race condition when PRs exist in both farajaland and core.
-    # The delay gives the other PR time to merge before reading develop.
-    name: Wait 30 seconds
-    runs-on: ubuntu-latest
-    steps:
-      - name: Wait 30 seconds
-        run: sleep 30
+  # wait-30s:
+  #   # Avoid a race condition when PRs exist in both testland and core.
+  #   # The delay gives the other PR time to merge before reading develop.
+  #   name: Wait 30 seconds
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Wait 30 seconds
+  #       run: sleep 30
 
   get-core-commit:
-    needs: wait-30s
+    # needs: wait-30s
     name: Resolve latest core tag
     runs-on: ubuntu-latest
     outputs:
@@ -57,7 +58,7 @@ jobs:
         run: echo "commit_sha=$(git rev-parse HEAD | cut -c 1-7)" >> $GITHUB_OUTPUT
 
   get-country-config-commit:
-    name: Resolve latest Farajaland tag
+    name: Resolve latest Testland tag
     runs-on: ubuntu-latest
     needs: get-core-commit
     outputs:
@@ -70,169 +71,128 @@ jobs:
         id: set_short_sha
         run: echo "short_sha=${GITHUB_SHA:0:7}" >> $GITHUB_OUTPUT
         if: github.event_name == 'push' || github.event_name == 'repository_dispatch'
-
-  deploy:
-    needs: [get-country-config-commit, get-core-commit]
-    uses: ./.github/workflows/deploy.yml
-    with:
-      environment: ${{ github.event.inputs.environment || 'e2e' }}
-      core-image-tag: ${{ github.event.inputs.core-image-tag || needs.get-core-commit.outputs.latest_commit_sha }}
-      countryconfig-image-tag: ${{ github.event.inputs.countryconfig-image-tag || needs.get-country-config-commit.outputs.short_sha }}
-      reset: 'true'
-    secrets: inherit
-
-  discover-tests:
-    name: Discover test directories
-    runs-on: ubuntu-24.04
-    needs: [get-core-commit, get-country-config-commit]
+  
+  trigger-e2e:
+    name: Trigger E2E workflow
+    runs-on: ubuntu-latest
+    needs: get-country-config-commit
     outputs:
-      test_matrix: ${{ steps.list-tests.outputs.test_matrix }}
+      run_id: ${{ steps.trigger_e2e.outputs.run_id }}
+      run_url: ${{ steps.trigger_e2e.outputs.run_url }}
     steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
-        with:
-          node-version-file: .nvmrc
-
-      - name: List Test Directories
-        id: list-tests
-        run: |
-          tests_suites=$(cd e2e/testcases; find * -type f -name "*.spec.ts" | jq -R -s -c 'split("\n")[:-1]')
-          echo "Test suites: $tests_suites"
-          echo "test_matrix=$tests_suites" >> $GITHUB_OUTPUT
-          echo "test_matrix=$tests_suites"
-      - name: Cache Node.js dependencies
-        uses: actions/cache@v5
-        with:
-          path: |
-            node_modules
-            ~/.cache/yarn/v6
-          key: ${{ runner.os }}-node-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-
-      - name: Install Dependencies
-        run: yarn
-
-      - name: Cache Playwright browsers
-        id: playwright-cache
-        uses: actions/cache@v5
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-playwright-
-
-      - name: Install Playwright
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
-        uses: nick-fields/retry@v4
-        with:
-          timeout_minutes: 10
-          max_attempts: 3
-          command: npx playwright install --with-deps
-  test:
-    needs: [deploy, discover-tests, get-core-commit, get-country-config-commit]
-    runs-on: ubuntu-24.04
-    environment: ${{ github.event.inputs.environment || 'e2e' }}
-    strategy:
-      max-parallel: 15
-      fail-fast: false
-      matrix:
-        # Since we are not yet in a place where we can reliably run all tests in parallel, we will run the slowest ones first
-        shard:
-          [
-            20,
-            3,
-            2,
-            1,
-            15,
-            5,
-            4,
-            16,
-            19,
-            7,
-            17,
-            8,
-            9,
-            12,
-            14,
-            18,
-            6,
-            10,
-            11,
-            13
-          ]
-    name: shard-${{ matrix.shard }}
-    steps:
-      - uses: actions/checkout@v6
-      - uses: actions/setup-node@v6
-        with:
-          node-version-file: .nvmrc
-
-      - name: Cache Node.js dependencies
-        id: node-cache
-        uses: actions/cache@v5
-        with:
-          path: |
-            node_modules
-            ~/.cache/yarn/v6
-          key: ${{ runner.os }}-node-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-
-      - name: Cache Playwright browsers
-        id: playwright-cache
-        uses: actions/cache@v5
-        with:
-          path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-${{ hashFiles('**/yarn.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-playwright-
-
-      - name: Install Dependencies
-        if: steps.node-cache.outputs.cache-hit != 'true'
-        run: yarn
-
-      - name: Install Playwright
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
-        uses: nick-fields/retry@v4
-        with:
-          timeout_minutes: 10
-          max_attempts: 3
-          command: npx playwright install --with-deps
-
-      - name: Run Playwright Tests
-        run: npx playwright test --shard=${{ matrix.shard }}/20
+      - name: Trigger E2E
         env:
-          DASHBOARD_E2E: 'true'
-          DOMAIN: '${{ vars.DOMAIN }}'
-
-      - id: ctrf_check
-        if: always()
-        run: |
-          [ -d ctrf ] && \
-            echo "ctrf=true" >> $GITHUB_OUTPUT || \
-            echo "ctrf=false" >> $GITHUB_OUTPUT
-
-      - name: Publish Test Summary Results
-        run: npx github-actions-ctrf ctrf/ctrf-report.json
-        if: always() && steps.ctrf_check.outputs.ctrf == 'true'
-
-      - name: Form the artifact name from test_file
-        if: always()
-        id: artifact
-        run: echo "artifact=$(echo '${{ matrix.test_file }}' | sed 's/\//__/g')" >> $GITHUB_OUTPUT
-
-      - uses: actions/upload-artifact@v7
-        if: always()
+          CORE_IMAGE_TAG: ${{ inputs.core-image-tag || needs.get-core-commit.outputs.latest_commit_sha }}
+          COUNTRYCONFIG_IMAGE_TAG: ${{ inputs.countryconfig-image-tag || needs.get-country-config-commit.outputs.short_sha }}
+        id: trigger_e2e
+        uses: actions/github-script@v7
         with:
-          name: playwright-report-${{github.event.inputs.core-image-tag || needs.get-core-commit.outputs.latest_commit_sha}}-${{github.event.inputs.countryconfig-image-tag || needs.get-country-config-commit.outputs.short_sha}}-${{ steps.artifact.outputs.artifact }}-shard-${{ matrix.shard }}-${{ github.run_id }}-${{ github.run_attempt }}
-          path: playwright-report/
-          retention-days: 30
+          github-token: ${{ secrets.TESTLAND_WORKFLOW_TOKEN }}
+          script: |
+            const result = await github.rest.actions.createWorkflowDispatch({
+              owner: 'opencrvs',
+              repo: 'opencrvs-testland-infrastructure',
+              workflow_id: 'deploy-and-e2e.yml',
+              ref: 'develop',
+              return_run_details: true,
+              headers: {
+                'X-GitHub-Api-Version': '2026-03-10',
+              },
 
+              inputs: {
+                'core-image-tag': '${{ env.CORE_IMAGE_TAG }}',
+                'countryconfig-image-tag': '${{ env.COUNTRYCONFIG_IMAGE_TAG }}'
+              },
+            });
+
+            console.log(JSON.stringify(result.data, null, 2));
+
+            const runId = result.data.workflow_run_id;
+
+            if (!runId) {
+              throw new Error(`workflow_run_id was not returned. Response: ${JSON.stringify(result.data)}`);
+            }
+
+            core.setOutput('run_id', runId);
+            core.setOutput('run_url', result.data.html_url);
+
+            console.log(`Triggered runId: ${runId}`);
+            console.log(`Run URL: ${result.data.html_url}`);
+
+      - name: Print link to E2E workflow run
+        id: print-links
+        run: |
+          E2E_RUN_LINK="${{ steps.trigger_e2e.outputs.run_url }}"
+          DEPLOYMENT_LINK="https://e2e.opencrvs.dev"
+
+          echo """
+          # E2E Environment summary
+          Action workflow (pipeline): $E2E_RUN_LINK
+
+          Web link: $DEPLOYMENT_LINK
+          """ >> $GITHUB_STEP_SUMMARY
+
+          echo "deployment_link=$DEPLOYMENT_LINK" >> $GITHUB_OUTPUT
+  listen-e2e:
+    needs: [trigger-e2e]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Wait for Environment Deployment (Deploy Job)
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.TESTLAND_WORKFLOW_TOKEN }}
+          script: |
+            const owner = 'opencrvs';
+            const repo = 'opencrvs-testland-infrastructure';
+            const runId = ${{ needs.trigger-e2e.outputs.run_id }};
+            let deployJobCompleted = false;
+
+            // Check if deploy job has completed
+            while (!deployJobCompleted) {
+              const workflowRun = await github.rest.actions.getWorkflowRun({
+                owner,
+                repo,
+                run_id: runId
+              });
+              const jobs = await github.rest.actions.listJobsForWorkflowRun({
+                owner,
+                repo,
+                run_id: runId
+              });
+
+              const deployJob = jobs.data.jobs.find(job => job.name === 'deploy / seed-data / seed-data');
+              const cancelled = jobs.data.jobs.find(job => job.conclusion === 'cancelled');
+
+              if (cancelled) {
+                throw new Error('E2E workflow was cancelled');
+              }
+
+              if (deployJob && deployJob.status === 'completed') {
+                deployJobCompleted = true;
+
+                if (deployJob.conclusion !== 'success') {
+                  throw new Error('Deploy job failed');
+                }
+
+                console.log('Deploy job completed successfully');
+              }
+
+              if(workflowRun.data.status === 'completed') {
+                deployJobCompleted = true;
+
+                if (workflowRun.data.conclusion !== 'success') {
+                  throw new Error('E2E workflow failed');
+                }
+              }
+
+              if (!deployJobCompleted) {
+                await new Promise(resolve => setTimeout(resolve, 10000));
+              }
+            }
   notify-slack:
     name: Notify Slack on Failure
     runs-on: ubuntu-latest
-    needs: [deploy, discover-tests, test]
+    needs: [listen-e2e]
     if: always() && failure()
     steps:
       - name: Send Slack notification
@@ -246,7 +206,7 @@ jobs:
   notify-slack-success:
     name: Notify Slack on success
     runs-on: ubuntu-latest
-    needs: [deploy, discover-tests, test]
+    needs: [listen-e2e]
     if: success()
     steps:
       - name: Send Slack notification
