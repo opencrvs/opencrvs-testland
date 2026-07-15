@@ -16,7 +16,11 @@ import {
 import { faker } from '@faker-js/faker'
 import { CREDENTIALS, GATEWAY_HOST } from '../../constants'
 import { fillDate, formatV2ChildName } from '../birth/helpers'
-import { ensureAssignedToUser, selectAction } from '../../utils'
+import {
+  ensureAssignedToUser,
+  navigateToWorkqueue,
+  selectAction
+} from '../../utils'
 import { ActionType } from '@opencrvs/toolkit/events'
 import { createDeclaration, Declaration } from '../test-data/birth-declaration'
 import { openRecordByTitle } from '../print-certificate/birth/helpers'
@@ -467,29 +471,30 @@ test('Archival and unarchival of a notified declaration', async ({ page }) => {
   let declaration: Declaration
 
   await test.step('Initialise a notified birth record via API', async () => {
-    // LOCAL_REGISTRAR does not hold record.notify, so a Community Leader
-    // notifies it instead.
-    const communityLeaderToken = await getToken(CREDENTIALS.COMMUNITY_LEADER)
+    const hospitalOfficialToken = await getToken(CREDENTIALS.HOSPITAL_OFFICIAL)
 
     const notifyRes = await createDeclaration(
-      communityLeaderToken,
+      hospitalOfficialToken,
       undefined,
       ActionType.NOTIFY
     )
     declaration = notifyRes.declaration
   })
 
-  // A record that has only been notified (never declared) has no
-  // legalStatuses.DECLARED, so LOCAL_REGISTRAR's declaredIn-scoped
-  // record.archive/unarchive can't match and would be denied. REGISTRAR_GENERAL
-  // (NATIONAL_REGISTRAR) holds both scopes unrestricted, so use that role here.
-  await test.step('Login as Registrar General', async () => {
-    await login(page, CREDENTIALS.REGISTRAR_GENERAL)
+  await test.step('Login as Registration Officer', async () => {
+    await login(page, CREDENTIALS.REGISTRATION_OFFICER)
+  })
+
+  await test.step('Notified record appears in the Notifications work queue', async () => {
+    await navigateToWorkqueue(page, 'Notifications')
+    await expect(
+      page.getByRole('button', { name: formatV2ChildName(declaration) })
+    ).toBeVisible()
   })
 
   await test.step('Archive the notified declaration', async () => {
-    await searchFromSearchBar(page, formatV2ChildName(declaration))
-    await ensureAssignedToUser(page, CREDENTIALS.REGISTRAR_GENERAL)
+    await openRecordByTitle(page, formatV2ChildName(declaration))
+    await ensureAssignedToUser(page, CREDENTIALS.REGISTRATION_OFFICER)
 
     await expect(page.getByTestId('status-value')).toHaveText('Notified')
 
@@ -507,8 +512,17 @@ test('Archival and unarchival of a notified declaration', async ({ page }) => {
     await expect(page.getByTestId('status-value')).toHaveText('Archived')
   })
 
+  await test.step('Archived record no longer appears in the Notifications work queue', async () => {
+    await page.getByTestId('exit-event').click()
+    await navigateToWorkqueue(page, 'Notifications')
+    await expect(
+      page.getByRole('button', { name: formatV2ChildName(declaration) })
+    ).toBeHidden()
+  })
+
   await test.step('Unarchive the declaration', async () => {
-    await ensureAssignedToUser(page, CREDENTIALS.REGISTRAR_GENERAL)
+    await searchFromSearchBar(page, formatV2ChildName(declaration))
+    await ensureAssignedToUser(page, CREDENTIALS.REGISTRATION_OFFICER)
 
     await selectAction(page, 'Unarchive')
 
@@ -522,5 +536,13 @@ test('Archival and unarchival of a notified declaration', async ({ page }) => {
   await test.step('Unarchived declaration reverts to Notified status', async () => {
     await searchFromSearchBar(page, formatV2ChildName(declaration))
     await expect(page.getByTestId('status-value')).toHaveText('Notified')
+  })
+
+  await test.step('Unarchived record reappears in the Notifications workqueue', async () => {
+    await page.getByTestId('exit-event').click()
+    await navigateToWorkqueue(page, 'Notifications')
+    await expect(
+      page.getByRole('button', { name: formatV2ChildName(declaration) })
+    ).toBeVisible()
   })
 })
