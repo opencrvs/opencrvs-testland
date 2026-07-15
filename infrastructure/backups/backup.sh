@@ -153,7 +153,6 @@ docker run --rm \
 # Backup Minio
 # ---------------------------------------------------------------------------------------------
 echo "Creating a backup for Minio"
-
 LOCAL_MINIO_BACKUP=$ROOT_PATH/backups/minio/ocrvs-${LABEL:-$BACKUP_DATE}.tar.gz
 cd $ROOT_PATH/minio && tar -zcvf $LOCAL_MINIO_BACKUP . && cd /
 
