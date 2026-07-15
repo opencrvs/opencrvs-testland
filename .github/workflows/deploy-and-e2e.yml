@@ -80,6 +80,13 @@ jobs:
       run_id: ${{ steps.trigger_e2e.outputs.run_id }}
       run_url: ${{ steps.trigger_e2e.outputs.run_url }}
     steps:
+      - name: Print resolved e2e properties
+        env:
+          CORE_IMAGE_TAG: ${{ inputs.core-image-tag || needs.get-core-commit.outputs.latest_commit_sha }}
+          COUNTRYCONFIG_IMAGE_TAG: ${{ inputs.countryconfig-image-tag || needs.get-country-config-commit.outputs.short_sha }}
+        run: |
+          echo "Core image tag: $CORE_IMAGE_TAG"
+          echo "Country config image tag: $COUNTRYCONFIG_IMAGE_TAG"
       - name: Trigger E2E
         env:
           CORE_IMAGE_TAG: ${{ inputs.core-image-tag || needs.get-core-commit.outputs.latest_commit_sha }}
