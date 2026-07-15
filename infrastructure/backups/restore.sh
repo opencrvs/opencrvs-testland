@@ -35,10 +35,6 @@ print_usage_and_exit() {
   echo 'Usage: ./restore.sh'
   echo "This script CLEARS ALL DATA and RESTORES A SPECIFIC DAY'S or label's data. This process is irreversible, so USE WITH CAUTION."
   echo "Script must receive a label parameter to restore data from that specific day in format +%Y-%m-%d i.e. 2019-01-01 or that label"
-  echo "The Elasticsearch backup folder /data/backups/elasticsearch must exist with all previous snapshots and indices. All files are required"
-  echo ""
-  echo "If your Elasticsearch is password protected, an admin user's credentials can be given as environment variables:"
-  echo "ELASTICSEARCH_ADMIN_USER=your_user ELASTICSEARCH_ADMIN_PASSWORD=your_pass"
   exit 1
 }
 
@@ -49,7 +45,6 @@ fi
 if [ "$IS_LOCAL" = false ]; then
   ROOT_PATH=${ROOT_PATH:-/data}
 
-  # In this example, we load the ELASTICSEARCH_ADMIN_USER & ELASTICSEARCH_ADMIN_PASSWORD database access secrets from a file.
   # We recommend that the secrets are served via a secure API from a Hardware Security Module
   source /data/secrets/opencrvs.secrets
 else
@@ -72,13 +67,6 @@ else
   NETWORK=opencrvs_overlay_net
 fi
 
-elasticsearch_host() {
-  if [ ! -z ${ELASTICSEARCH_ADMIN_USER+x} ] || [ ! -z ${ELASTICSEARCH_ADMIN_PASSWORD+x} ]; then
-    echo "$ELASTICSEARCH_ADMIN_USER:$ELASTICSEARCH_ADMIN_PASSWORD@elasticsearch:9200"
-  else
-    echo "elasticsearch:9200"
-  fi
-}
 
 #####
 #
@@ -90,37 +78,6 @@ elasticsearch_host() {
 #
 #####
 
-
-##
-# ------ ELASTICSEARCH -----
-##
-
-echo "delete any previously created snapshot if any.  This may error on a fresh install with a repository_missing_exception error.  Just ignore it."
-docker run --rm --network=$NETWORK appropriate/curl curl -X DELETE "http://$(elasticsearch_host)/_snapshot/ocrvs"
-
-# Delete all data from elasticsearch
-#-----------------------------------
-approved_words=${ES_INDEX_PREFIXES:-"events_ ocrvs- reindexing_status"}
-indices=$(docker run --rm --network=$NETWORK appropriate/curl curl -sS -XGET "http://$(elasticsearch_host)/_cat/indices?h=index")
-echo "--------------------------"
-echo "🧹 cleanup for indices: $approved_words from $indices"
-echo "--------------------------"
-for index in ${indices[@]}; do
-  for approved in $approved_words; do
-    echo "Checking index $index against approved pattern $approved..."
-    case "$index" in
-    "$approved"*)
-        echo "Delete index $index..."
-        docker run --rm --network=$NETWORK appropriate/curl curl -sS -XDELETE "http://$(elasticsearch_host)/$index"
-        break
-        ;;
-    esac
-  done
-done
-
-echo "Waiting for elasticsearch to restart so that the restore script can find the updated volume."
-docker service update --force --update-parallelism 1 --update-delay 30s opencrvs_elasticsearch
-docker run --rm --network=$NETWORK toschneck/wait-for-it -t 120 elasticsearch:9200 -- echo "Elasticsearch is up"
 
 ##
 # ------ MINIO -------
@@ -183,26 +140,6 @@ if [ -f "$ROOT_PATH/backups/postgres/events-${LABEL}.dump" ]; then
 else
   echo "PostgreSQL backup not found for label ${LABEL}. Skipping PostgreSQL database restore..."
 fi
-
-##
-# ------ ELASTICSEARCH -----
-##
-
-# Register backup folder as an Elasticsearch repository for restoring the search data
-#-------------------------------------------------------------------------------------
-docker run --rm --network=$NETWORK appropriate/curl curl -X PUT -H "Content-Type: application/json;charset=UTF-8" "http://$(elasticsearch_host)/_snapshot/ocrvs" -d '{ "type": "fs", "settings": { "location": "/data/backups/elasticsearch", "compress": true }}'
-sleep 10
-
-# Restore all data from a backup into search
-#-------------------------------------------
-json_payload="{\"indices\": \"ocrvs-*,events_*\", \"include_global_state\": false}"
-docker run --rm --network=$NETWORK appropriate/curl curl -X POST -H "Content-Type: application/json;charset=UTF-8" "http://$(elasticsearch_host)/_snapshot/ocrvs/snapshot_$LABEL/_restore?pretty" -d "$json_payload"
-sleep 10
-echo "Waiting 1 minute to rotate elasticsearch passwords"
-echo
-docker service update --force opencrvs_setup-elasticsearch-users
-echo
-sleep 60
 
 ##
 # ------ MINIO -----
