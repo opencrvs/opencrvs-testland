@@ -46,11 +46,11 @@ export const roles: Role[] = [
     ])
   },
   {
-    id: 'LOCAL_REGISTRAR',
+    id: 'SEAL_MANAGER',
     label: {
-      defaultMessage: 'Registrar',
+      defaultMessage: 'Seal manager',
       description: 'Name for user role Registrar',
-      id: 'userRole.localRegistrar'
+      id: 'userRole.sealManager'
     },
     scopes: defineScopes([
       { type: 'profile.electronic-signature' },
@@ -78,6 +78,123 @@ export const roles: Role[] = [
       { type: 'record.custom-action', options: { event: ['birth'], customActionTypes: ['ESCALATE', 'REINSTATE_REVOKE_REGISTRATION'], placeOfEvent: 'administrativeArea' } },
       { type: 'record.custom-action', options: { event: ['birth'], customActionTypes: ['ISSUE_CERTIFIED_COPY', 'ISSUE_VERIFIABLE_CREDENTIAL'], registeredIn: 'administrativeArea' } },
       { type: 'record.custom-action', options: { event: ['birth'], customActionTypes: ['SEAL', 'UNSEAL'] } },
+      { type: 'record.unassign-others' },
+      {
+        type: 'dashboard.view',
+        options: { ids: ['registrations', 'completeness', 'registry'] }
+      }
+    ])
+  },
+  {
+    id: 'SEAL_SEARCHER',
+    label: {
+      defaultMessage: 'Seal searcher',
+      description: 'Name for user role Registrar',
+      id: 'userRole.sealSearcher'
+    },
+    scopes: defineScopes([
+      { type: 'profile.electronic-signature' },
+      { type: 'performance.read' },
+      { type: 'organisation.read-locations', options: { accessLevel: 'administrativeArea' } },
+      { type: 'user.read', options: { accessLevel: 'administrativeArea' } },
+      { type: 'user.search', options: { accessLevel: 'administrativeArea' } },
+      { type: 'performance.read-dashboards' },
+      {
+        type: 'workqueue',
+        options: { ids: ['assigned-to-you', 'recent', 'requires-completion', 'in-external-validation', 'escalated', 'potential-duplicate', 'pending-updates', 'pending-registration', 'pending-approval', 'pending-certification', 'pending-issuance', 'correction-requested'] }
+      },
+      { type: 'record.search', options: { placeOfEvent: 'administrativeArea' } },
+      { type: 'record.create', options: { placeOfEvent: 'administrativeArea' } },
+      { type: 'record.read', options: { placeOfEvent: 'administrativeArea', flags: { noneOf: [InherentFlags.SEALED] } } },
+      { type: 'record.declare', options: { placeOfEvent: 'administrativeArea' } },
+      { type: 'record.edit', options: { placeOfEvent: 'administrativeArea' } },
+      { type: 'record.reject', options: { placeOfEvent: 'administrativeArea' } },
+      { type: 'record.archive', options: { declaredIn: 'administrativeArea' } },
+      { type: 'record.unarchive', options: { declaredIn: 'administrativeArea' } },
+      { type: 'record.review-duplicates', options: { placeOfEvent: 'administrativeArea' } },
+      { type: 'record.register', options: { placeOfEvent: 'administrativeArea' } },
+      { type: 'record.print-certified-copies', options: { registeredIn: 'administrativeArea' } },
+      { type: 'record.correct', options: { registeredIn: 'administrativeArea' } },
+      { type: 'record.custom-action', options: { event: ['birth'], customActionTypes: ['ESCALATE', 'REINSTATE_REVOKE_REGISTRATION'], placeOfEvent: 'administrativeArea' } },
+      { type: 'record.custom-action', options: { event: ['birth'], customActionTypes: ['ISSUE_CERTIFIED_COPY', 'ISSUE_VERIFIABLE_CREDENTIAL'], registeredIn: 'administrativeArea' } },
+      { type: 'record.unassign-others' },
+      {
+        type: 'dashboard.view',
+        options: { ids: ['registrations', 'completeness', 'registry'] }
+      }
+    ])
+  },
+  {
+    id: 'SEAL_READER',
+    label: {
+      defaultMessage: 'Seal reader',
+      description: 'Name for user role Registrar',
+      id: 'userRole.sealReader'
+    },
+    scopes: defineScopes([
+      { type: 'profile.electronic-signature' },
+      { type: 'performance.read' },
+      { type: 'organisation.read-locations', options: { accessLevel: 'administrativeArea' } },
+      { type: 'user.read', options: { accessLevel: 'administrativeArea' } },
+      { type: 'user.search', options: { accessLevel: 'administrativeArea' } },
+      { type: 'performance.read-dashboards' },
+      {
+        type: 'workqueue',
+        options: { ids: ['assigned-to-you', 'recent', 'requires-completion', 'in-external-validation', 'escalated', 'potential-duplicate', 'pending-updates', 'pending-registration', 'pending-approval', 'pending-certification', 'pending-issuance', 'correction-requested'] }
+      },
+      { type: 'record.search', options: { placeOfEvent: 'administrativeArea' } },
+      { type: 'record.create', options: { placeOfEvent: 'administrativeArea' } },
+      { type: 'record.read', options: { placeOfEvent: 'administrativeArea' } },
+      { type: 'record.declare', options: { placeOfEvent: 'administrativeArea' } },
+      { type: 'record.edit', options: { placeOfEvent: 'administrativeArea' } },
+      { type: 'record.reject', options: { placeOfEvent: 'administrativeArea' } },
+      { type: 'record.archive', options: { declaredIn: 'administrativeArea' } },
+      { type: 'record.unarchive', options: { declaredIn: 'administrativeArea' } },
+      { type: 'record.review-duplicates', options: { placeOfEvent: 'administrativeArea' } },
+      { type: 'record.register', options: { placeOfEvent: 'administrativeArea' } },
+      { type: 'record.print-certified-copies', options: { registeredIn: 'administrativeArea' } },
+      { type: 'record.correct', options: { registeredIn: 'administrativeArea' } },
+      { type: 'record.custom-action', options: { event: ['birth'], customActionTypes: ['ESCALATE', 'REINSTATE_REVOKE_REGISTRATION'], placeOfEvent: 'administrativeArea' } },
+      { type: 'record.custom-action', options: { event: ['birth'], customActionTypes: ['ISSUE_CERTIFIED_COPY', 'ISSUE_VERIFIABLE_CREDENTIAL'], registeredIn: 'administrativeArea' } },
+      { type: 'record.unassign-others' },
+      {
+        type: 'dashboard.view',
+        options: { ids: ['registrations', 'completeness', 'registry'] }
+      }
+    ])
+  },
+  {
+    id: 'LOCAL_REGISTRAR',
+    label: {
+      defaultMessage: 'Registrar',
+      description: 'Name for user role Registrar',
+      id: 'userRole.localRegistrar'
+    },
+    scopes: defineScopes([
+      { type: 'profile.electronic-signature' },
+      { type: 'performance.read' },
+      { type: 'organisation.read-locations', options: { accessLevel: 'administrativeArea' } },
+      { type: 'user.read', options: { accessLevel: 'administrativeArea' } },
+      { type: 'user.search', options: { accessLevel: 'administrativeArea' } },
+      { type: 'performance.read-dashboards' },
+      {
+        type: 'workqueue',
+        options: { ids: ['assigned-to-you', 'recent', 'requires-completion', 'in-external-validation', 'escalated', 'potential-duplicate', 'pending-updates', 'pending-registration', 'pending-approval', 'pending-certification', 'pending-issuance', 'correction-requested'] }
+      },
+      { type: 'record.search', options: { placeOfEvent: 'administrativeArea', flags: { noneOf: [InherentFlags.SEALED] } } },
+      { type: 'record.create', options: { placeOfEvent: 'administrativeArea' } },
+      { type: 'record.read', options: { placeOfEvent: 'administrativeArea', flags: { noneOf: [InherentFlags.SEALED] } } },
+      { type: 'record.declare', options: { placeOfEvent: 'administrativeArea' } },
+      { type: 'record.edit', options: { placeOfEvent: 'administrativeArea' } },
+      { type: 'record.reject', options: { placeOfEvent: 'administrativeArea' } },
+      { type: 'record.archive', options: { declaredIn: 'administrativeArea' } },
+      { type: 'record.unarchive', options: { declaredIn: 'administrativeArea' } },
+      { type: 'record.review-duplicates', options: { placeOfEvent: 'administrativeArea' } },
+      { type: 'record.register', options: { placeOfEvent: 'administrativeArea' } },
+      { type: 'record.print-certified-copies', options: { registeredIn: 'administrativeArea' } },
+      { type: 'record.correct', options: { registeredIn: 'administrativeArea' } },
+      { type: 'record.custom-action', options: { event: ['birth'], customActionTypes: ['ESCALATE', 'REINSTATE_REVOKE_REGISTRATION'], placeOfEvent: 'administrativeArea' } },
+      { type: 'record.custom-action', options: { event: ['birth'], customActionTypes: ['ISSUE_CERTIFIED_COPY', 'ISSUE_VERIFIABLE_CREDENTIAL'], registeredIn: 'administrativeArea' } },
       { type: 'record.unassign-others' },
       {
         type: 'dashboard.view',
