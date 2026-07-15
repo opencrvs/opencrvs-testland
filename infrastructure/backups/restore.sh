@@ -45,10 +45,6 @@ fi
 if [ "$IS_LOCAL" = false ]; then
   ROOT_PATH=${ROOT_PATH:-/data}
 
-  if [ -z "$REPLICAS" ]; then
-    echo "Error: Argument for the --replicas is required."
-    print_usage_and_exit
-  fi
   # We recommend that the secrets are served via a secure API from a Hardware Security Module
   source /data/secrets/opencrvs.secrets
 else
