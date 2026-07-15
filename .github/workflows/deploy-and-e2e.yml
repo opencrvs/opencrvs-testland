@@ -134,10 +134,14 @@ jobs:
           DEPLOYMENT_LINK="https://e2e.opencrvs.dev"
 
           echo """
-          # E2E Environment summary
-          Action workflow (pipeline): $E2E_RUN_LINK
-
-          Web link: $DEPLOYMENT_LINK
+          ## E2E Environment summary
+          
+          - Action workflow (pipeline): $E2E_RUN_LINK
+          - Web link: $DEPLOYMENT_LINK
+          - Core image tag: ${{ inputs.core-image-tag || needs.get-core-commit.outputs.latest_commit_sha }}
+          - Country config image tag: ${{ inputs.countryconfig-image-tag || needs.get-country-config-commit.outputs.short_sha }}
+          - Triggered from: ${{ github.event.client_payload.actor || github.actor }}
+          
           """ >> $GITHUB_STEP_SUMMARY
 
           echo "deployment_link=$DEPLOYMENT_LINK" >> $GITHUB_OUTPUT
