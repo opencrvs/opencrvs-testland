@@ -18,12 +18,8 @@ on:
     inputs:
       core-image-tag:
         description: Core image tag
-        required: true
-        default: 'v2.0.0'
       countryconfig-image-tag:
         description: Your Country Config image tag
-        required: true
-        default: 'v2.0.0'
 
 concurrency:
   group: ci-build
