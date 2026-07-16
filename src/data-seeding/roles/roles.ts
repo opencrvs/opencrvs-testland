@@ -289,9 +289,8 @@ export const roles: Role[] = [
       { type: 'record.register' },
       { type: 'record.print-certified-copies' },
       { type: 'record.correct' },
-      { type: 'record.custom-action', options: { event: ['birth'], customActionTypes: ['REGISTRAR_GENERAL_FEEDBACK', 'REVOKE_REGISTRATION', 'REINSTATE_REVOKE_REGISTRATION', 'APPROVE_DECLARATION'] } },
+      { type: 'record.custom-action', options: { event: ['birth'], customActionTypes: ['SEAL', 'UNSEAL', 'REGISTRAR_GENERAL_FEEDBACK', 'REVOKE_REGISTRATION', 'REINSTATE_REVOKE_REGISTRATION', 'APPROVE_DECLARATION'] } },
       { type: 'record.custom-action', options: { event: ['death'], customActionTypes: ['APPROVE_DECLARATION'] } },
-      { type: 'record.custom-action', options: { event: ['birth', 'death'], customActionTypes: ['SEAL', 'UNSEAL'] } },
       { type: 'record.unassign-others' }
     ])
   },
