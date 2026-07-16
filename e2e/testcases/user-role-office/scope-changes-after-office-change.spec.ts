@@ -62,7 +62,6 @@ test(
     test.setTimeout(300_000)
 
     const page = await browser.newPage()
-    try {
       let username = ''
       let fullName = ''
       let childName = ''
@@ -233,8 +232,5 @@ test(
         }
       )
     } 
-    finally {
-      await page.close()
-    }
-  }
+   
 )

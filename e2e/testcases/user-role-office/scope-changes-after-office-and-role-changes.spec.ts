@@ -73,7 +73,6 @@ test('Scope changes after office and role changes', async ({ browser }) => {
   test.setTimeout(300_000)
 
   const page = await browser.newPage()
-  try {
     let username = ''
     let fullName = ''
     let childName = ''
@@ -219,7 +218,7 @@ test('Scope changes after office and role changes', async ({ browser }) => {
       const { refreshToken } = await getAuthTokens(username, NEW_USER_PASSWORD)
       expect(refreshToken).toBeDefined()
 
-      // Hand off only the refresh token; the client mints the access token from it.
+
       await page.goto(`${CLIENT_URL}?refreshToken=${refreshToken}`)
       await page.waitForSelector('#pin-input, #appSpinner', {
         state: 'visible'
@@ -247,8 +246,5 @@ test('Scope changes after office and role changes', async ({ browser }) => {
         page.getByText(`No event or draft found with id: ${eventId}`)
       ).toBeVisible({ timeout: 30_000 })
     })
-  }
-   finally {
-    await page.close()
-  }
+  
 })
