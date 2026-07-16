@@ -1159,13 +1159,28 @@ export const birthEvent = defineConfig({
           'This is shown as the action name anywhere the user can trigger the action from',
         id: 'event.birth.custom.action.seal.label'
       },
-      supportingCopy: {
-        defaultMessage: 'TODO',
-        description:
-          'This is the supporting copy for the Seal declaration -action',
-        id: 'event.birth.custom.action.seal.supportingCopy'
-      },
-      form: [],
+      form: [
+        {
+          id: 'reason',
+          type: FieldType.TEXTAREA,
+          required: true,
+          label: {
+            defaultMessage: 'Reason',
+            description: 'This is the label for reason field',
+            id: 'form.field.label.reason'
+          }
+        },
+        {
+          id: 'comments',
+          type: FieldType.TEXTAREA,
+          required: true,
+          label: {
+            defaultMessage: 'Additional comments',
+            description: 'This is the label for additional comments field',
+            id: 'form.field.label.additionalComments'
+          }
+        }
+      ],
       conditionals: [
         {
           type: ConditionalType.SHOW,
@@ -1198,13 +1213,28 @@ export const birthEvent = defineConfig({
         description: 'The label to show in audit history for the seal action',
         id: 'event.birth.custom.action.seal.audit-history-label'
       },
-      form: [],
-      supportingCopy: {
-        defaultMessage: 'TODO',
-        description:
-          'This is the supporting copy for the Unseal declaration -action',
-        id: 'event.birth.custom.action.unseal.supportingCopy'
-      },
+      form: [
+        {
+          id: 'reason',
+          type: FieldType.TEXTAREA,
+          required: true,
+          label: {
+            defaultMessage: 'Reason',
+            description: 'This is the label for reason field',
+            id: 'form.field.label.reason'
+          }
+        },
+        {
+          id: 'comments',
+          type: FieldType.TEXTAREA,
+          required: true,
+          label: {
+            defaultMessage: 'Additional comments',
+            description: 'This is the label for additional comments field',
+            id: 'form.field.label.additionalComments'
+          }
+        }
+      ],
       flags: [{ id: InherentFlags.SEALED, operation: 'remove' }],
       conditionals: [
         {

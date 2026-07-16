@@ -181,7 +181,7 @@ export const roles: Role[] = [
         type: 'workqueue',
         options: { ids: ['assigned-to-you', 'recent', 'requires-completion', 'in-external-validation', 'escalated', 'potential-duplicate', 'pending-updates', 'pending-registration', 'pending-approval', 'pending-certification', 'pending-issuance', 'correction-requested'] }
       },
-      { type: 'record.search', options: { placeOfEvent: 'administrativeArea', flags: { noneOf: [InherentFlags.SEALED] } } },
+      { type: 'record.search', options: { placeOfEvent: 'administrativeArea' } },
       { type: 'record.create', options: { placeOfEvent: 'administrativeArea' } },
       { type: 'record.read', options: { placeOfEvent: 'administrativeArea', flags: { noneOf: [InherentFlags.SEALED] } } },
       { type: 'record.declare', options: { placeOfEvent: 'administrativeArea' } },
@@ -278,9 +278,9 @@ export const roles: Role[] = [
       { type: 'organisation.read-locations' },
       { type: 'user.read' },
       { type: 'user.search' },
-      { type: 'record.search', options: { flags: { noneOf: [InherentFlags.SEALED] } } },
+      { type: 'record.search' },
       { type: 'workqueue', options: { ids: ['assigned-to-you', 'recent', 'pending-feedback-registrar-general', 'potential-duplicate', 'registration-registrar-general'] } },
-      { type: 'record.read', options: { flags: { noneOf: [InherentFlags.SEALED] } } },
+      { type: 'record.read' },
       { type: 'record.declare' },
       { type: 'record.reject' },
       { type: 'record.archive' },
@@ -291,6 +291,7 @@ export const roles: Role[] = [
       { type: 'record.correct' },
       { type: 'record.custom-action', options: { event: ['birth'], customActionTypes: ['REGISTRAR_GENERAL_FEEDBACK', 'REVOKE_REGISTRATION', 'REINSTATE_REVOKE_REGISTRATION', 'APPROVE_DECLARATION'] } },
       { type: 'record.custom-action', options: { event: ['death'], customActionTypes: ['APPROVE_DECLARATION'] } },
+      { type: 'record.custom-action', options: { event: ['birth', 'death'], customActionTypes: ['SEAL', 'UNSEAL'] } },
       { type: 'record.unassign-others' }
     ])
   },
