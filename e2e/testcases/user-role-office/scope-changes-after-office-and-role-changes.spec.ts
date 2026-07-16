@@ -5,7 +5,6 @@ import { faker } from '@faker-js/faker'
 import { CLIENT_URL, CREDENTIALS, GATEWAY_HOST } from '../../constants'
 import {
   createPIN,
-  drawSignature,
   getAuthTokens,
   getToken,
   login,
@@ -62,200 +61,194 @@ const expectVersionCard = async (
   role: string,
   office: string
 ) => {
-  
   await expect(page.locator('span').filter({ hasText: fullName })).toBeVisible()
   await expect(
     page.getByText(`${role} • ${office}`, { exact: true })
   ).toBeVisible()
   await expect(page.getByText('Online', { exact: true })).toBeVisible()
-  await expect(page.getByText('OpenCRVS v2.0.0', { exact: true })).toBeVisible()
+  await expect(page.getByText('OpenCRVS v2.1.0', { exact: true })).toBeVisible()
 }
 
-test.describe
-  .serial('Scope changes after office change - user loses access when the office changes', () => {
-  let page: Page
-  let username: string
-  let fullName: string
-  let childName: string
-  let trackingId: string
-  let eventId: string
-  let draftCountBeforeChange = 0
+test('Scope changes after office and role changes', async ({ browser }) => {
+  test.setTimeout(300_000)
 
-  test.beforeAll(async ({ browser }) => {
-    page = await browser.newPage()
-  })
+  const page = await browser.newPage()
+  try {
+    let username = ''
+    let fullName = ''
+    let childName = ''
+    let trackingId = ''
+    let eventId = ''
+    let draftCountBeforeChange = 0
 
-  test.afterAll(async () => {
-    await page.close()
-  })
+    await test.step('Create a new registrar user and set up initial record and drafts', async () => {
+      const adminToken = await getToken(CREDENTIALS.NATIONAL_SYSTEM_ADMIN)
+      const client = createClient(
+        GATEWAY_HOST + '/events',
+        `Bearer ${adminToken}`
+      )
 
-  test('Create a new registrar user and set up initial record and drafts', async () => {
-    test.setTimeout(300_000)
+      const name = {
+        firstname: faker.person.firstName(),
+        surname: faker.person.lastName()
+      }
 
-    const adminToken = await getToken(CREDENTIALS.NATIONAL_SYSTEM_ADMIN)
-    const client = createClient(
-      GATEWAY_HOST + '/events',
-      `Bearer ${adminToken}`
-    )
+      fullName = `${name.firstname} ${name.surname}`
+      username = `${name.firstname[0]}.${name.surname}`
+        .toLowerCase()
+        .replace(/[^a-z0-9.]/g, '')
 
-    const name = {
-      firstname: faker.person.firstName(),
-      surname: faker.person.lastName()
-    }
+      const offices = await getLocations('CRVS_OFFICE', adminToken)
+      const ibomboDistrictOfficeId = getIdByName(
+        offices,
+        'Ibombo District Office'
+      )
 
-    fullName = `${name.firstname} ${name.surname}`
-    username = `${name.firstname[0]}.${name.surname}`
-      .toLowerCase()
-      .replace(/[^a-z0-9.]/g, '')
+      await client.user.create.mutate({
+        name,
+        role: 'LOCAL_REGISTRAR',
+        primaryOfficeId: ibomboDistrictOfficeId,
+        mobile: `07${faker.string.numeric(8)}`,
+        email: faker.internet.email(),
+        fullHonorificName: fullName,
+        device: 'web',
+        data: {}
+      })
 
-    const offices = await getLocations('CRVS_OFFICE', adminToken)
-    const IbomboDistrictOfficeId = getIdByName(
-      offices,
-      'Ibombo District Office'
-    )
+      await loginWithNewUser(page, username)
 
-    await client.user.create.mutate({
-      name,
-      role: 'LOCAL_REGISTRAR',
-      primaryOfficeId: IbomboDistrictOfficeId,
-      mobile: `07${faker.string.numeric(8)}`,
-      email: faker.internet.email(),
-      fullHonorificName: 'Mir',
-      device: 'web',
-      data: {}
+      const { token, refreshToken } = await getAuthTokens(
+        username,
+        NEW_USER_PASSWORD
+      )
+
+      await page.goto(`${CLIENT_URL}?refreshToken=${refreshToken}`)
+      await page.waitForSelector('#pin-input, #appSpinner', {
+        state: 'visible'
+      })
+      await createPIN(page)
+      await page.goto(CLIENT_URL)
+
+      const declaration = await createDeclaration(
+        token,
+        undefined,
+        ActionType.DECLARE
+      )
+
+      trackingId = declaration.trackingId!
+      eventId = declaration.eventId
+      childName = formatV2ChildName(declaration.declaration)
+
+      await searchFromSearchBar(page, childName, true)
+      await expect(page.getByTestId('tracking-id-value')).toContainText(
+        trackingId
+      )
+
+      const draftNames: string[] = []
+      for (let i = 0; i < 3; i++) {
+        draftNames.push(await createDraft(page))
+      }
+
+      draftCountBeforeChange = await countDraftRows(page, draftNames.length)
+      expect(draftCountBeforeChange).toBe(draftNames.length)
+
+      for (const draftName of draftNames) {
+        await expect(
+          page.getByRole('button', { name: draftName, exact: true })
+        ).toBeVisible()
+      }
+
+      await expectVersionCard(
+        page,
+        fullName,
+        'Registrar',
+        'Ibombo District Office'
+      )
     })
 
-    await loginWithNewUser(page, username)
+    await test.step('Administrator moves the user to Isamba District Office and Hospital Official', async () => {
+      await logout(page)
+      await login(page, CREDENTIALS.NATIONAL_SYSTEM_ADMIN)
 
-    const { token, refreshToken } = await getAuthTokens(
-      username,
-      NEW_USER_PASSWORD
-    )
+      await page.getByRole('button', { name: 'Organisation' }).click()
+      await page.getByRole('button', { name: 'Central' }).click()
+      await page.getByRole('button', { name: 'Ibombo' }).click()
+      await page.getByRole('button', { name: 'Ibombo District Office' }).click()
+      await expect(page.locator('#content-name')).toHaveText(
+        'Ibombo District Office'
+      )
 
-    await page.goto(`${CLIENT_URL}?refreshToken=${refreshToken}`)
-    await page.waitForSelector('#pin-input, #appSpinner', { state: 'visible' })
-    await createPIN(page)
-    await page.goto(CLIENT_URL)
-    
+      await page.getByRole('button', { name: fullName }).click()
+      await expect(page.locator('#content-name')).toHaveText(fullName)
 
-    const declaration = await createDeclaration(
-      token,
-      undefined,
-      ActionType.DECLARE
-    )
+      await page.locator('#sub-page-header-munu-button-dropdownMenu').click()
+      await page.getByText('Edit details').click()
+      await expect(page.getByText('Confirm details')).toBeVisible()
 
-    trackingId = declaration.trackingId!
-    eventId = declaration.eventId
-    childName = formatV2ChildName(declaration.declaration)
+      await page.getByTestId('change-button-primaryOfficeId').click()
+      await page.locator('#searchable-select-primaryOfficeId').click()
+      await page.locator('#primaryOfficeId').fill('Isamba')
+      await page.getByText('Isamba District Office').click()
+      await page.getByRole('button', { name: 'Continue' }).click()
 
-    await searchFromSearchBar(page, childName, true)
-    await expect(page.getByTestId('tracking-id-value')).toContainText(
-      trackingId
-    )
+      await page.locator('#role').click()
+      await page.getByText('Hospital Official', { exact: true }).click()
+      await page.getByRole('button', { name: 'Continue' }).click()
 
-    const draftNames: string[] = []
-    for (let i = 0; i < 3; i++) {
-      draftNames.push(await createDraft(page))
-    }
+      await expect(page.getByTestId('row-value-primaryOfficeId')).toHaveText(
+        'Isamba District Office, Isamba, Central, Farajaland'
+      )
+      await expect(page.getByTestId('row-value-role')).toHaveText(
+        'Hospital Official'
+      )
 
-    draftCountBeforeChange = await countDraftRows(page, draftNames.length)
-    expect(draftCountBeforeChange).toBe(draftNames.length)
+      await page.getByRole('button', { name: 'Confirm' }).click()
+      await page.getByTestId('confirm_office_change').click()
 
-    for (const draftName of draftNames) {
+      await expect(page.getByTestId('office-link-value')).toHaveText(
+        'Isamba District Office'
+      )
       await expect(
-        page.getByRole('button', { name: draftName, exact: true })
+        page.getByText('Hospital Official', { exact: true })
       ).toBeVisible()
-    }
-    await expectVersionCard(
-      page,
-      fullName,
-      'Registrar',
-      'Ibombo District Office'
-    )
-  })
+    })
 
-  test('Administrator moves the user to Isamba District Office', async () => {
-    test.setTimeout(240_000)
+    await test.step('User can no longer find the record or drafts after the office and role change', async () => {
+      await logout(page)
 
-    await logout(page)
-    await login(page, CREDENTIALS.NATIONAL_SYSTEM_ADMIN)
+      const { refreshToken } = await getAuthTokens(username, NEW_USER_PASSWORD)
+      expect(refreshToken).toBeDefined()
 
-    await page.getByRole('button', { name: 'Organisation' }).click()
-    await page.getByRole('button', { name: 'Central' }).click()
-    await page.getByRole('button', { name: 'Ibombo' }).click()
-    await page.getByRole('button', { name: 'Ibombo District Office' }).click()
-    await expect(page.locator('#content-name')).toHaveText(
-      'Ibombo District Office'
-    )
+      // Hand off only the refresh token; the client mints the access token from it.
+      await page.goto(`${CLIENT_URL}?refreshToken=${refreshToken}`)
+      await page.waitForSelector('#pin-input, #appSpinner', {
+        state: 'visible'
+      })
 
-    await page.getByRole('button', { name: fullName }).click()
-    await expect(page.locator('#content-name')).toHaveText(fullName)
+      await searchFromSearchBar(page, trackingId, false)
+      await expect(
+        page.getByRole('button', { name: trackingId, exact: true })
+      ).not.toBeVisible()
 
-    await page.locator('#sub-page-header-munu-button-dropdownMenu').click()
-    await page.getByText('Edit details').click()
-    await expect(page.getByText('Confirm details')).toBeVisible()
+      await page.goto(CLIENT_URL)
+      const draftCountAfterChange = await countDraftRows(page, 0)
+      expect(draftCountAfterChange).toBe(0)
+      expect(draftCountBeforeChange).toBeGreaterThan(0)
 
-    await page.getByTestId('change-button-primaryOfficeId').click()
-    await page.locator('#searchable-select-primaryOfficeId').click()
-    await page.locator('#primaryOfficeId').fill('Isamba')
-    await page.getByText('Isamba District Office').click()
-    await page.getByRole('button', { name: 'Continue' }).click()
+      await expectVersionCard(
+        page,
+        fullName,
+        'Hospital Official',
+        'Isamba District Office'
+      )
 
-    await page.locator('#role').click()
-    await page.locator('#react-select-2-option-7').click()
-    await page.getByRole('button', { name: 'Continue' }).click()
-
-    await expect(page.getByTestId('row-value-primaryOfficeId')).toHaveText(
-      'Isamba District Office, Isamba, Central, Farajaland'
-    )
-    await expect(page.getByTestId('row-value-role')).toHaveText(
-      'Hospital Official'
-    )
-    await page.getByRole('button', { name: 'Confirm' }).click()
-    await page.getByTestId('confirm_office_change').click()
-
-    await expect(page.getByTestId('office-link-value')).toHaveText(
-      'Isamba District Office'
-    )
-    await expect(page.getByText('Hospital Official', { exact: true })).toBeVisible()
-  })
-
-  test('User can no longer find the record or drafts after the office change', async () => {
-    test.setTimeout(240_000)
-
-    await logout(page)
-
-    const { token, refreshToken } = await getAuthTokens(
-      username,
-      NEW_USER_PASSWORD
-    )
-    expect(refreshToken).toBeDefined()
-
-    // Hand off only the refresh token; the client mints the access token from it.
-    await page.goto(`${CLIENT_URL}?refreshToken=${refreshToken}`)
-
-    await page.waitForSelector('#pin-input, #appSpinner', { state: 'visible' })
-   
-
-    await searchFromSearchBar(page, trackingId, false)
-    await expect(
-      page.getByRole('button', { name: trackingId, exact: true })
-    ).not.toBeVisible()
-
-    await page.goto(CLIENT_URL)
-    const draftCountAfterChange = await countDraftRows(page, 0)
-    expect(draftCountAfterChange).toBe(0)
-    expect(draftCountBeforeChange).toBeGreaterThan(0)
-     await expectVersionCard(
-      page,
-      fullName,
-      'Hospital Official',
-      'Isamba District Office'
-    )
-
-    await page.goto(`${CLIENT_URL}/events/${eventId}`)
-    await expect(
-      page.getByText(`No event or draft found with id: ${eventId}`)
-    ).toBeVisible({ timeout: 30_000 })
-  })
+      await page.goto(`${CLIENT_URL}/events/${eventId}`)
+      await expect(
+        page.getByText(`No event or draft found with id: ${eventId}`)
+      ).toBeVisible({ timeout: 30_000 })
+    })
+  }
+   finally {
+    await page.close()
+  }
 })
