@@ -13,6 +13,8 @@ import {
   and,
   ConditionalType,
   defineConfig,
+  event,
+  EventStatus,
   field,
   FieldType,
   flag,
@@ -52,6 +54,12 @@ export const birthEvent = defineConfig({
     defaultMessage: '{child.name.firstname} {child.name.surname}',
     description: 'This is the title of the summary',
     id: 'event.birth.title'
+  },
+  icon: {
+    FileLock: and(
+      event.hasStatus(EventStatus.enum.REGISTERED),
+      event.hasFlag(InherentFlags.SEALED)
+    )
   },
   fallbackTitle: {
     id: 'event.tennis-club-membership.fallbackTitle',
