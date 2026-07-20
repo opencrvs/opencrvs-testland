@@ -28,7 +28,7 @@ test.describe.serial('4. Team Page -1', () => {
     ]
 
     test('4.1.1 Verify Team Members, Roles and their statuses', async () => {
-     await verifyTeamMembers(page, team)
+      await verifyTeamMembers(page, team)
     })
 
     test('4.1.2 Clicking member navigates to profile', async () => {

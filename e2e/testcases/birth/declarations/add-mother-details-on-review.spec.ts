@@ -9,13 +9,13 @@ import {
   login,
   logout,
   switchEventTab,
-  validateActionMenuButton
+  validateActionMenuButton,
+  triggerDeclarationAction
 } from '../../../helpers'
 import { faker } from '@faker-js/faker'
 import { CREDENTIALS } from '../../../constants'
 import { ensureAssignedToUser, selectAction } from '../../../utils'
 import { REQUIRED_VALIDATION_ERROR } from '../helpers'
-import { triggerDeclarationAction } from '../../../helpers'
 import { openRecordByTitle } from '../../print-certificate/birth/helpers'
 
 test.describe.serial('Add mother details on review', () => {

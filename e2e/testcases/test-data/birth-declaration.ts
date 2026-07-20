@@ -217,7 +217,7 @@ export async function createDeclaration(
 
   if (action === ActionType.DECLARE) {
     const declareAction = declareRes.actions.find(
-      (action: ActionDocument) => action.type === ActionType.DECLARE
+      (action) => action.type === ActionType.DECLARE
     )
 
     if (!declareAction || !('declaration' in declareAction)) {
@@ -307,7 +307,7 @@ export async function notifyAndDeclare(
   })
 
   const declareAction = declareRes.actions.find(
-    (action: ActionDocument) => action.type === ActionType.DECLARE
+    (action) => action.type === ActionType.DECLARE
   )
 
   if (!declareAction || !('declaration' in declareAction)) {

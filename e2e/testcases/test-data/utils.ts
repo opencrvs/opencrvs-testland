@@ -5,7 +5,9 @@ import path from 'path'
 
 export function getSignatureFile() {
   const buffer = fs.readFileSync(path.join(__dirname, 'signature.png'))
-  return new File([buffer], `signature-${Date.now()}.png`, {
+  // Uint8Array copy: Buffer is not a BlobPart under newer @types/node
+  // (Buffer<ArrayBufferLike> vs ArrayBufferView<ArrayBuffer>)
+  return new File([new Uint8Array(buffer)], `signature-${Date.now()}.png`, {
     type: 'image/png'
   })
 }

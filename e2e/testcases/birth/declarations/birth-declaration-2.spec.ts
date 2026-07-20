@@ -9,12 +9,12 @@ import {
   login,
   switchEventTab,
   expectRowValue,
-  validateActionMenuButton
+  validateActionMenuButton,
+  triggerDeclarationAction
 } from '../../../helpers'
 import { faker } from '@faker-js/faker'
 import { CREDENTIALS } from '../../../constants'
 import { validateAddress } from '../helpers'
-import { triggerDeclarationAction } from '../../../helpers'
 import { openRecordByTitle } from '../../print-certificate/birth/helpers'
 
 test.describe.serial('2. Birth declaration case - 2', () => {

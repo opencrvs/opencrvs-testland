@@ -13,14 +13,17 @@ import {
   getPlaceOfBirth
 } from '../test-data/birth-declaration'
 import { CREDENTIALS } from '../../constants'
-import { formatV2ChildName, getAdministrativeAreas } from '../birth/helpers'
+import {
+  formatV2ChildName,
+  getAdministrativeAreas,
+  getIdByName
+} from '../birth/helpers'
 import {
   ensureAssignedToUser,
   expectInUrl,
   selectAction,
   waitForCorrectionAction
 } from '../../utils'
-import { getIdByName } from '../birth/helpers'
 import { AddressType } from '@opencrvs/toolkit/events'
 import { openRecordByTitle } from '../print-certificate/birth/helpers'
 

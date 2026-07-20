@@ -96,6 +96,7 @@ test('Cleared field values are removed after correcting a registered birth recor
     await page.getByRole('button', { name: 'Continue' }).click()
     await page.getByRole('button', { name: 'Verified' }).click()
 
+    // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
     const path = require('path')
     const attachmentPath = path.join(__dirname, '../test-data/image.png')
     const inputFile = page.locator(

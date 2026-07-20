@@ -397,8 +397,8 @@ const diskQuestions = [
     validate: notEmpty,
     valueLabel: 'DISK_SPACE',
     initial: process.env.DISK_SPACE || '200g',
-    scope: 'ENVIRONMENT' as const,
-  },
+    scope: 'ENVIRONMENT' as const
+  }
 ]
 const infrastructureQuestions = [
   {
@@ -771,18 +771,22 @@ ALL_QUESTIONS.push(
 const SPECIAL_NON_APPLICATION_ENVIRONMENTS = ['jump', 'backup']
 
 ;(async () => {
-  log(kleur.bold().yellow(
-    '\n------------------------------------------------------------------------------\n' +
-    'Welcome to the OpenCRVS environment setup script!\n\n' +
-    'This script is deprecated as of OpenCRVS v2.0:\n' +
-    ' - Users who are using 1.9 and are not yet ready to migrate to Kubernetes\n' +
-    '   should continue using this script.\n' +
-    ' - Users who are using 1.9 and wish to migrate from Swarm to Kubernetes\n' +
-    '   should refer to the migration documentation for guidance.\n' +
-    ' - New users and users who have already migrated to Kubernetes should no longer use this script.\n' +
-    'Please refer to the documentation for setting up environments using the new infrastructure setup.\n' +
-    '------------------------------------------------------------------------------\n'
-  ))
+  log(
+    kleur
+      .bold()
+      .yellow(
+        '\n------------------------------------------------------------------------------\n' +
+          'Welcome to the OpenCRVS environment setup script!\n\n' +
+          'This script is deprecated as of OpenCRVS v2.0:\n' +
+          ' - Users who are using 1.9 and are not yet ready to migrate to Kubernetes\n' +
+          '   should continue using this script.\n' +
+          ' - Users who are using 1.9 and wish to migrate from Swarm to Kubernetes\n' +
+          '   should refer to the migration documentation for guidance.\n' +
+          ' - New users and users who have already migrated to Kubernetes should no longer use this script.\n' +
+          'Please refer to the documentation for setting up environments using the new infrastructure setup.\n' +
+          '------------------------------------------------------------------------------\n'
+      )
+  )
   const { type: environment } = await prompts<string>(
     [
       {
@@ -925,7 +929,7 @@ const SPECIAL_NON_APPLICATION_ENVIRONMENTS = ['jump', 'backup']
           'If connecting to the server requires a VPN connection, please connect your VPN client before trying again.',
           'If your connection is via a jump server, please specify the jump server in the SSH_ARGS variable.'
         )
-        error('Reason:', err.message)
+        error('Reason:', err instanceof Error ? err.message : String(err))
         process.exit(1)
       }
       success(
@@ -953,28 +957,32 @@ const SPECIAL_NON_APPLICATION_ENVIRONMENTS = ['jump', 'backup']
   } else {
     log('\n', kleur.bold().underline('Server setup'), '\n')
     const encryption_key_defined = findExistingValue(
-            'ENCRYPTION_KEY',
-            'SECRET',
-            'ENVIRONMENT',
-            existingValues
+      'ENCRYPTION_KEY',
+      'SECRET',
+      'ENVIRONMENT',
+      existingValues
     )
 
     if (!encryption_key_defined) {
-        const answers_enable_encryption = await prompts(
-          [
-            {
-              name: 'enableEncryption',
-              type: 'confirm' as const,
-              message: 'Do you want to enable disk encryption?',
-              scope: 'ENVIRONMENT' as const,
-              initial: Boolean(process.env.ENABLE_ENCRYPTION)
-            }
-          ].map(questionToPrompt)
-        )
-        enableEncryption = answers_enable_encryption.enableEncryption
+      const answers_enable_encryption = await prompts(
+        [
+          {
+            name: 'enableEncryption',
+            type: 'confirm' as const,
+            message: 'Do you want to enable disk encryption?',
+            scope: 'ENVIRONMENT' as const,
+            initial: Boolean(process.env.ENABLE_ENCRYPTION)
+          }
+        ].map(questionToPrompt)
+      )
+      enableEncryption = answers_enable_encryption.enableEncryption
     }
     if (enableEncryption) {
-      console.log('\n', kleur.bold().green('✔'), kleur.bold().yellow(' Disk encryption is enabled'))
+      console.log(
+        '\n',
+        kleur.bold().green('✔'),
+        kleur.bold().yellow(' Disk encryption is enabled')
+      )
       await promptAndStoreAnswer(environment, diskQuestions, existingValues)
     }
     const { domain } = await promptAndStoreAnswer(
@@ -1110,7 +1118,7 @@ const SPECIAL_NON_APPLICATION_ENVIRONMENTS = ['jump', 'backup']
     }
   ]
 
-  if (enableEncryption){
+  if (enableEncryption) {
     derivedUpdates.push({
       name: 'ENCRYPTION_KEY',
       type: 'SECRET' as const,

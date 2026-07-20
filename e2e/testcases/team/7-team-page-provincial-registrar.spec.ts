@@ -1,8 +1,7 @@
 import { test, expect, type Page } from '@playwright/test'
 import { login } from '../../helpers'
 import { CREDENTIALS } from '../../constants'
-import { verifyMembersClickable } from '../birth/helpers'
-import { verifyTeamMembers } from '../birth/helpers'
+import { verifyMembersClickable, verifyTeamMembers } from '../birth/helpers'
 
 test.describe.serial('7. Team Page -1', () => {
   let page: Page

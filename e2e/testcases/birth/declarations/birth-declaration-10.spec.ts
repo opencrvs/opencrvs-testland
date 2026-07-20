@@ -5,12 +5,12 @@ import {
   formatName,
   goToSection,
   login,
-  switchEventTab
+  switchEventTab,
+  triggerDeclarationAction
 } from '../../../helpers'
 import { faker } from '@faker-js/faker'
 import { CREDENTIALS } from '../../../constants'
 import { REQUIRED_VALIDATION_ERROR } from '../helpers'
-import { triggerDeclarationAction } from '../../../helpers'
 import { openRecordByTitle } from '../../print-certificate/birth/helpers'
 
 test.describe.serial('10. Birth declaration case - 10', () => {

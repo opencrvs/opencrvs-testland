@@ -6,11 +6,11 @@ import {
   formatName,
   getRandomDate,
   goToSection,
-  login
+  login,
+  triggerDeclarationAction
 } from '../../helpers'
 import { CREDENTIALS } from '../../constants'
 import { ensureAssignedToUser, selectAction } from '../../utils'
-import { triggerDeclarationAction } from '../../helpers'
 import { assertRecordInWorkqueue, fillDate } from '../birth/helpers'
 import { openRecordByTitle } from '../print-certificate/birth/helpers'
 

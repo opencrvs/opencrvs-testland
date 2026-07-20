@@ -7,12 +7,12 @@ import {
   login,
   searchFromSearchBar,
   switchEventTab,
-  validateActionMenuButton
+  validateActionMenuButton,
+  triggerDeclarationAction
 } from '../../helpers'
 import { faker } from '@faker-js/faker'
 import { CREDENTIALS } from '../../constants'
 import { ensureAssignedToUser, selectAction } from '../../utils'
-import { triggerDeclarationAction } from '../../helpers'
 import { format, subDays } from 'date-fns'
 import { openRecordByTitle } from '../print-certificate/birth/helpers'
 

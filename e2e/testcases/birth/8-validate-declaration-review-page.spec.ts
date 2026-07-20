@@ -8,12 +8,12 @@ import {
   login,
   formatDateObjectTo_dMMMMyyyy,
   expectRowValueWithChangeButton,
-  expectRowValue
+  expectRowValue,
+  triggerDeclarationAction
 } from '../../helpers'
 import { faker } from '@faker-js/faker'
 import { CREDENTIALS } from '../../constants'
 import { fillDate } from './helpers'
-import { triggerDeclarationAction } from '../../helpers'
 import { ensureAssignedToUser, selectAction } from '../../utils'
 import { openRecordByTitle } from '../print-certificate/birth/helpers'
 

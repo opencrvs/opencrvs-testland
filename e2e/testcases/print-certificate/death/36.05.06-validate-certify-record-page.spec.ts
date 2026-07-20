@@ -114,6 +114,7 @@ test.describe.serial('Validate collect payment page', () => {
 
   test.describe('6.0 Validate "Upload signed affidavit" page:', async () => {
     test('6.1 Should be able to add file and navigate to the "Ready to certify?" page.', async () => {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports, @typescript-eslint/no-var-requires
       const path = require('path')
       const attachmentPath = path.resolve(__dirname, './528KB-random.png')
       const inputFile = await page.locator(

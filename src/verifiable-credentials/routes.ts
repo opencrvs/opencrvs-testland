@@ -3,6 +3,7 @@ import { env } from '@countryconfig/environment'
 import { logger } from '@countryconfig/logger'
 import { ServerRoute, ReqRefDefaults } from '@hapi/hapi'
 import { createClient } from '@opencrvs/toolkit/api'
+import { getBearerToken } from '@countryconfig/utils'
 import QRCode from 'qrcode'
 import { birthCredentialTemplate } from './birth-credential-template'
 import { paperBirthCredentialTemplate } from './paper-birth-credential-template'
@@ -16,14 +17,14 @@ const exampleOid4vcIssuanceResponse = {
   path: '/_demo-issuer/openid4vc/sdjwt/issue',
   handler: () =>
     'openid-credential-offer://?credential_offer_uri=https%3A%2F%2Fissuer.example.com%2Foffers%2F2K5sgesB'
-}
+} satisfies ServerRoute<ReqRefDefaults>
 
 const exampleRawJwtSignResponse = {
   method: 'POST',
   path: '/_demo-issuer/raw/jwt/sign',
   handler: () =>
     'eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvbiBEb2UiLCJpYXQiOjE1MTYyMzkwMjJ9.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
-}
+} satisfies ServerRoute<ReqRefDefaults>
 
 const credentialOfferRoute = {
   method: 'POST',
@@ -42,7 +43,7 @@ const credentialOfferRoute = {
     )
 
     const url = new URL('events', GATEWAY_URL).toString()
-    const client = createClient(url, req.headers.authorization)
+    const client = createClient(url, getBearerToken(req.headers.authorization))
     const event = await client.event.search.query({
       query: {
         type: 'and',
@@ -57,7 +58,7 @@ const credentialOfferRoute = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: req.headers.authorization
+        Authorization: getBearerToken(req.headers.authorization)
       },
       body: JSON.stringify(birthCredentialTemplate(event.results[0]))
     })
@@ -109,7 +110,7 @@ const paperCredentialRoute = {
     )
 
     const url = new URL('events', GATEWAY_URL).toString()
-    const client = createClient(url, req.headers.authorization)
+    const client = createClient(url, getBearerToken(req.headers.authorization))
     const event = await client.event.search.query({
       query: {
         type: 'and',
@@ -129,7 +130,7 @@ const paperCredentialRoute = {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: req.headers.authorization
+        Authorization: getBearerToken(req.headers.authorization)
       },
       body: JSON.stringify(paperBirthCredentialTemplate(event.results[0]))
     })
