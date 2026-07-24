@@ -61,8 +61,8 @@ test.describe
      * for hidden fields. The forward gate only needs `mother.verified` +
      * `child.dob`, so drop the now-hidden NID fields from the seed.
      */
-    delete declaration['mother.idType']
-    delete declaration['mother.nid']
+    delete (declaration as Partial<typeof declaration>)['mother.idType']
+    delete (declaration as Partial<typeof declaration>)['mother.nid']
 
     const res = await createDeclaration(token, declaration)
     eventId = res.eventId
