@@ -13,7 +13,7 @@ test.describe.serial('Advanced Search - Mobile', () => {
   let district = ''
   test.beforeAll(async ({ browser }) => {
     page = await browser.newPage()
-    setMobileViewport(page)
+    await setMobileViewport(page)
     const token = await getToken(
       CREDENTIALS.LOCAL_REGISTRAR.USERNAME,
       CREDENTIALS.LOCAL_REGISTRAR.PASSWORD

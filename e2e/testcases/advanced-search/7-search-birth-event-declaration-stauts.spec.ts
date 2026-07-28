@@ -77,7 +77,7 @@ test.describe
     expect(page.url()).toContain(
       `child.name=${encodeURIComponent(JSON.stringify({ firstname, surname }))}`
     )
-    expect(
+    await expect(
       page.getByRole('button', { name: joinValuesWith([firstname, surname]) })
     ).not.toBeVisible()
   })

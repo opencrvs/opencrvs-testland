@@ -42,11 +42,20 @@ export async function selectAction(
     | 'View'
     | 'Archive'
 ) {
-  if (
-    (await page.getByTestId('status-value').innerText()) !== 'Draft' &&
-    action !== 'View'
-  ) {
-    await ensureAssigned(page)
+  if (action !== 'View') {
+    const statusValue = page.getByTestId('status-value')
+
+    /*
+     * The status chip renders before the event data resolves, so reading it
+     * immediately can return an empty string and misroute the branch below
+     * (treating a draft as non-draft, or vice versa).
+     */
+    await statusValue.waitFor({ state: 'visible' })
+    await expect(statusValue).not.toBeEmpty()
+
+    if ((await statusValue.innerText()) !== 'Draft') {
+      await ensureAssigned(page)
+    }
   }
 
   await page.getByRole('button', { name: 'Action', exact: true }).click()
@@ -63,56 +72,53 @@ export async function selectAction(
 }
 
 export async function ensureAssigned(page: Page) {
-  await page.waitForTimeout(SAFE_INPUT_CHANGE_TIMEOUT_MS)
+  const actionButton = page.getByRole('button', { name: 'Action', exact: true })
+  const assignedTo = page.getByTestId('assignedTo-value')
 
-  await page.getByRole('button', { name: 'Action' }).click()
+  /*
+   * `assignedTo-value` is asserted negatively below. A negative assertion on a
+   * locator that has not rendered yet passes instantly, so wait for the value
+   * to exist before acting on it.
+   */
+  await assignedTo.waitFor({ state: 'visible' })
 
-  const unAssignAction = page
-    .locator('#action-Dropdown-Content li')
-    .filter({ hasText: new RegExp(`^Unassign$`, 'i') })
-    .first()
+  await expect(actionButton).toBeEnabled()
+  await actionButton.click()
 
-  let assignAction = page
-    .locator('#action-Dropdown-Content li')
-    .filter({ hasText: new RegExp(`^Assign$`, 'i') })
-    .first()
+  const actionMenuItem = (label: string) =>
+    page
+      .locator('#action-Dropdown-Content li')
+      .filter({ hasText: new RegExp(`^${label}$`, 'i') })
+      .first()
 
-  // Wait until either "Unassign" or "Assign" is visible
-  await Promise.race([
-    unAssignAction.waitFor({ state: 'visible' }),
-    assignAction.waitFor({ state: 'visible' })
-  ])
+  const unAssignAction = actionMenuItem('Unassign')
+  const assignAction = actionMenuItem('Assign')
+
+  /*
+   * Wait until either "Unassign" or "Assign" is visible. `Promise.race` would
+   * leave the losing `waitFor` to reject later as an unhandled rejection, so
+   * wait on a single locator that matches either item instead.
+   */
+  await unAssignAction.or(assignAction).first().waitFor({ state: 'visible' })
 
   if (await unAssignAction.isVisible()) {
     await unAssignAction.click()
     // Wait for the unassign modal to appear
     await page.getByRole('button', { name: 'Unassign', exact: true }).click()
-    await expect(page.getByTestId('assignedTo-value')).toHaveText(
-      'Not assigned',
-      {
-        timeout: SAFE_OUTBOX_TIMEOUT_MS
-      }
-    )
-    await page.getByRole('button', { name: 'Action' }).click()
-
-    assignAction = page
-      .locator('#action-Dropdown-Content li')
-      .filter({ hasText: new RegExp(`^Assign$`, 'i') })
-      .first()
-  }
-
-  if (await assignAction.isVisible()) {
-    await assignAction.click()
-    // Wait for the assign modal to appear
-    await page.getByRole('button', { name: 'Assign', exact: true }).click()
-  }
-
-  await expect(page.getByTestId('assignedTo-value')).not.toHaveText(
-    'Not assigned',
-    {
+    await expect(assignedTo).toHaveText('Not assigned', {
       timeout: SAFE_OUTBOX_TIMEOUT_MS
-    }
-  )
+    })
+    await actionButton.click()
+  }
+
+  await assignAction.waitFor({ state: 'visible' })
+  await assignAction.click()
+  // Wait for the assign modal to appear
+  await page.getByRole('button', { name: 'Assign', exact: true }).click()
+
+  await expect(assignedTo).not.toHaveText('Not assigned', {
+    timeout: SAFE_OUTBOX_TIMEOUT_MS
+  })
 }
 
 export async function expectInUrl(page: Page, assertionString: string) {
@@ -141,10 +147,7 @@ export async function ensureInExternalValidationIsEmpty(page: Page) {
 }
 
 export async function selectLocationOption(page: Page, locationName: string) {
-  await page
-    .locator('[id^="locationOption"]')
-    .getByText(locationName)
-    .click()
+  await page.locator('[id^="locationOption"]').getByText(locationName).click()
 }
 
 export async function type(page: Page, locator: string, text: string) {
