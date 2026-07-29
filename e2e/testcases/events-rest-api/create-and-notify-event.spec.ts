@@ -649,7 +649,7 @@ test.describe('Events REST API', () => {
 
       await expect(page.locator('#row_0')).toContainText('Sent incomplete')
       await expect(page.locator('#row_0')).toContainText(clientName)
-      await expect(page.locator('#row_0')).toContainText('Health integration')
+      await expect(page.locator('#row_0')).toContainText('Test-int.')
 
       // Open modal by clicking 'Sent incomplete' action row
       await page.getByText('Sent incomplete').click()

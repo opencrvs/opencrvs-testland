@@ -248,7 +248,7 @@ test.describe.serial("2. Validate the child's details page", () => {
   test.describe('2.5 Validate delayed registration', async () => {
     test.beforeAll(async ({ browser }) => {
       page = await browser.newPage()
-      loginAndBeginBirthDeclaration({ page })
+      await loginAndBeginBirthDeclaration({ page })
     })
 
     test.afterAll(async () => {
@@ -323,7 +323,7 @@ test.describe.serial("2. Validate the child's details page", () => {
   test.describe('2.6 Validate place of delivery field', async () => {
     test.beforeAll(async ({ browser }) => {
       page = await browser.newPage()
-      loginAndBeginBirthDeclaration({ page })
+      await loginAndBeginBirthDeclaration({ page })
     })
 
     test.afterAll(async () => {
