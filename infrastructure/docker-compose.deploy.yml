@@ -571,6 +571,7 @@ services:
       - AUTH_URL=http://auth:4040
       - APPLICATION_CONFIG_URL=http://config:2021
       - CONFIRM_REGISTRATION_URL=http://workflow:5050/confirm/registration
+      - USER_MANAGEMENT_URL=http://user-mgnt:3030
       - MONGO_URL=mongodb://mongo1/user-mgnt?replicaSet=rs0
       - CONFIG_MONGO_URL=mongodb://mongo1/application-config?replicaSet=rs0
       - APN_SERVICE_URL=http://apm-server:8200
@@ -597,6 +598,11 @@ services:
       - MOSIP_API_USERINFO_URL=https://mosip-api.{{hostname}}/esignet/get-oidp-user-info
       - OPENID_PROVIDER_CLAIMS=name,family_name,given_name,middle_name,birthdate,address
       - OPENID_PROVIDER_CLIENT_ID=mock-client_id
+      # MOSIP integration credentials seeded into user-mgnt on startup.
+      # Must match the mosip-api OPENCRVS_CLIENT_ID / OPENCRVS_CLIENT_SECRET below.
+      # Leave empty to have user-mgnt generate credentials (revealed via the NSA UI).
+      - MOSIP_INTEGRATION_CLIENT_ID=${OPENCRVS_MOSIP_CLIENT_ID:-}
+      - MOSIP_INTEGRATION_CLIENT_SECRET=${OPENCRVS_MOSIP_CLIENT_SECRET:-}
     networks:
       - overlay_net
     logging:
@@ -1121,13 +1127,20 @@ services:
     volumes:
       - /data/sqlite:/data/sqlite
       - /certs:/certs:ro
-    image: ghcr.io/opencrvs/mosip-api:1.9.2-mock.1
+    image: ghcr.io/opencrvs/mosip-api:1.9.2-mock.2
     environment:
       - NODE_ENV=production
       - MOSIP_BIRTH_WEBHOOK_URL=http://mosip-mock:20240/webhooks/opencrvs/birth
       - MOSIP_DEATH_WEBHOOK_URL=http://mosip-mock:20240/webhooks/opencrvs/death
       - OPENCRVS_GATEWAY_URL=http://gateway:7070
       - OPENCRVS_PUBLIC_KEY_URL=http://auth:4040/.well-known
+      # Direct authentication (ocrvs-12360): confirm registrations with a freshly
+      # issued token minted from this integration's own credentials, so they survive
+      # OpenCRVS redeployments and are audited as the MOSIP system client. The
+      # client id/secret must match countryconfig's MOSIP_INTEGRATION_* values above.
+      - OPENCRVS_AUTH_URL=http://auth:4040
+      - OPENCRVS_CLIENT_ID=${OPENCRVS_MOSIP_CLIENT_ID:-}
+      - OPENCRVS_CLIENT_SECRET=${OPENCRVS_MOSIP_CLIENT_SECRET:-}
       - LOCALE=en
       - ESIGNET_USERINFO_URL=http://esignet-mock:20260/oidc/userinfo
       - ESIGNET_TOKEN_URL=http://esignet-mock:20260/oauth/token
@@ -1186,7 +1199,7 @@ services:
         tag: 'mosip-api'
 
   mosip-mock:
-    image: ghcr.io/opencrvs/mosip-mock:1.9.2-mock.1
+    image: ghcr.io/opencrvs/mosip-mock:1.9.2-mock.2
     depends_on:
       - mosip-api
     environment:
@@ -1210,7 +1223,7 @@ services:
         tag: 'mosip-mock'
 
   esignet-mock:
-    image: ghcr.io/opencrvs/esignet-mock:1.9.2-mock.1
+    image: ghcr.io/opencrvs/esignet-mock:1.9.2-mock.2
     volumes:
       - /certs:/certs:ro
     environment:

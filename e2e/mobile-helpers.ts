@@ -2,8 +2,8 @@ import { Page } from '@playwright/test'
 
 export const MOBILE_VIEWPORT_SIZE = { height: 800, width: 360 }
 
-export function setMobileViewport(page: Page) {
-  page.setViewportSize(MOBILE_VIEWPORT_SIZE)
+export async function setMobileViewport(page: Page) {
+  await page.setViewportSize(MOBILE_VIEWPORT_SIZE)
 }
 
 export function isMobile(page: Page) {

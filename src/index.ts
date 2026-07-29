@@ -57,6 +57,7 @@ import { conditionalsHandler } from './form/common/custom-validation-conditional
 import { COUNTRY_WIDE_CRUDE_DEATH_RATE } from './api/application/application-config'
 import { handlebarsHandler } from './form/common/certificate/handlebars/handler'
 import { trackingIDHandler } from './api/tracking-id/handler'
+import { systemReadyHandler } from './api/integration/handler'
 import { dashboardQueriesHandler } from './api/dashboards/handler'
 import { fontsHandler } from './api/fonts/handler'
 import { recordNotificationHandler } from './api/record-notification/handler'
@@ -671,6 +672,17 @@ export async function createServer() {
   })
 
   server.route({
+    method: 'GET',
+    path: '/triggers/system/ready',
+    handler: systemReadyHandler,
+    options: {
+      tags: ['api', 'integration'],
+      description:
+        'Called by events on startup. Registers integrations in user-mgmt using the provided bootstrap token.'
+    }
+  })
+
+  server.route({
     method: 'POST',
     path: '/trigger/events/{event}/actions/{action}',
     handler: onAnyActionHandler,
@@ -763,24 +775,32 @@ export async function createServer() {
 
     const event = request.payload as EventDocument
 
-    const eventWithOptimisticallyApprovedLastAction = {
-      ...event,
-      actions: event.actions.map((action, index) =>
-        index === event.actions.length - 1
-          ? {
-              ...action,
-              status: ActionStatus.Accepted,
-              ...(actionType === ActionType.REGISTER
+    const wasActionAcceptedImmediately = response.statusCode === 200
+
+    // A deferred confirmation (HTTP 202, e.g. pending MOSIP) has no response
+    // body, so the last action must stay as-is — reading registrationNumber
+    // from response.source would crash on null
+    const eventWithOptimisticallyApprovedLastAction =
+      wasActionAcceptedImmediately
+        ? {
+            ...event,
+            actions: event.actions.map((action, index) =>
+              index === event.actions.length - 1
                 ? {
-                    registrationNumber: (
-                      response.source as { registrationNumber: string }
-                    ).registrationNumber
+                    ...action,
+                    status: ActionStatus.Accepted,
+                    ...(actionType === ActionType.REGISTER
+                      ? {
+                          registrationNumber: (
+                            response.source as { registrationNumber: string }
+                          ).registrationNumber
+                        }
+                      : {})
                   }
-                : {})
-            }
-          : action
-      ) as ActionDocument[]
-    }
+                : action
+            ) as ActionDocument[]
+          }
+        : event
     /*
      * Forward event to integration / process management platforms
      */
@@ -803,8 +823,6 @@ export async function createServer() {
         )
       }
     }
-
-    const wasActionAcceptedImmediately = response.statusCode === 200
 
     if (wasRequestForActionConfirmation && wasActionAcceptedImmediately) {
       /*

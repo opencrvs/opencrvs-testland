@@ -78,22 +78,67 @@ export const assertRecordInWorkqueue = async ({
   await page.getByRole('button', { name: 'Outbox' }).click()
   await ensureOutboxIsEmpty(page)
 
-  for (const { title, exists } of workqueues) {
-    await page
-      .getByRole('button', {
-        name: title
-      })
-      .click()
+  const record = page.getByRole('button', { name, exact: true })
 
+  /*
+   * Draining the outbox only proves the action reached the backend, not that
+   * the search index has caught up. Callers almost always list an absence
+   * first (e.g. `Assigned to you`), which would then pass vacuously against a
+   * not-yet-indexed record and hide a real regression.
+   *
+   * Checking a presence first pins the index to a state where the record is
+   * visible, so every later absence check is meaningful. It also keeps
+   * absences fast: a negative assertion that is already true returns at once,
+   * whereas one waiting on index lag burns the whole timeout.
+   */
+  const ordered = [...workqueues].sort(
+    (a, b) => Number(b.exists) - Number(a.exists)
+  )
+
+  const openWorkqueue = async (title: string) => {
+    await page.getByRole('button', { name: title }).click()
     await expect(page.getByTestId('search-result')).toContainText(title, {
       timeout: SAFE_OUTBOX_TIMEOUT_MS
     })
+  }
+
+  let settled = false
+
+  for (const { title, exists } of ordered) {
+    if (exists && !settled) {
+      /*
+       * Re-open the workqueue on each attempt to force a refetch rather than
+       * waiting out the client's poll cycle.
+       */
+      await expect(async () => {
+        await openWorkqueue(title)
+        await expect(record).toBeVisible({ timeout: 1_500 })
+      }).toPass({ timeout: SAFE_OUTBOX_TIMEOUT_MS })
+
+      settled = true
+      continue
+    }
+
+    await openWorkqueue(title)
 
     if (exists) {
-      await expect(page.getByRole('button', { name })).toBeVisible()
+      await expect(record).toBeVisible()
     } else {
-      await expect(page.getByRole('button', { name })).toBeHidden()
+      await expect(record).toBeHidden()
     }
+  }
+
+  /*
+   * Callers rely on this helper leaving the page on the *last* workqueue they
+   * listed -- the next step typically assigns or opens the record from it. The
+   * reordering above changes which queue the loop ends on, so restore the
+   * original post-condition.
+   */
+  const lastListed = workqueues[workqueues.length - 1]
+  const lastChecked = ordered[ordered.length - 1]
+
+  if (lastListed && lastChecked && lastListed.title !== lastChecked.title) {
+    await openWorkqueue(lastListed.title)
   }
 }
 
