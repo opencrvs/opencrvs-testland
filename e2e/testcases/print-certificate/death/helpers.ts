@@ -3,7 +3,9 @@ import { Declaration } from '../../test-data/death-declaration'
 import { selectAction } from '../../../utils'
 
 export async function selectCertificationType(page: Page, type: string) {
-  await page.locator('#certificateTemplateId svg').click()
+  await page
+    .locator('#certificateTemplateId .react-select__dropdown-indicator')
+    .click()
   await page
     .locator('.react-select__menu')
     .getByText(type, { exact: true })
