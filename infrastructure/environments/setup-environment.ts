@@ -641,13 +641,6 @@ const derivedVariables = [
     scope: 'ENVIRONMENT'
   },
   {
-    name: 'CONTENT_SECURITY_POLICY_WILDCARD',
-    valueLabel: 'CONTENT_SECURITY_POLICY_WILDCARD',
-    valueType: 'VARIABLE',
-    type: 'disabled',
-    scope: 'ENVIRONMENT'
-  },
-  {
     name: 'CLIENT_APP_URL',
     valueLabel: 'CLIENT_APP_URL',
     valueType: 'VARIABLE',
@@ -1378,22 +1371,6 @@ const SPECIAL_NON_APPLICATION_ENVIRONMENTS = ['jump', 'backup']
       ),
       didExist: findExistingValue(
         'GATEWAY_HOST',
-        'VARIABLE',
-        'ENVIRONMENT',
-        existingValues
-      ),
-      scope: 'ENVIRONMENT' as const
-    },
-    {
-      type: 'VARIABLE' as const,
-      name: 'CONTENT_SECURITY_POLICY_WILDCARD',
-      value: answerOrExisting(
-        allAnswers.domain,
-        findExistingValue('DOMAIN', 'VARIABLE', 'ENVIRONMENT', existingValues),
-        (val) => `*.${val}`
-      ),
-      didExist: findExistingValue(
-        'CONTENT_SECURITY_POLICY_WILDCARD',
         'VARIABLE',
         'ENVIRONMENT',
         existingValues

@@ -1,0 +1,34 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+#
+# OpenCRVS is also distributed under the terms of the Civil Registration
+# & Healthcare Disclaimer located at http://opencrvs.org/license.
+#
+# Copyright (C) The OpenCRVS Authors located at https://github.com/opencrvs/opencrvs-core/blob/master/AUTHORS.
+
+# Traefik dynamic configuration. TLS options cannot be set through Docker labels,
+# so they are provided here via the file provider (see --providers.file.filename
+# on the traefik service in docker-compose.deploy.yml).
+#
+# Without this, Traefik falls back to Go's default TLS 1.2 cipher list, which
+# includes CBC suites with HMAC-SHA-1 — TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA and
+# TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA. Burkina Faso's ANSSI scan flagged them
+# (observation O4), and ANSSI-BP-035 asks for AEAD suites only.
+# See https://github.com/opencrvs/opencrvs-core/issues/13246
+#
+# The option set named "default" applies to every router that does not name its
+# own, so this covers all OpenCRVS routers without touching their labels.
+tls:
+  options:
+    default:
+      minVersion: VersionTLS12
+      # AEAD only: AES-GCM and ChaCha20-Poly1305. TLS 1.3 suites are not
+      # configurable in Go and stay enabled regardless of this list.
+      cipherSuites:
+        - TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+        - TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
+        - TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256
+        - TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+        - TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+        - TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256

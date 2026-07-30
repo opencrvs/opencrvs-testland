@@ -2,6 +2,14 @@
 
 ## 1.9.16 Release Candidate
 
+### Improvements
+
+- Traefik now negotiates only AEAD cipher suites (AES-GCM and ChaCha20-Poly1305) on TLS 1.2, via a new `infrastructure/traefik/dynamic.yml`. Previously no TLS options were configured at all, so Traefik fell back to Go's defaults, which still offer `TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA` and `TLS_ECDHE_RSA_WITH_AES_256_CBC_SHA` — CBC suites with HMAC-SHA-1, flagged by a national vulnerability scan and disallowed by ANSSI-BP-035. TLS 1.3 is unaffected. [#13246](https://github.com/opencrvs/opencrvs-core/issues/13246)
+
+- The client and login apps now receive an explicit list of allowed Content-Security-Policy sources instead of the `*.<domain>` wildcard, so neither app trusts unrelated subdomains such as Kibana, the MinIO console or webhooks. Each app gets only what it uses: the login app is limited to the gateway, config and country config origins. The `CONTENT_SECURITY_POLICY_WILDCARD` environment variable is no longer used and has been removed from `setup-environment.ts` — the values are now derived from the deployment hostname directly in the compose file. [#13246](https://github.com/opencrvs/opencrvs-core/issues/13246)
+
+  **Upgrade note:** if you have customised `docker-compose.deploy.yml` and still reference `${CONTENT_SECURITY_POLICY_WILDCARD}`, either keep setting that variable yourself or adopt the explicit lists. Add any extra origin your country configuration loads in the browser (for example a custom font or asset host) to the relevant list, or it will be blocked.
+
 ## 1.9.15 Release Candidate
 
 ## 1.9.14 Release Candidate
