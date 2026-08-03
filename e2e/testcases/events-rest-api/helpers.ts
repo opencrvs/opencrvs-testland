@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto'
 import { format } from 'date-fns'
 import { createClient } from '@opencrvs/toolkit/api'
 import { CLIENT_URL, CREDENTIALS, GATEWAY_HOST } from '../../constants'
@@ -95,4 +96,50 @@ export async function createIntegrationContext(): Promise<IntegrationContext> {
 export async function createRegisteredEvent(registrarToken: string) {
   const { eventId } = await createDeclaration(registrarToken)
   return eventId
+}
+
+/**
+ * `POST /api/events/locations` requires the `user.data-seeding` or
+ * `config.update-all` scope. Only NATIONAL_SYSTEM_ADMIN carries
+ * `config.update-all` by default (see countryconfig role definitions) —
+ * no role currently carries `user.data-seeding`.
+ */
+export function buildLocationPayload(
+  overrides: Partial<{
+    id: string
+    name: string
+    externalId: string | null
+    administrativeAreaId: string | null
+    locationType: string | null
+    validUntil: string | null
+  }> = {}
+) {
+  return {
+    id: randomUUID(),
+    name: `E2E location ${randomUUID()}`,
+    externalId: null,
+    administrativeAreaId: null,
+    locationType: null,
+    validUntil: null,
+    ...overrides
+  }
+}
+
+export function buildAdministrativeAreaPayload(
+  overrides: Partial<{
+    id: string
+    name: string
+    externalId: string | null
+    parentId: string | null
+    validUntil: string | null
+  }> = {}
+) {
+  return {
+    id: randomUUID(),
+    name: `E2E administrative area ${randomUUID()}`,
+    externalId: null,
+    parentId: null,
+    validUntil: null,
+    ...overrides
+  }
 }
