@@ -8,7 +8,23 @@
  *
  * Copyright (C) The OpenCRVS Authors located at https://github.com/opencrvs/opencrvs-core/blob/master/AUTHORS.
  */
-import { bool, cleanEnv, port, str, url } from 'envalid'
+import { bool, cleanEnv, makeValidator, port, str, url } from 'envalid'
+
+const UUID_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+
+/**
+ * A UUID, or an empty string when the variable is left unconfigured. Used for
+ * seeded integration credentials: user-mgnt validates the client id it returns
+ * as a UUID, so a malformed seed must fail fast at startup rather than surface
+ * as a runtime 500 during integration registration.
+ */
+const uuidOrEmpty = makeValidator<string>((value) => {
+  if (value === '' || UUID_REGEX.test(value)) {
+    return value
+  }
+  throw new Error('Expected a UUID')
+})
 
 export const env = cleanEnv(process.env, {
   DOMAIN: str({ devDefault: '*' }),
@@ -39,6 +55,14 @@ export const env = cleanEnv(process.env, {
     default: 'http://mosip-api:2024',
     devDefault: 'http://localhost:2024',
     desc: 'URL for MOSIP interoperability API'
+  }),
+  MOSIP_INTEGRATION_CLIENT_ID: uuidOrEmpty({
+    default: '',
+    desc: "OpenCRVS system client ID to seed for the MOSIP integration on startup. Must be a UUID and match the mosip-api's OPENCRVS_CLIENT_ID. Leave empty to have user-mgnt generate credentials instead (NSA reveals them via the Integrations page)."
+  }),
+  MOSIP_INTEGRATION_CLIENT_SECRET: str({
+    default: '',
+    desc: "OpenCRVS system client secret to seed for the MOSIP integration on startup. Must match the mosip-api's OPENCRVS_CLIENT_SECRET. Leave empty to have user-mgnt generate the secret instead."
   }),
   FORWARD_ACTIONS_TO: str({
     default: '',

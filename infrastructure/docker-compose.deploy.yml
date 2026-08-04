@@ -592,6 +592,11 @@ services:
       - MOSIP_API_USERINFO_URL=https://mosip-api.{{hostname}}/esignet/get-oidp-user-info
       - OPENID_PROVIDER_CLAIMS=name,family_name,given_name,middle_name,birthdate,address
       - OPENID_PROVIDER_CLIENT_ID=mock-client_id
+      # MOSIP integration credentials seeded into user-mgnt on startup.
+      # Must match the mosip-api OPENCRVS_CLIENT_ID / OPENCRVS_CLIENT_SECRET below.
+      # Leave empty to have user-mgnt generate credentials (revealed via the NSA UI).
+      - MOSIP_INTEGRATION_CLIENT_ID=${OPENCRVS_MOSIP_CLIENT_ID:-}
+      - MOSIP_INTEGRATION_CLIENT_SECRET=${OPENCRVS_MOSIP_CLIENT_SECRET:-}
     networks:
       - overlay_net
     logging:
@@ -929,6 +934,13 @@ services:
       - NODE_ENV=production
       - OPENCRVS_GATEWAY_URL=http://gateway:7070
       - OPENCRVS_PUBLIC_KEY_URL=http://auth:4040/.well-known
+      # Direct authentication (ocrvs-12360): confirm registrations with a freshly
+      # issued token minted from this integration's own credentials, so they survive
+      # OpenCRVS redeployments and are audited as the MOSIP system client. The
+      # client id/secret must match countryconfig's MOSIP_INTEGRATION_* values above.
+      - OPENCRVS_AUTH_URL=http://auth:4040
+      - OPENCRVS_CLIENT_ID=${OPENCRVS_MOSIP_CLIENT_ID:-}
+      - OPENCRVS_CLIENT_SECRET=${OPENCRVS_MOSIP_CLIENT_SECRET:-}
       - LOCALE=en
       - ESIGNET_USERINFO_URL=http://esignet-mock:20260/oidc/userinfo
       - ESIGNET_TOKEN_URL=http://esignet-mock:20260/oauth/token

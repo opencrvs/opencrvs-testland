@@ -98,6 +98,7 @@ export async function assertRecordInWorkqueue({
 
     if (exists) {
       await expect(record).toBeVisible()
+      await expect(record).toBeVisible()
     } else {
       await expect(record).toBeHidden()
     }
