@@ -33,7 +33,7 @@ def data_cleanup(
             helm template {opencrvs_tools_chart_path} \
                 --namespace {opencrvs_namespace} \
                 -f {opencrvs_configuration_file} \
-                --set image.tag={core_images_tag} \
+                --set platform.tag={core_images_tag} \
                 --set data_cleanup.enabled=true \
                 --set countryconfig.image.name={countryconfig_image_name} \
                 --set countryconfig.image.tag={countryconfig_image_tag} \
@@ -66,7 +66,7 @@ def seed_data(
 ):
     job_yaml = local("""
       helm template -f {opencrvs_configuration_file} \
-        --set image.tag={core_images_tag} \
+        --set platform.tag={core_images_tag} \
         --set data_seed.enabled=true -s templates/data-seed-job.yaml --namespace {opencrvs_namespace} {opencrvs_tools_chart_path}
       """.format(
             opencrvs_namespace=opencrvs_namespace,
