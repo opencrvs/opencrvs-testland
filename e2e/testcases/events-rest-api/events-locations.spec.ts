@@ -38,7 +38,7 @@ test.describe('POST /api/events/locations', () => {
       '/api/events/locations',
       'POST',
       systemAdminToken,
-      { locations: [payload] }
+      payload
     )
 
     expect(response.status).toBe(200)
@@ -62,20 +62,20 @@ test.describe('POST /api/events/locations', () => {
       '/api/events/locations',
       'POST',
       registrarToken,
-      { locations: [buildLocationPayload()] }
+      buildLocationPayload()
     )
 
     expect(response.status).toBe(403)
   })
 
-  test('rejects an empty payload', async () => {
+  test('rejects a payload missing required fields', async () => {
     const systemAdminToken = await getToken(CREDENTIALS.NATIONAL_SYSTEM_ADMIN)
 
     const response = await fetchClientAPI(
       '/api/events/locations',
       'POST',
       systemAdminToken,
-      { locations: [] }
+      {}
     )
 
     expect(response.status).toBe(400)

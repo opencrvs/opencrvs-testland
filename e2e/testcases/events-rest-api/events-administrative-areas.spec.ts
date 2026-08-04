@@ -16,7 +16,7 @@ test.describe('POST /api/events/administrative-areas', () => {
       '/api/events/administrative-areas',
       'POST',
       systemAdminToken,
-      { administrativeAreas: [payload] }
+      payload
     )
 
     expect(response.status).toBe(200)
@@ -41,20 +41,20 @@ test.describe('POST /api/events/administrative-areas', () => {
       '/api/events/administrative-areas',
       'POST',
       registrarToken,
-      { administrativeAreas: [buildAdministrativeAreaPayload()] }
+      buildAdministrativeAreaPayload()
     )
 
     expect(response.status).toBe(403)
   })
 
-  test('rejects an empty payload', async () => {
+  test('rejects a payload missing required fields', async () => {
     const systemAdminToken = await getToken(CREDENTIALS.NATIONAL_SYSTEM_ADMIN)
 
     const response = await fetchClientAPI(
       '/api/events/administrative-areas',
       'POST',
       systemAdminToken,
-      { administrativeAreas: [] }
+      {}
     )
 
     expect(response.status).toBe(400)
