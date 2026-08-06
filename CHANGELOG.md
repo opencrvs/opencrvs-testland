@@ -4,6 +4,10 @@
 
 - Adjusted values.yaml and Tiltfile to work with OpenCRVS v2.0 releases [#1491](https://github.com/opencrvs/opencrvs-countryconfig/pull/1491), [#1492](https://github.com/opencrvs/opencrvs-countryconfig/pull/1492), [#1493](https://github.com/opencrvs/opencrvs-countryconfig/pull/1493)
 
+### Breaking changes
+
+- Add `EVENTS_URL=http://events:5555/` to the `countryconfig` service in `infrastructure/docker-compose.deploy.yml`. It has no production default, so the service will not start without it, whether or not any integrations are configured. Startup integration registration (`INTEGRATIONS` in `src/api/integration/handler.ts`) calls the events service, which owns integration clients on 2.0; names that already exist are skipped, so restarts never invalidate credentials a National System Admin has rotated. When upgrading from 1.9.x, `USER_MANAGEMENT_URL` is no longer read and can be removed. [#12360](https://github.com/opencrvs/opencrvs-core/issues/12360)
+
 ## 1.9.16
 
 ### New features

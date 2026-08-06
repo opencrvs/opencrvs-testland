@@ -565,7 +565,7 @@ services:
       - NODE_ENV=production
       - OPENCRVS_ENVIRONMENT=production
       - AUTH_URL=http://auth:4040
-      - USER_MANAGEMENT_URL=http://user-mgnt:3030
+      - EVENTS_URL=http://events:5555/
       - MONGO_URL=mongodb://mongo1/user-mgnt?replicaSet=rs0
       - APN_SERVICE_URL=http://apm-server:8200
       - COUNTRY_CONFIG_URL=https://countryconfig.{{hostname}}
