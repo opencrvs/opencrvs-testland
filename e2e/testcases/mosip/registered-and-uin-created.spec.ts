@@ -1,28 +1,34 @@
 import { expect, test, Page } from '@playwright/test'
 import { createClient } from '@opencrvs/toolkit/api'
+import { omit } from 'lodash'
 import { CREDENTIALS, GATEWAY_HOST } from '../../constants'
-import { getToken, login, auditRecord } from '../../helpers'
+import { getToken, login, auditRecord, switchEventTab } from '../../helpers'
 import {
   createDeclaration,
   getDeclaration
 } from '../test-data/birth-declaration'
-import { ensureAssigned } from '../../utils'
+
 import { formatV2ChildName } from '../birth/helpers'
+
+async function getEventById(eventId: string, token: string) {
+  const client = createClient(`${GATEWAY_HOST}/events`, `Bearer ${token}`)
+  return client.event.get.query({ eventId })
+}
 
 /**
  * Asserts the MOSIP integration audit-history wording.
  *
- * When a birth registration is forwarded to MOSIP, the Local Registrar's
- * "Register" is deferred (HTTP 202) and the MOSIP *system* integration confirms
- * it asynchronously, authoring the final REGISTER with the UIN. The audit
- * history therefore reads "Registered and UIN created" (attributed to the
- * "MOSIP" system, with no role/office), not the human-authored "Registered".
+ * When a birth registration is forwarded to MOSIP, the registrar's "Register"
+ * is deferred (HTTP 202) and the MOSIP *system* integration confirms it
+ * asynchronously, authoring the final REGISTER with the UIN. The audit history
+ * therefore reads "Registered and UIN created" (attributed to the "MOSIP"
+ * system, with no role/office), not the human-authored "Registered".
  * See `events.history.status` in `src/translations/client.csv`.
  *
  * Assumes the environment has MOSIP fully wired: the mock stack (mosip-api,
  * mosip-mock, esignet-mock) is running and the MOSIP system integration is
- * seeded with credentials matching mosip-api (OPENCRVS_MOSIP_CLIENT_ID /
- * OPENCRVS_MOSIP_CLIENT_SECRET), so `systemReadyHandler` registers it and the
+ * seeded with credentials matching mosip-api (OPENCRVS_CLIENT_ID /
+ * OPENCRVS_CLIENT_SECRET), so `systemReadyHandler` registers it and the
  * deferred registration is confirmed by the MOSIP system.
  */
 test.describe
@@ -38,10 +44,7 @@ test.describe
     // afterAll (page.close on an undefined page).
     page = await browser.newPage()
 
-    token = await getToken(
-      CREDENTIALS.LOCAL_REGISTRAR.USERNAME,
-      CREDENTIALS.LOCAL_REGISTRAR.PASSWORD
-    )
+    token = await getToken(CREDENTIALS.REGISTRAR)
 
     /*
      * A MOSIP-eligible birth: a verified/authenticated parent and a child under
@@ -52,6 +55,7 @@ test.describe
      * verification a user would otherwise perform in the UI.
      */
     const declaration = await getDeclaration({
+      token,
       partialDeclaration: { 'mother.verified': 'authenticated' }
     })
 
@@ -61,10 +65,11 @@ test.describe
      * for hidden fields. The forward gate only needs `mother.verified` +
      * `child.dob`, so drop the now-hidden NID fields from the seed.
      */
-    delete (declaration as Partial<typeof declaration>)['mother.idType']
-    delete (declaration as Partial<typeof declaration>)['mother.nid']
+    const res = await createDeclaration(
+      token,
+      omit(declaration, ['mother.idType', 'mother.nid'])
+    )
 
-    const res = await createDeclaration(token, declaration)
     eventId = res.eventId
     childName = formatV2ChildName(declaration)
     trackingId = res.trackingId
@@ -75,21 +80,24 @@ test.describe
   })
 
   test('Login', async () => {
-    await login(page, CREDENTIALS.LOCAL_REGISTRAR)
+    await login(page, CREDENTIALS.REGISTRAR)
   })
 
   test('MOSIP confirms the registration and the audit history reads "Registered and UIN created"', async () => {
+    // MOSIP's asynchronous confirmation has to land before the UI steps even
+    // begin, so this needs more than the default per-test budget
+    test.setTimeout(180_000)
+
     /*
      * The registrar's Register was deferred; MOSIP confirms it asynchronously
      * and the *system* authors the final REGISTER. Poll the events API (cheap,
      * short-circuits the instant it lands) instead of reloading the browser, so
      * the UI is only opened once the record is already registered.
      */
-    const client = createClient(GATEWAY_HOST + '/events', `Bearer ${token}`)
     await expect
       .poll(
         async () => {
-          const event = await client.event.get.query(eventId)
+          const event = await getEventById(eventId, token)
           return event.actions.some(
             (action) =>
               action.type === 'REGISTER' &&
@@ -103,8 +111,22 @@ test.describe
 
     await auditRecord({ page, trackingId, name: childName })
 
-    // Assign/download so the full history renders instead of the skeleton.
-    await ensureAssigned(page)
+    /*
+     * The full history renders only when the record is assigned to the viewer
+     * AND present in the local cache (see useEventOverviewInfo); otherwise the
+     * Audit tab is a skeleton. A deferred register keeps the registrar's
+     * assignment, so unlike the usual flow there is no Assign click to pull the
+     * record down — download it explicitly.
+     */
+    await expect(page.getByTestId('assignedTo-value')).toContainText(
+      'Kennedy Mweene'
+    )
+    await page
+      .getByRole('button', { name: 'Assign record', exact: true })
+      .click()
+
+    // auditRecord lands on Summary; the history table lives under Audit
+    await switchEventTab(page, 'Audit')
 
     await expect(page.locator('#listTable-task-history')).toContainText(
       'Registered and UIN created'
