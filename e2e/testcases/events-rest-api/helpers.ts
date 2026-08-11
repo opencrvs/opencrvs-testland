@@ -119,7 +119,10 @@ export function buildLocationPayload(
     name: `E2E location ${randomUUID()}`,
     externalId: null,
     administrativeAreaId: null,
-    locationType: null,
+    // Real locations always have a type; a null locationType is not
+    // representative test data and breaks analytics reindexing, which
+    // requires a non-null locationType on every location.
+    locationType: 'CRVS_OFFICE',
     validUntil: null,
     ...overrides
   }
