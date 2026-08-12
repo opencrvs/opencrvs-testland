@@ -100,14 +100,21 @@ export async function systemReadyHandler(
   } catch (error) {
     // Without the existing list we cannot tell a first registration from a
     // restart, and creating blindly would duplicate the integration and
-    // invalidate the credentials already in use.
+    // invalidate the credentials already in use. Answer 503 rather than 200:
+    // events retries the trigger on a failing status, and reporting success
+    // here would consume the only attempt that will ever be made, leaving the
+    // integration unregistered until events happens to restart.
     logger.warn(
       `Skipping integration registration, listing integrations failed: ${
         error instanceof Error ? error.message : error
       }`
     )
-    return h.response().code(200)
+    return h.response().code(503)
   }
+
+  // Every integration is attempted before answering, so one failure does not
+  // hide the others. Retrying is safe: names already registered are skipped.
+  let anyFailed = false
 
   for (const integration of INTEGRATIONS) {
     const alreadyRegistered = existing.get(integration.name)
@@ -166,6 +173,7 @@ export async function systemReadyHandler(
       })
 
       if (!res.ok) {
+        anyFailed = true
         logger.warn(
           `Registering integration "${integration.name}" failed: ${res.status} ${await res.text()}`
         )
@@ -177,11 +185,15 @@ export async function systemReadyHandler(
         )
       }
     } catch (error) {
+      anyFailed = true
       logger.warn(
         `Registering integration "${integration.name}" threw: ${error instanceof Error ? error.message : error}`
       )
     }
   }
 
-  return h.response().code(200)
+  // 503 asks events to retry. Answering 200 with an integration unregistered
+  // spends the only attempt events makes, and the symptom surfaces far away:
+  // the integrating system authenticates as a client that does not exist.
+  return h.response().code(anyFailed ? 503 : 200)
 }

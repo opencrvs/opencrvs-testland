@@ -120,4 +120,58 @@ describe('systemReadyHandler', () => {
     expect(registrationCalls()).toHaveLength(0)
     expect(warnings()[0]).toContain('listing integrations failed')
   })
+
+  /*
+   * Events retries the trigger only on a failing status, and it makes that one
+   * series of attempts at startup. Answering 200 with an integration
+   * unregistered therefore strands it until events happens to restart, and the
+   * symptom surfaces far away: the integrating system authenticates as a client
+   * that does not exist.
+   */
+  describe('answers a status events can act on', () => {
+    it('200 once every integration is registered', async () => {
+      mockFetch.mockResolvedValueOnce(jsonResponse([]))
+      mockFetch.mockResolvedValueOnce(jsonResponse({ clientId: CONFIGURED_ID }))
+
+      expect(await systemReadyHandler(request, h)).toMatchObject({
+        statusCode: 200
+      })
+    })
+
+    it('200 when everything is already registered', async () => {
+      mockFetch.mockResolvedValueOnce(
+        jsonResponse([{ id: CONFIGURED_ID, name: 'MOSIP' }])
+      )
+
+      expect(await systemReadyHandler(request, h)).toMatchObject({
+        statusCode: 200
+      })
+    })
+
+    it('503 when listing integrations fails', async () => {
+      mockFetch.mockResolvedValueOnce(jsonResponse({ error: 'nope' }, 500))
+
+      expect(await systemReadyHandler(request, h)).toMatchObject({
+        statusCode: 503
+      })
+    })
+
+    it('503 when registering an integration fails', async () => {
+      mockFetch.mockResolvedValueOnce(jsonResponse([]))
+      mockFetch.mockResolvedValueOnce(jsonResponse({ error: 'nope' }, 500))
+
+      expect(await systemReadyHandler(request, h)).toMatchObject({
+        statusCode: 503
+      })
+    })
+
+    it('503 when registering an integration throws', async () => {
+      mockFetch.mockResolvedValueOnce(jsonResponse([]))
+      mockFetch.mockRejectedValueOnce(new Error('ECONNREFUSED'))
+
+      expect(await systemReadyHandler(request, h)).toMatchObject({
+        statusCode: 503
+      })
+    })
+  })
 })
