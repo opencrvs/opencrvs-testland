@@ -157,6 +157,7 @@ export const roles: Role[] = [
       { type: 'user.search' },
       { type: 'record.search' },
       { type: 'workqueue', options: { ids: ['assigned-to-you', 'recent', 'pending-feedback-registrar-general', 'potential-duplicate', 'registration-registrar-general'] } },
+      { type: 'record.create', options: { placeOfEvent: 'all' } },
       { type: 'record.read' },
       { type: 'record.declare' },
       { type: 'record.reject' },
