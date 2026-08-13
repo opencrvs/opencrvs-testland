@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.1 Release Candidate
+
+- Adjusted values.yaml and Tiltfile to work with OpenCRVS v2.0 releases [#1491](https://github.com/opencrvs/opencrvs-countryconfig/pull/1491), [#1492](https://github.com/opencrvs/opencrvs-countryconfig/pull/1492), [#1493](https://github.com/opencrvs/opencrvs-countryconfig/pull/1493)
+
 ## 2.0.0
 
 ### Breaking changes
