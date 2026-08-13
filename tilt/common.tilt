@@ -18,9 +18,16 @@ traefik_tilt_label = '5.Traefik'
 # Install Traefik GW
 helm_repo('traefik-repo', 'https://traefik.github.io/charts', labels=[traefik_tilt_label])
 helm_resource(
-  'traefik', 'traefik-repo/traefik', namespace='traefik', resource_deps=['traefik-repo'],
-  flags=['--values=./examples/traefik/values.yaml'])
-
+    'traefik',
+    'traefik-repo/traefik',
+    namespace='traefik',
+    resource_deps=['traefik-repo'],
+    flags=[
+        '--version=39.0.0',
+        '--values=./examples/traefik/values.yaml',
+        '--create-namespace',
+    ],
+)
 # OpenCRVS application has traefik CRDs IngressRoute
 # and Middleware, so we need to add traefik as dependency
 # to all workloads that use them
@@ -91,7 +98,6 @@ opensrvs_services = [
   'events',
   'gateway',
   'login',
-  'user-mgnt'
 ]
 
 opensrvs_postdeploy_jobs = [

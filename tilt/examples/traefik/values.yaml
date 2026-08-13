@@ -23,12 +23,10 @@ providers:
 service:
   enabled: true
   single: false
-  type: NodePort
 
 ports:
   web:
     port: 8000
     protocol: TCP
-    nodePort: 30080
 
 tlsStore: {}

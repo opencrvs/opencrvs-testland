@@ -5,10 +5,10 @@
 
 # OpenCRVS core images tag:
 # For releases it's ok to keeps same as branch_or_tag
-core_images_tag = os.getenv("OPENCRVS_CORE_IMAGE_TAG", "v2.0.0-beta")
+# FIXME: Put release version here
+core_images_tag = os.getenv("OPENCRVS_CORE_IMAGE_TAG", "v2.0.1-beta")
 
-# FIXME: Put release version
-core_ref = os.getenv("OPENCRVS_CORE_REF", "release-v2.0.0")
+core_ref = os.getenv("OPENCRVS_CORE_REF", "release/2.0.1")
 
 # Build countryconfig image in local registry (use any name and tag you want)
 countryconfig_image_name="opencrvs/ocrvs-countryconfig"
