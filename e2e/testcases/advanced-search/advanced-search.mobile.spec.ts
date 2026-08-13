@@ -14,7 +14,7 @@ test.describe.serial('Advanced Search - Mobile', () => {
   let village = ''
   test.beforeAll(async ({ browser }) => {
     page = await browser.newPage()
-    await await setMobileViewport(page)
+    await setMobileViewport(page)
     const token = await getToken(CREDENTIALS.REGISTRAR_VILLAGE)
 
     const administrativeAreas = await getAdministrativeAreas(token)
