@@ -107,8 +107,14 @@ export const roles: Role[] = [
       ...defineScopes([
         { type: 'config.update-all' },
         { type: 'organisation.read-locations' },
-        { type: 'user.create', options: { role: ['HOSPITAL_CLERK', 'COMMUNITY_LEADER', 'REGISTRATION_AGENT', 'LOCAL_REGISTRAR', 'NATIONAL_REGISTRAR', 'LOCAL_SYSTEM_ADMIN', 'NATIONAL_SYSTEM_ADMIN', 'PERFORMANCE_MANAGER', 'PROVINCIAL_REGISTRAR', 'EMBASSY_OFFICIAL'] } },
-        { type: 'user.edit', options: { role: ['HOSPITAL_CLERK', 'COMMUNITY_LEADER', 'REGISTRATION_AGENT', 'LOCAL_REGISTRAR', 'NATIONAL_REGISTRAR', 'LOCAL_SYSTEM_ADMIN', 'NATIONAL_SYSTEM_ADMIN', 'PERFORMANCE_MANAGER', 'PROVINCIAL_REGISTRAR', 'EMBASSY_OFFICIAL'] } },
+        {
+          type: 'user.create',
+          options: { role: ['HOSPITAL_CLERK', 'COMMUNITY_LEADER', 'REGISTRATION_AGENT', 'LOCAL_REGISTRAR', 'NATIONAL_REGISTRAR', 'LOCAL_SYSTEM_ADMIN', 'NATIONAL_SYSTEM_ADMIN', 'PERFORMANCE_MANAGER', 'PROVINCIAL_REGISTRAR', 'EMBASSY_OFFICIAL', 'FIELD_AGENT'] }
+        },
+        {
+          type: 'user.edit',
+          options: { role: ['HOSPITAL_CLERK', 'COMMUNITY_LEADER', 'REGISTRATION_AGENT', 'LOCAL_REGISTRAR', 'NATIONAL_REGISTRAR', 'LOCAL_SYSTEM_ADMIN', 'NATIONAL_SYSTEM_ADMIN', 'PERFORMANCE_MANAGER', 'PROVINCIAL_REGISTRAR', 'EMBASSY_OFFICIAL', 'FIELD_AGENT'] }
+        },
         { type: 'user.read' },
         { type: 'user.search' },
         { type: 'performance.read' },
@@ -151,6 +157,7 @@ export const roles: Role[] = [
       { type: 'user.search' },
       { type: 'record.search' },
       { type: 'workqueue', options: { ids: ['assigned-to-you', 'recent', 'pending-feedback-registrar-general', 'potential-duplicate', 'registration-registrar-general'] } },
+      { type: 'record.create', options: { placeOfEvent: 'all' } },
       { type: 'record.read' },
       { type: 'record.declare' },
       { type: 'record.reject' },
@@ -250,6 +257,27 @@ export const roles: Role[] = [
       { type: 'record.custom-action', options: { event: ['birth'], customActionTypes: ['ISSUE_CERTIFIED_COPY'], placeOfEvent: 'location' } },
       { type: 'record.print-certified-copies', options: { placeOfEvent: 'location' } },
       { type: 'record.correct', options: { placeOfEvent: 'location' } }
+    ])
+  },
+  {
+    /**
+     * Exercises the `createdBy` scope option: this agent only ever sees records
+     * they created themselves, even after another user re-declares the record
+     * with edits. See https://github.com/opencrvs/opencrvs-core/issues/13287
+     */
+    id: 'FIELD_AGENT',
+    label: {
+      defaultMessage: 'Field Agent',
+      description: 'Name for user role Field Agent',
+      id: 'userRole.fieldAgent'
+    },
+    scopes: defineScopes([
+      { type: 'user.read-only-my-audit' },
+      { type: 'workqueue', options: { ids: ['assigned-to-you', 'recent', 'pending-validation'] } },
+      { type: 'record.create', options: { placeOfEvent: 'administrativeArea' } },
+      { type: 'record.declare', options: { placeOfEvent: 'administrativeArea' } },
+      { type: 'record.search', options: { placeOfEvent: 'administrativeArea', createdBy: 'user' } },
+      { type: 'record.read', options: { placeOfEvent: 'administrativeArea', createdBy: 'user' } }
     ])
   }
 ]
