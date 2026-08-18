@@ -93,6 +93,10 @@ CREATE TABLE IF NOT EXISTS analytics.event_actions (
   UNIQUE (id, event_id)
 );
 
+-- Integration-authored actions (e.g. MOSIP) have no role by design.
+-- Existing databases created before this change still have the constraint.
+ALTER TABLE analytics.event_actions ALTER COLUMN created_by_role DROP NOT NULL;
+
 CREATE INDEX CONCURRENTLY IF NOT EXISTS analytics_idx_event_actions_event_id
 ON analytics.event_actions (event_id);
 
