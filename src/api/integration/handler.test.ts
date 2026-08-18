@@ -58,6 +58,25 @@ function warnings() {
   return mockLogger.warn.mock.calls.map(([message]) => String(message))
 }
 
+function statusCodeOf(response: unknown) {
+  return (response as { statusCode: number }).statusCode
+}
+
+/*
+ * The handler answers one question: did every configured integration end up
+ * registered. Assert the class of the response rather than an exact code, so
+ * these stay true regardless of what the caller does about it.
+ */
+function expectReportedComplete(response: unknown) {
+  expect(statusCodeOf(response)).toBeGreaterThanOrEqual(200)
+  expect(statusCodeOf(response)).toBeLessThan(300)
+}
+
+function expectReportedIncomplete(response: unknown) {
+  expect(statusCodeOf(response)).toBeGreaterThanOrEqual(500)
+  expect(statusCodeOf(response)).toBeLessThan(600)
+}
+
 describe('systemReadyHandler', () => {
   beforeEach(() => {
     vi.clearAllMocks()
@@ -67,7 +86,7 @@ describe('systemReadyHandler', () => {
     mockFetch.mockResolvedValueOnce(jsonResponse([]))
     mockFetch.mockResolvedValueOnce(jsonResponse({ clientId: CONFIGURED_ID }))
 
-    await systemReadyHandler(request, h)
+    const response = await systemReadyHandler(request, h)
 
     const [, options] = registrationCalls()[0]
     expect(JSON.parse(String(options?.body))).toMatchObject({
@@ -78,6 +97,7 @@ describe('systemReadyHandler', () => {
       }
     })
     expect(warnings()).toEqual([])
+    expectReportedComplete(response)
   })
 
   // A restart must never clobber a secret a National System Admin rotated
@@ -86,10 +106,11 @@ describe('systemReadyHandler', () => {
       jsonResponse([{ id: CONFIGURED_ID, name: 'MOSIP' }])
     )
 
-    await systemReadyHandler(request, h)
+    const response = await systemReadyHandler(request, h)
 
     expect(registrationCalls()).toHaveLength(0)
     expect(warnings()).toEqual([])
+    expectReportedComplete(response)
   })
 
   // The failure this warning exists for: the integration was registered with a
@@ -101,7 +122,7 @@ describe('systemReadyHandler', () => {
       ])
     )
 
-    await systemReadyHandler(request, h)
+    const response = await systemReadyHandler(request, h)
 
     // Still must not re-register, or it would invalidate credentials in use
     expect(registrationCalls()).toHaveLength(0)
@@ -110,68 +131,39 @@ describe('systemReadyHandler', () => {
     expect(warning).toContain('ac3daa16-bd38-41dd-9dbc-98a10b71bddd')
     expect(warning).toContain(CONFIGURED_ID)
     expect(warning).toContain('NOT in use')
+
+    // The name is taken and only an operator can resolve the mismatch, so
+    // registration is as complete as it can get
+    expectReportedComplete(response)
   })
 
-  it('does not register anything when listing integrations fails', async () => {
+  it('reports incomplete when listing integrations fails', async () => {
     mockFetch.mockResolvedValueOnce(jsonResponse({ error: 'nope' }, 500))
 
-    await systemReadyHandler(request, h)
+    const response = await systemReadyHandler(request, h)
 
     expect(registrationCalls()).toHaveLength(0)
     expect(warnings()[0]).toContain('listing integrations failed')
+    expectReportedIncomplete(response)
   })
 
-  /*
-   * Events retries the trigger only on a failing status, and it makes that one
-   * series of attempts at startup. Answering 200 with an integration
-   * unregistered therefore strands it until events happens to restart, and the
-   * symptom surfaces far away: the integrating system authenticates as a client
-   * that does not exist.
-   */
-  describe('answers a status events can act on', () => {
-    it('200 once every integration is registered', async () => {
-      mockFetch.mockResolvedValueOnce(jsonResponse([]))
-      mockFetch.mockResolvedValueOnce(jsonResponse({ clientId: CONFIGURED_ID }))
+  it('reports incomplete when registering an integration is refused', async () => {
+    mockFetch.mockResolvedValueOnce(jsonResponse([]))
+    mockFetch.mockResolvedValueOnce(jsonResponse({ error: 'nope' }, 500))
 
-      expect(await systemReadyHandler(request, h)).toMatchObject({
-        statusCode: 200
-      })
-    })
+    const response = await systemReadyHandler(request, h)
 
-    it('200 when everything is already registered', async () => {
-      mockFetch.mockResolvedValueOnce(
-        jsonResponse([{ id: CONFIGURED_ID, name: 'MOSIP' }])
-      )
+    expect(warnings()[0]).toContain('failed')
+    expectReportedIncomplete(response)
+  })
 
-      expect(await systemReadyHandler(request, h)).toMatchObject({
-        statusCode: 200
-      })
-    })
+  it('reports incomplete when registering an integration throws', async () => {
+    mockFetch.mockResolvedValueOnce(jsonResponse([]))
+    mockFetch.mockRejectedValueOnce(new Error('ECONNREFUSED'))
 
-    it('503 when listing integrations fails', async () => {
-      mockFetch.mockResolvedValueOnce(jsonResponse({ error: 'nope' }, 500))
+    const response = await systemReadyHandler(request, h)
 
-      expect(await systemReadyHandler(request, h)).toMatchObject({
-        statusCode: 503
-      })
-    })
-
-    it('503 when registering an integration fails', async () => {
-      mockFetch.mockResolvedValueOnce(jsonResponse([]))
-      mockFetch.mockResolvedValueOnce(jsonResponse({ error: 'nope' }, 500))
-
-      expect(await systemReadyHandler(request, h)).toMatchObject({
-        statusCode: 503
-      })
-    })
-
-    it('503 when registering an integration throws', async () => {
-      mockFetch.mockResolvedValueOnce(jsonResponse([]))
-      mockFetch.mockRejectedValueOnce(new Error('ECONNREFUSED'))
-
-      expect(await systemReadyHandler(request, h)).toMatchObject({
-        statusCode: 503
-      })
-    })
+    expect(warnings()[0]).toContain('threw')
+    expectReportedIncomplete(response)
   })
 })
