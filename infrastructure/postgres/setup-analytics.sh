@@ -68,6 +68,8 @@ CREATE TABLE IF NOT EXISTS analytics.locations (
   location_type TEXT NOT NULL
 );
 
+ALTER TABLE analytics.locations ALTER COLUMN location_type DROP NOT NULL;
+
 CREATE TABLE IF NOT EXISTS analytics.event_actions (
   event_type text NOT NULL,
   action_type TEXT NOT NULL,
