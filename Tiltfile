@@ -4,9 +4,7 @@
 # https://github.com/opencrvs/infrastructure/blob/develop/Tiltfile
 
 # OpenCRVS core images tag:
-# For releases it's ok to keeps same as branch_or_tag
-# FIXME: Put release version here
-core_images_tag = os.getenv("OPENCRVS_CORE_IMAGE_TAG", "v2.0.1-beta")
+core_images_tag = os.getenv("OPENCRVS_CORE_IMAGE_TAG", "v2.0.1")
 
 core_ref = os.getenv("OPENCRVS_CORE_REF", "release/2.0.1")
 
