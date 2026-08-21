@@ -89,8 +89,8 @@ export const roles: Role[] = [
     scopes: [
       ...defineScopes([
         { type: 'organisation.read-locations', options: { accessLevel: 'administrativeArea' } },
-        { type: 'user.create', options: { accessLevel: 'administrativeArea', role: ['HOSPITAL_CLERK', 'COMMUNITY_LEADER', 'REGISTRATION_AGENT', 'LOCAL_REGISTRAR', 'PROVINCIAL_REGISTRAR'] } },
-        { type: 'user.edit', options: { accessLevel: 'administrativeArea', role: ['HOSPITAL_CLERK', 'COMMUNITY_LEADER', 'REGISTRATION_AGENT', 'LOCAL_REGISTRAR', 'PROVINCIAL_REGISTRAR'] } },
+        { type: 'user.create', options: { accessLevel: 'administrativeArea', role: ['HOSPITAL_CLERK', 'COMMUNITY_LEADER', 'REGISTRATION_AGENT', 'LOCAL_REGISTRAR', 'PROVINCIAL_REGISTRAR', 'FIELD_AGENT'] } },
+        { type: 'user.edit', options: { accessLevel: 'administrativeArea', role: ['HOSPITAL_CLERK', 'COMMUNITY_LEADER', 'REGISTRATION_AGENT', 'LOCAL_REGISTRAR', 'PROVINCIAL_REGISTRAR', 'FIELD_AGENT'] } },
         { type: 'user.read', options: { accessLevel: 'administrativeArea' } },
         { type: 'user.search', options: { accessLevel: 'administrativeArea' } }
       ])
