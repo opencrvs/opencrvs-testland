@@ -1,12 +1,16 @@
 # Changelog
 
-## 2.0.1 Release Candidate
+## 2.0.1 Release
 
 ### Security fixes
 
 - Every `/triggers/user/*` route now requires authentication, inheriting the default `jwt` strategy instead of setting `auth: false`. Previously anyone able to reach the country config service could trigger 2FA codes, password-reset credentials and notification emails or SMS to arbitrary recipients. Requires OpenCRVS core 2.0.1 or later, which sends an `Authorization` header on every one of these requests — including `all-user-notification`, which core now dispatches with an anonymous token. Run `npx @opencrvs/toolkit verify-endpoints` against a locally-running country config to confirm the required public endpoints still respond and the secured ones reject unauthenticated requests. [#13501](https://github.com/opencrvs/opencrvs-core/pull/13501)
 
 - Adjusted values.yaml and Tiltfile to work with OpenCRVS v2.0 releases [#1491](https://github.com/opencrvs/opencrvs-countryconfig/pull/1491), [#1492](https://github.com/opencrvs/opencrvs-countryconfig/pull/1492), [#1493](https://github.com/opencrvs/opencrvs-countryconfig/pull/1493)
+
+### Improvements
+
+- `analytics.locations.location_type` is now nullable, matching core's data model where the field is optional; the constraint is dropped on existing databases during deploy. [#1503](https://github.com/opencrvs/opencrvs-countryconfig/pull/1503)
 
 ### Breaking changes
 
