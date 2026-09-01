@@ -7,29 +7,31 @@
 #
 # Copyright (C) The OpenCRVS Authors located at https://github.com/opencrvs/opencrvs-core/blob/master/AUTHORS.
 
-# Gitflow release initialisation workflow.
+# Gitflow release initialisation workflow. Dispatched by opencrvs-core's
+# init-release (or run manually) with a semver version.
 #
-# Triggered by opencrvs-core's init-release workflow (or manually) with a
-# semver version string (e.g. 1.7.2).
+# Farajaland mirrors opencrvs-countryconfig with its own changes on top. Version
+# bumps and CHANGELOG entries live in countryconfig; farajaland inherits them by
+# merging countryconfig's release branch.
 #
-# Farajaland is a mirror of opencrvs-countryconfig with farajaland-specific
-# modifications on top. Version bumps and CHANGELOG entries live in
-# countryconfig; farajaland inherits them by merging countryconfig's release
-# branch. What this workflow does, in order:
-#   1. Derives the base branch:
-#        - patch release (z > 0)  → release/<x>.<y>.<z-1>  (must already exist)
-#        - minor/major (z = 0)    → develop
-#   2. Waits for countryconfig's release/<version> branch to appear (both
-#      workflows are triggered in parallel by core's init-release).
-#   3. Creates a release branch from the farajaland base branch, then merges
-#      countryconfig's release branch in to inherit version-bump commits.
-#   4. Opens up to two PRs:
-#        a. release/<version> → <target branch>                 (the release PR)
-#           master for a release on the current channel; the release branch one
-#           channel up for an older-channel hotfix. opencrvs-core resolves this
-#           and passes it in via the target_branch input.
-#        b. merge-back/release-<version>-to-develop → develop  (merge-back PR,
-#           current channel only)
+# What it does:
+#   1. Base branch: release/<x>.<y>.<z-1> for a patch (must exist), develop for
+#      a minor/major.
+#   2. Waits for countryconfig's release/<version> — core dispatches both repos
+#      at once.
+#   3. Creates release/<version> from the base branch and merges countryconfig's
+#      release branch in, inheriting the bump commits.
+#   4. Opens the PRs:
+#        release/<version> -> master, only when the release is on the channel
+#        master tracks
+#        merge-back/... -> develop, or -> the release branch one channel up for
+#        an older channel — which then gets no PR to master at all, because it
+#        reaches master and develop through that branch.
+#      Core resolves which one and passes it in as target_branch; this repo
+#      never derives it.
+#
+# TODO: this repo only cuts release branches on the 1.9.x line. Remove this
+# workflow, and the PRs it opens, once this branch reaches develop.
 name: Release - Start a new release
 on:
   workflow_dispatch:
@@ -42,7 +44,7 @@ on:
         type: string
         required: false
         default: 'master'
-        description: 'Branch the release PR targets. Passed down by opencrvs-core. Leave as master for a release on the current channel; set to the release branch one channel up (e.g. release/2.0.2) for an older-channel hotfix.'
+        description: 'Branch this release merges into, passed down by opencrvs-core. master for the current channel, or the release branch one channel up (e.g. release/2.0.2) for an older one.'
 
 jobs:
   release_workflow:
@@ -55,12 +57,8 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      # Derive base_branch and target_branch from the version number.
-      #   - patch (z > 0): base = release/<x>.<y>.<z-1>, target = master
-      #     The previous release branch must already exist; if not, the step
-      #     fails early with a clear message rather than branching from an
-      #     unexpected point.
-      #   - minor/major (z = 0): base = develop, target = master
+      # Base branch from the version: patch -> release/<x>.<y>.<z-1>, which
+      # must already exist, minor/major -> develop.
       - name: Determine the Base Branch
         id: get_base_branch
         run: |
@@ -83,30 +81,54 @@ jobs:
               exit 1
             fi
           fi
-          # opencrvs-core is the single source of truth for which branch a release
-          # targets: it knows which channel master currently tracks and passes the
-          # resolved branch down when it dispatches this workflow. This repo does
-          # not re-derive it -- its own version files and branch history are not a
-          # reliable signal.
-          #
-          #   target = master        -> release is on the current channel, so
-          #                             develop still needs the merge-back PR.
-          #   target = release/<v>   -> older-channel hotfix climbing to the next
-          #                             channel up. It reaches master and develop
-          #                             through that branch, so no merge-back PR.
+          # Core passes the target down: it is the one repo that knows which
+          # channel master tracks. This repo's own version files and branch
+          # history are not a reliable signal, so it never re-derives it.
+          #   master      -> current channel: release PR to master + merge-back
+          #                  PR to develop.
+          #   release/<v> -> older channel: no release PR, just a merge-back
+          #                  into that branch, which carries it onwards.
           target_branch="${{ inputs.target_branch }}"
           if [ -z "$target_branch" ]; then
             target_branch="master"
           fi
+
+          # Current channel merges back into develop; an older one merges into
+          # its target. Every step below reads off this one value.
           if [ "$target_branch" = "master" ]; then
-            merge_back="true"
+            merge_back_target="develop"
           else
-            merge_back="false"
+            merge_back_target="$target_branch"
           fi
-          echo "Release PR will target: $target_branch (merge-back to develop: $merge_back)"
+
+          # Dots are stripped (1.9.17 into 2.0.2 -> release-1917-into-202) to
+          # satisfy the branch-name check used across the OpenCRVS repos.
+          slug="${merge_back_target#release/}"
+          mergeback_branch="merge-back/release-${version//./}-into-${slug//./}"
+
+          echo "merge-back: $mergeback_branch -> $merge_back_target"
           echo "target_branch=$target_branch" >> $GITHUB_OUTPUT
-          echo "merge_back=$merge_back" >> $GITHUB_OUTPUT
+          echo "merge_back_target=$merge_back_target" >> $GITHUB_OUTPUT
+          echo "mergeback_branch=$mergeback_branch" >> $GITHUB_OUTPUT
           echo "base_branch=$base_branch" >> $GITHUB_OUTPUT
+
+      # The target release branch must already exist; opencrvs-core resolves
+      # which one it is. Fail before anything is created.
+      - name: Verify the target release branch exists
+        if: steps.get_base_branch.outputs.target_branch != 'master'
+        run: |
+          TARGET_BRANCH="${{ steps.get_base_branch.outputs.target_branch }}"
+          if ! git ls-remote --exit-code --heads origin "$TARGET_BRANCH" > /dev/null 2>&1; then
+            echo "::error::$TARGET_BRANCH does not exist in this repository. Initialise ${TARGET_BRANCH#release/} here first, or re-run with the target_branch input set explicitly."
+            exit 1
+          fi
+
+      # Set once for the job: the branch-creation step is skipped on a re-run,
+      # but the merge-back step below still needs an author.
+      - name: Configure the git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
 
       - name: Check if release branch already exists
         id: check_branch
@@ -118,11 +140,9 @@ jobs:
             echo "exists=false" >> $GITHUB_OUTPUT
           fi
 
-      # Poll for countryconfig's release branch before creating farajaland's.
-      # Both workflows are triggered at the same time by core's init-release,
-      # so countryconfig may not have pushed its branch yet.
-      # Skipped if the farajaland release branch was already created by a
-      # previous run (countryconfig's branch must exist at that point already).
+      # Core dispatches both repos at once, so countryconfig may not have
+      # pushed its release branch yet. Skipped on a re-run, where it must
+      # already exist.
       - name: Wait for countryconfig release branch
         if: steps.check_branch.outputs.exists == 'false'
         run: |
@@ -142,16 +162,12 @@ jobs:
             sleep 30
           done
 
-      # Create farajaland's release branch from its own base, then merge
-      # countryconfig's release branch in. This brings version-bump commits
-      # into farajaland so PRs have a real diff.
-      # Skipped if the release branch was already created by a previous run.
+      # Cut farajaland's release branch from its own base, then merge
+      # countryconfig's in so the PRs carry its bump commits. Skipped when a
+      # previous run already created the branch.
       - name: Create release branch
         if: steps.check_branch.outputs.exists == 'false'
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
           git checkout "${{ steps.get_base_branch.outputs.base_branch }}"
           git checkout -b "release/${{ inputs.version }}"
 
@@ -161,42 +177,84 @@ jobs:
 
           git push origin "release/${{ inputs.version }}"
 
-      # A dedicated merge-back branch is used for the develop PR so that any
-      # conflict-resolution commits do not land on the release branch itself.
-      - name: Create merge-back branch for develop PR
-        if: steps.get_base_branch.outputs.merge_back == 'true'
+      # A separate branch keeps conflict-resolution commits off the release
+      # branch.
+      #   current channel: cut from release/<version>, PR'd into develop.
+      #   older channel:   cut from the target with release/<version> merged in,
+      #                    so the PR diff is only what this channel adds.
+      - name: Create merge-back branch
+        id: merge_back
         run: |
-          VERSION_NO_DOTS=$(echo "${{ inputs.version }}" | tr -d '.')
-          MERGEBACK_BRANCH="merge-back/release-${VERSION_NO_DOTS}-to-develop"
+          MERGEBACK_BRANCH="${{ steps.get_base_branch.outputs.mergeback_branch }}"
+          MERGE_BACK_TARGET="${{ steps.get_base_branch.outputs.merge_back_target }}"
+          RELEASE_BRANCH="release/${{ inputs.version }}"
+
           if git ls-remote --exit-code --heads origin "$MERGEBACK_BRANCH" > /dev/null 2>&1; then
             echo "Branch $MERGEBACK_BRANCH already exists, skipping."
-          else
-            git fetch origin "release/${{ inputs.version }}"
-            git checkout -b "$MERGEBACK_BRANCH" "origin/release/${{ inputs.version }}"
-            git push origin "$MERGEBACK_BRANCH"
+            exit 0
           fi
 
-      # Up to two PRs are created:
+          if [ "$MERGE_BACK_TARGET" = "develop" ]; then
+            git fetch origin "$RELEASE_BRANCH"
+            git checkout -b "$MERGEBACK_BRANCH" "origin/$RELEASE_BRANCH"
+          else
+            git fetch origin "$RELEASE_BRANCH" "$MERGE_BACK_TARGET"
+            git checkout -b "$MERGEBACK_BRANCH" "origin/$MERGE_BACK_TARGET"
+            if ! git merge --no-edit "origin/$RELEASE_BRANCH"; then
+              # Both channels bumped the version fields and the CHANGELOG away
+              # from the same ancestor, so those always conflict and always
+              # resolve one way: the target keeps its own numbers. Any other
+              # conflict is real and needs a human. Keep this list in step with
+              # the bump step above.
+              CONFLICTS=$(git diff --name-only --diff-filter=U)
+              UNEXPECTED=$(echo "$CONFLICTS" | grep -Ev '(^|/)package\.json$|^CHANGELOG\.md$' || true)
+              if [ -n "$UNEXPECTED" ]; then
+                git merge --abort
+                echo "::error::$RELEASE_BRANCH does not merge cleanly into $MERGE_BACK_TARGET (${UNEXPECTED//$'\n'/ }). Create $MERGEBACK_BRANCH from $MERGE_BACK_TARGET by hand, merge $RELEASE_BRANCH into it, push it, then re-run this workflow."
+                exit 1
+              fi
+              git checkout --ours -- $CONFLICTS
+              git add -- $CONFLICTS
+              git commit --no-edit
+              RESOLVED="${CONFLICTS//$'\n'/ }"
+              echo "Kept $MERGE_BACK_TARGET's copy of: $RESOLVED"
+              echo "auto_resolved=$RESOLVED" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+          git push origin "$MERGEBACK_BRANCH"
+
+      # PR 1 — release/<version> → master
+      #   The release PR, opened for the current (or a newer) channel only.
+      #   Merging it ships the version to production and triggers the publish
+      #   workflow. An older channel opens no release PR at all: it ships from
+      #   its own release branch and reaches master through the channel above it.
       #
-      #   PR 1 — release/<version> → <target branch>
-      #     The release PR. Targets master for a release on the current channel.
-      #     For an older-channel hotfix it targets the release branch one channel
-      #     up, as resolved by opencrvs-core and passed in via target_branch.
-      #
-      #   PR 2 — merge-back/release-<version>-to-develop → develop
-      #     Uses a dedicated branch so conflict-resolution commits stay off
-      #     the release branch.
-      #       - z=0 (base is develop): initially an empty diff; useful once
-      #         release-branch fixes are cherry-picked.
-      #       - z>0 (base is a prior release branch): backports patch fixes.
-      # Each PR is checked individually — one may already exist while the other
-      # does not, so both are always evaluated.
+      # PR 2 — merge-back/release-<version-no-dots>-into-<target> → <target>
+      #   develop for the current channel, the next unreleased patch of the
+      #   channel above for an older one. Uses a dedicated branch so
+      #   conflict-resolution commits stay off the release branch.
+      #     - z=0 (base is develop): initially an empty diff; useful once
+      #       release-branch fixes are cherry-picked.
+      #     - z>0 (base is a prior release branch): backports patch fixes.
       - name: Create Pull Requests
         run: |
           PR_BRANCH="release/${{ inputs.version }}"
-          VERSION_NO_DOTS=$(echo "${{ inputs.version }}" | tr -d '.')
-          MERGEBACK_BRANCH="merge-back/release-${VERSION_NO_DOTS}-to-develop"
-          TARGET_BRANCH="${{ steps.get_base_branch.outputs.target_branch }}"
+          MERGEBACK_BRANCH="${{ steps.get_base_branch.outputs.mergeback_branch }}"
+          MERGE_BACK_TARGET="${{ steps.get_base_branch.outputs.merge_back_target }}"
+          AUTO_RESOLVED="${{ steps.merge_back.outputs.auto_resolved }}"
+
+          # base, head, title, body. Leaves an already-open PR alone, so a
+          # re-run can open just the missing one.
+          create_pr() {
+            local existing
+            existing=$(gh pr list --head "$2" --base "$1" --state open --json number --jq '.[0].number // ""')
+            if [ -n "$existing" ]; then
+              echo "PR $2 → $1 already exists (#$existing), skipping."
+              return
+            fi
+            gh pr create --base "$1" --head "$2" --title "$3" --body "$4"
+          }
 
           if [ -f .github/TEMPLATES/RELEASE_PR_TEMPLATE.md ]; then
             BODY=$(cat .github/TEMPLATES/RELEASE_PR_TEMPLATE.md)
@@ -204,39 +262,29 @@ jobs:
             BODY=""
           fi
 
-          if [ "$TARGET_BRANCH" != "master" ]; then
-            BODY="${BODY}
+          if [ "$MERGE_BACK_TARGET" = "develop" ]; then
+            create_pr "master" "$PR_BRANCH" "Release v${{ inputs.version }}" "$BODY"
+
+            MERGEBACK_TITLE="chore: merge release v${{ inputs.version }} back to develop"
+            MERGEBACK_BODY="Merge release branch back to develop to keep develop in sync with any release-branch fixes."
+          else
+            echo "Skipping the release PR to master: ${{ inputs.version }} is on an older channel."
+
+            MERGEBACK_TITLE="chore: merge release v${{ inputs.version }} into $MERGE_BACK_TARGET"
+            MERGEBACK_BODY="${BODY}
 
           ---
 
-          > **Note:** \`${{ inputs.version }}\` is on an older channel than the one \`master\` tracks, so this PR targets \`$TARGET_BRANCH\` instead of \`master\`. The changes reach \`master\` and \`develop\` through that branch -- no merge-back PR to \`develop\` is opened for this release."
+          > **Note:** \`${{ inputs.version }}\` is on an older channel than the one \`master\` tracks, so no release PR to \`master\` is opened. This PR carries the release up into \`$MERGE_BACK_TARGET\`, and it reaches \`master\` and \`develop\` through that channel's own release."
+
+            if [ -n "$AUTO_RESOLVED" ]; then
+              MERGEBACK_BODY="${MERGEBACK_BODY}
+
+          > The merge kept \`$MERGE_BACK_TARGET\`'s copy of: $AUTO_RESOLVED — the version bump and changelog entry belong to \`${{ inputs.version }}\`'s own channel. Check that nothing else in those files needed to come across."
+            fi
           fi
 
-          EXISTING_MASTER_PR=$(gh pr list --head "$PR_BRANCH" --base "$TARGET_BRANCH" --state open --json number --jq '.[0].number // ""')
-          if [ -z "$EXISTING_MASTER_PR" ]; then
-            gh pr create \
-              --base "$TARGET_BRANCH" \
-              --head "$PR_BRANCH" \
-              --title "Release v${{ inputs.version }}" \
-              --body "$BODY"
-          else
-            echo "PR $PR_BRANCH → $TARGET_BRANCH already exists (#$EXISTING_MASTER_PR), skipping."
-          fi
-
-          if [ "${{ steps.get_base_branch.outputs.merge_back }}" != "true" ]; then
-            echo "Skipping the merge-back PR to develop: ${{ inputs.version }} targets $TARGET_BRANCH, not master."
-            exit 0
-          fi
-
-          EXISTING_DEVELOP_PR=$(gh pr list --head "$MERGEBACK_BRANCH" --base "develop" --state open --json number --jq '.[0].number // ""')
-          if [ -z "$EXISTING_DEVELOP_PR" ]; then
-            gh pr create \
-              --base "develop" \
-              --head "$MERGEBACK_BRANCH" \
-              --title "chore: merge release v${{ inputs.version }} back to develop" \
-              --body "Merge release branch back to develop to keep develop in sync with any release-branch fixes."
-          else
-            echo "PR $MERGEBACK_BRANCH → develop already exists (#$EXISTING_DEVELOP_PR), skipping."
-          fi
+          create_pr "$MERGE_BACK_TARGET" "$MERGEBACK_BRANCH" "$MERGEBACK_TITLE" "$MERGEBACK_BODY"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
