@@ -89,6 +89,18 @@ export const TriggerVariable = {
   [TriggerEvent.CHANGE_PHONE_NUMBER]: z.object({
     firstname: z.string(),
     code: z.string()
+  }),
+  [TriggerEvent.PASSWORD_RESET_LINK]: z.object({
+    firstname: z.string(),
+    applicationName: z.string(),
+    countryLogo: z.string(),
+    recoveryURL: z.string()
+  }),
+  [TriggerEvent.USERNAME_REMINDER_LINK]: z.object({
+    firstname: z.string(),
+    applicationName: z.string(),
+    countryLogo: z.string(),
+    recoveryURL: z.string()
   })
 } as const
 
@@ -310,6 +322,20 @@ const templates = {
     subject: '', // Subject defined from National Sys Admin Dashboard
     template: readOtherTemplate<TriggerVariable['all-user-notification']>(
       'all-user-notification'
+    )
+  },
+  [TriggerEvent.PASSWORD_RESET_LINK]: {
+    type: 'password-reset-link',
+    subject: 'Reset your password',
+    template: readOtherTemplate<TriggerVariable['password-reset-link']>(
+      'password-reset-link'
+    )
+  },
+  [TriggerEvent.USERNAME_REMINDER_LINK]: {
+    type: 'username-reminder-link',
+    subject: 'Retrieve your username',
+    template: readOtherTemplate<TriggerVariable['username-reminder-link']>(
+      'username-reminder-link'
     )
   }
 } as const

@@ -301,6 +301,14 @@ function convertPayloadToVariable({
       }
     case TriggerEvent.ALL_USER_NOTIFICATION:
       return { subject: payload.subject, body: payload.body }
+    case TriggerEvent.PASSWORD_RESET_LINK:
+    case TriggerEvent.USERNAME_REMINDER_LINK:
+      return {
+        firstname,
+        applicationName: applicationConfig.APPLICATION_NAME,
+        countryLogo: COUNTRY_LOGO_URL,
+        recoveryURL: `${LOGIN_URL}recover?token=${encodeURIComponent(payload.token)}`
+      }
     default:
       throw new Error(`Unknown event: ${event}`)
   }

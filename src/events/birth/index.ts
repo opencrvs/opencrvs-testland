@@ -950,6 +950,28 @@ export const birthEvent = defineConfig({
       ],
       correctionForm: CORRECTION_FORM
     },
+      {
+        type: ActionType.APPROVE_CORRECTION,
+        label: {
+          id: 'v2.events.correction.approve.label',
+          defaultMessage: 'Approve correction',
+          description: 'Label for the approve correction action'
+        },
+        conditionals: [
+              { type: ConditionalType.SHOW, conditional: not(flag('revoked')) }
+            ]
+      },
+      {
+        type: ActionType.REJECT_CORRECTION,
+        label: {
+          id: 'v2.events.correction.reject.label',
+          defaultMessage: 'Reject correction',
+          description: 'Label for the reject correction action'
+        },
+        conditionals: [
+              { type: ConditionalType.SHOW, conditional: not(flag('revoked')) }
+            ]
+      },
     {
       type: ActionType.ARCHIVE,
       label: {

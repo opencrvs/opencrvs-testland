@@ -113,6 +113,26 @@ export default function getUserNotificationRoutes(): ServerRoute<ReqRefDefaults>
         tags: ['api'],
         description: 'Handles verification for email address change'
       }
+    },
+    {
+      method: 'POST',
+      path: '/triggers/user/password-reset-link',
+      handler: makeNotificationHandler('password-reset-link'),
+      options: {
+        auth: false,
+        tags: ['api'],
+        description: 'Handles notification for password reset recovery link'
+      }
+    },
+    {
+      method: 'POST',
+      path: '/triggers/user/username-reminder-link',
+      handler: makeNotificationHandler('username-reminder-link'),
+      options: {
+        auth: false,
+        tags: ['api'],
+        description: 'Handles notification for username reminder recovery link'
+      }
     }
   ]
 }

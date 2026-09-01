@@ -2371,3 +2371,16 @@ wq.noRecords.readyToPrint,No records messages for ready to print tab,No records 
 wq.noRecords.requiresUpdate,No records messages for require updates tab,No records require updates,Aucun document ne nécessite de mise à jour
 wq.noRecords.sentForApproval,No records messages for sent for approval tab,No records sent for approval,Aucun document envoyé pour approbation
 wq.noRecords.sentForReview,No records messages for sent for review tab,No records sent for review,Aucun document envoyé pour examen
+action.assign.label,,Assign,Attribuer
+action.unassign.label,,Unassign,Retirer l'attribution
+buttons.backToLogin,Button label to navigate back to the login page,Back to login,Retour à la connexion
+buttons.unarchive,Unarchive button text,Unarchive,Désarchiver
+duplicates.content.notDuplicateContentConfirmationDescription,Not a duplicate content confirmation description message,"By clicking 'Confirm', the event will be marked as not a duplicate.","En cliquant sur 'Confirmer', l'événement sera marqué comme n'étant pas un doublon."
+duplicates.reviewUnavailable.description,Body of the banner shown when the user cannot access every record matched as a potential duplicate,"It is flagged against a record registered outside your jurisdiction, which you are not permitted to view. The review must be completed by someone with access to both records.","Il est signalé par rapport à un enregistrement enregistré en dehors de votre juridiction, que vous n'êtes pas autorisé à consulter. L'examen doit être effectué par une personne ayant accès aux deux enregistrements."
+duplicates.reviewUnavailable.title,Title of the banner shown when the user cannot access every record matched as a potential duplicate,You cannot review this record for duplicates,Vous ne pouvez pas examiner cet enregistrement pour les doublons
+error.officeInactive,Title shown when a user's assigned office is inactive,Your assigned office has been made inactive,Votre bureau assigné a été désactivé
+error.officeInactiveDescription,Description shown when a user's assigned office is inactive,Please contact your administrator to be reassigned,Veuillez contacter votre administrateur pour être réaffecté.
+event.birth.action.unarchive.label,Label for unarchive record button in dropdown menu,Unarchive,Désarchiver
+event.edit.cancelEdits,"Label for ""Cancel edits"" in edit action menu",Cancel edits,
+event.summary.redacted,Accessible name for a value the user is not permitted to see,Hidden,Masqué
+settings.changeAvatar.avatarProcessingError,Avatar processing error message,There was an error processing the image. Please try again.,Une erreur s'est produite lors du traitement de l'image. Veuillez réessayer.

@@ -41,7 +41,9 @@ const otherTemplates = {
   updateUserNameNotification: 'updateUserNameNotification',
   resetUserPasswordNotification: 'resetUserPasswordNotification',
   resetUserPasswordByAdminNotification: 'resetUserPasswordByAdminNotification',
-  resendInviteNotification: 'resendInviteNotification'
+  resendInviteNotification: 'resendInviteNotification',
+  resetPasswordLinkNotification: 'resetPasswordLinkNotification',
+  retrieveUsernameLinkNotification: 'retrieveUsernameLinkNotification'
 }
 
 export type SMSTemplateType =
@@ -135,7 +137,9 @@ const TriggerToSMSTemplate = {
   ['2fa']: 'authenticationCodeNotification',
   ['all-user-notification']: 'allUserNotification',
   ['change-email-address']: 'authenticationCodeNotification',
-  ['change-phone-number']: 'authenticationCodeNotification'
+  ['change-phone-number']: 'authenticationCodeNotification',
+  ['password-reset-link']: 'resetPasswordLinkNotification',
+  ['username-reminder-link']: 'retrieveUsernameLinkNotification'
 } satisfies Record<TriggerEvent, SMSTemplateType>
 
 function isTriggerEvent(event: any): event is TriggerEvent {
