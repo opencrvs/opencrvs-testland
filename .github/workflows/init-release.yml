@@ -131,59 +131,19 @@ jobs:
           echo "mergeback_branch=$mergeback_branch" >> $GITHUB_OUTPUT
           echo "base_branch=$base_branch" >> $GITHUB_OUTPUT
 
-      # An older-channel release merges into the next unreleased patch of the
-      # channel master tracks, which may not have been initialised in this repo
-      # yet. Cut it from master and initialise it exactly as this workflow would
-      # have — by merging countryconfig's release branch in — so the merge-back
-      # PR has somewhere to land and a later init-release run for that version
-      # finds a branch it does not have to fix up by hand.
-      - name: Ensure the target release branch exists
+      # The target release branch must already exist. This workflow never cuts
+      # the next channel's release branch: that release writes its own version
+      # bump and CHANGELOG, and a placeholder here would make its own
+      # init-release run skip them. Fail now, before anything is created.
+      - name: Verify the target release branch exists
         if: steps.get_base_branch.outputs.release_pr == 'false'
         run: |
           TARGET_BRANCH="${{ steps.get_base_branch.outputs.target_branch }}"
-          TARGET_VERSION="${TARGET_BRANCH#release/}"
-          BASE_BRANCH="${{ steps.get_base_branch.outputs.base_branch }}"
-
-          if git ls-remote --exit-code --heads origin "$TARGET_BRANCH" > /dev/null 2>&1; then
-            echo "$TARGET_BRANCH already exists."
-            exit 0
-          fi
-
-          echo "$TARGET_BRANCH does not exist yet — cutting it from master and initialising it as $TARGET_VERSION."
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-
-          git fetch --no-tags --quiet origin master
-          git checkout -b "$TARGET_BRANCH" origin/master
-
-          # Farajaland has no version bump of its own: it inherits countryconfig's
-          # by merging countryconfig's release branch, exactly like the release
-          # step below. countryconfig is dispatched in parallel by core, so its
-          # branch may not be pushed yet.
-          CC_REPO="https://github.com/opencrvs/opencrvs-countryconfig.git"
-          for i in $(seq 1 20); do
-            if git ls-remote --exit-code --heads "$CC_REPO" "$TARGET_BRANCH" > /dev/null 2>&1; then
-              break
-            fi
-            if [ "$i" -eq 20 ]; then
-              echo "::error::Timed out waiting for countryconfig/$TARGET_BRANCH. Once it exists, re-run this workflow."
-              exit 1
-            fi
-            echo "Attempt $i/20: waiting 30s for countryconfig/$TARGET_BRANCH..."
-            sleep 30
-          done
-
-          git fetch "$CC_REPO" "$TARGET_BRANCH"
-          if ! git merge --no-edit FETCH_HEAD; then
-            git merge --abort
-            echo "::error::countryconfig/$TARGET_BRANCH does not merge cleanly into farajaland's master. Create $TARGET_BRANCH by hand, then re-run this workflow."
+          if ! git ls-remote --exit-code --heads origin "$TARGET_BRANCH" > /dev/null 2>&1; then
+            echo "::error::$TARGET_BRANCH does not exist in this repository. Initialise ${TARGET_BRANCH#release/} here first, or re-run with the target_branch input set explicitly."
             exit 1
           fi
-
-          git push origin "$TARGET_BRANCH"
-
-          # Put the checkout back where the steps below expect it.
-          git checkout "$BASE_BRANCH"
+          echo "$TARGET_BRANCH exists."
 
       - name: Check if release branch already exists
         id: check_branch
