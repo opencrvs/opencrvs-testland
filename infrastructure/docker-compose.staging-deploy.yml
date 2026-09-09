@@ -11,14 +11,12 @@ services:
     environment:
       - NODE_ENV=production
       - LANGUAGES=en,fr
-      - SENTRY_DSN=${SENTRY_DSN:-}
     deploy:
       replicas: 1
 
   auth:
     environment:
       - NODE_ENV=production
-      - SENTRY_DSN=${SENTRY_DSN:-}
     deploy:
       replicas: 1
 
@@ -33,7 +31,6 @@ services:
       - jwt-public-key.{{ts}}
     environment:
       - NODE_ENV=production
-      - SENTRY_DSN=${SENTRY_DSN:-}
       - SENDER_EMAIL_ADDRESS=${SENDER_EMAIL_ADDRESS}
       - ALERT_EMAIL=${ALERT_EMAIL}
       - SMTP_HOST=${SMTP_HOST}

@@ -34,7 +34,6 @@ services:
     environment:
       - NODE_ENV=production
       - OPENCRVS_ENVIRONMENT=production
-      - SENTRY_DSN=${SENTRY_DSN:-}
       - SENDER_EMAIL_ADDRESS=${SENDER_EMAIL_ADDRESS}
       - ALERT_EMAIL=${ALERT_EMAIL}
       - SMTP_HOST=${SMTP_HOST}
@@ -72,12 +71,12 @@ services:
 
   mongo2:
     image: mongo:4.4
-    hostname: "mongo2"
+    hostname: 'mongo2'
     restart: unless-stopped
     command: mongod --auth --replSet rs0 --keyFile /etc/mongodb-keyfile
     volumes:
-      - "/data/mongo:/data/db"
-      - "/mongodb-keyfile:/mongodb-keyfile"
+      - '/data/mongo:/data/db'
+      - '/mongodb-keyfile:/mongodb-keyfile'
     entrypoint:
       - bash
       - -c
@@ -91,7 +90,7 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=${MONGODB_ADMIN_PASSWORD}
     deploy:
       labels:
-        - "traefik.enable=false"
+        - 'traefik.enable=false'
       replicas: 1
       placement:
         constraints:
