@@ -18,7 +18,6 @@ import * as Hapi from '@hapi/hapi'
 import * as Pino from 'hapi-pino'
 import * as JWT from 'hapi-auth-jwt2'
 import * as inert from '@hapi/inert'
-import * as Sentry from 'hapi-sentry'
 import * as H2o2 from '@hapi/h2o2'
 import fetch from 'node-fetch'
 import {
@@ -26,7 +25,6 @@ import {
   DOMAIN,
   GATEWAY_URL,
   LOGIN_URL,
-  SENTRY_DSN,
   COUNTRY_CONFIG_HOST,
   COUNTRY_CONFIG_PORT,
   CHECK_INVALID_TOKEN,
@@ -109,19 +107,6 @@ export default function getPlugins() {
         prettyPrint: false,
         logPayload: false,
         instance: logger
-      }
-    })
-  }
-
-  if (SENTRY_DSN) {
-    plugins.push({
-      plugin: Sentry,
-      options: {
-        client: {
-          environment: process.env.NODE_ENV,
-          dsn: SENTRY_DSN
-        },
-        catchLogErrors: true
       }
     })
   }
@@ -743,14 +728,6 @@ export async function createServer() {
   })
 
   server.route(getUserNotificationRoutes())
-
-  server.ext({
-    type: 'onRequest',
-    method(request: Hapi.Request & { sentryScope?: any }, h) {
-      request.sentryScope?.setExtra('payload', request.payload)
-      return h.continue
-    }
-  })
 
   server.ext('onPostHandler', async (request, h) => {
     if (!env.ANALYTICS_DATABASE_URL) {

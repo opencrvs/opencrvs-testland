@@ -37,7 +37,6 @@ export const env = cleanEnv(process.env, {
   AUTH_URL: url({ devDefault: 'http://localhost:4040' }),
   COUNTRY_CONFIG_URL: url({ devDefault: 'http://localhost:3040' }),
   APPLICATION_CONFIG_URL: url({ devDefault: 'http://localhost:2021/' }),
-  SENTRY_DSN: str({ default: undefined }),
   CHECK_INVALID_TOKEN: bool({
     default: true,
     devDefault: false,

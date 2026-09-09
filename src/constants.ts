@@ -27,7 +27,6 @@ export const AUTH_URL = env.AUTH_URL
 export const COUNTRY_CONFIG_URL = env.COUNTRY_CONFIG_URL
 export const APPLICATION_CONFIG_URL = env.APPLICATION_CONFIG_URL
 
-export const SENTRY_DSN = env.SENTRY_DSN
 export const CHECK_INVALID_TOKEN = env.CHECK_INVALID_TOKEN
 
 export const PRODUCTION = env.isProd
