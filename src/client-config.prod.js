@@ -20,7 +20,6 @@
 ;(function initClientConfig() {
   const scheme = window.location.protocol // "http:" or "https:"
   const hostname = '{{hostname}}' // Replace dynamically if needed
-  const sentry = '{{sentry}}' // Replace dynamically if needed
   const minioBucket = '{{minio_bucket}}'
   const minioBaseUrl = '{{minio_base_url}}'
 
@@ -43,7 +42,6 @@
     // Country code in uppercase ALPHA-3 format
     COUNTRY: 'FAR',
     LANGUAGES: 'en,fr',
-    SENTRY: sentry,
     DASHBOARDS: [
       {
         id: 'registrations',

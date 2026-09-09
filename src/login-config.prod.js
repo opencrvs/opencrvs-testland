@@ -11,7 +11,6 @@
 
 const scheme = window.location.protocol; // "http:" or "https:"
 const hostname = "{{hostname}}"; // Replace dynamically if needed
-const sentry = "{{sentry}}"; // Replace dynamically if needed
 window.config = {
   AUTH_API_URL: `${scheme}//gateway.${hostname}/auth/`,
   CONFIG_API_URL: `${scheme}//config.${hostname}`,
@@ -19,6 +18,5 @@ window.config = {
   COUNTRY: 'FAR',
   LANGUAGES: 'en,fr',
   CLIENT_APP_URL: `${scheme}//register.${hostname}/`,
-  COUNTRY_CONFIG_URL: `${scheme}//countryconfig.${hostname}`,
-  SENTRY: sentry
+  COUNTRY_CONFIG_URL: `${scheme}//countryconfig.${hostname}`
 };

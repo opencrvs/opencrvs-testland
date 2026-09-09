@@ -31,7 +31,6 @@ services:
   notification:
     environment:
       - LANGUAGES=en,fr
-      - SENTRY_DSN=${SENTRY_DSN:-}
       - QA_ENV=true
       - NODE_ENV=production
 
@@ -45,7 +44,6 @@ services:
       - QA_ENV=true
       - CHECK_INVALID_TOKEN=true
       - MONGO_URL=mongodb://mongo1/user-mgnt?replicaSet=rs0
-      - SENTRY_DSN=${SENTRY_DSN:-}
       - SENDER_EMAIL_ADDRESS=${SENDER_EMAIL_ADDRESS}
       - ALERT_EMAIL=${ALERT_EMAIL}
       - SMTP_HOST=${SMTP_HOST}
@@ -65,7 +63,6 @@ services:
   gateway:
     environment:
       - LANGUAGES=en,fr
-      - SENTRY_DSN=${SENTRY_DSN:-}
       - QA_ENV=true
       - NODE_ENV=production
       - DISABLE_RATE_LIMIT=true
@@ -73,43 +70,36 @@ services:
   workflow:
     environment:
       - LANGUAGES=en,fr
-      - SENTRY_DSN=${SENTRY_DSN:-}
       - QA_ENV=true
       - NODE_ENV=production
 
   search:
     environment:
-      - SENTRY_DSN=${SENTRY_DSN:-}
       - QA_ENV=true
       - NODE_ENV=production
 
   metrics:
     environment:
-      - SENTRY_DSN=${SENTRY_DSN:-}
       - QA_ENV=true
       - NODE_ENV=production
 
   auth:
     environment:
-      - SENTRY_DSN=${SENTRY_DSN:-}
       - QA_ENV=true
       - NODE_ENV=production
 
   user-mgnt:
     environment:
-      - SENTRY_DSN=${SENTRY_DSN:-}
       - QA_ENV=true
       - NODE_ENV=production
 
   webhooks:
     environment:
-      - SENTRY_DSN=${SENTRY_DSN:-}
       - QA_ENV=true
       - NODE_ENV=production
 
   config:
     environment:
-      - SENTRY_DSN=${SENTRY_DSN:-}
       - QA_ENV=true
       - NODE_ENV=production
 

@@ -30,7 +30,6 @@
     // Country code in uppercase ALPHA-3 format
     COUNTRY: 'FAR',
     LANGUAGES: 'en,fr',
-    SENTRY: '',
     DASHBOARDS: [
       {
         id: 'registrations',

@@ -645,7 +645,6 @@ services:
       - jwt-private-key.{{ts}}
     environment:
       - NODE_ENV=production
-      - SENTRY_DSN=${SENTRY_DSN:-}
       - APN_SERVICE_URL=http://apm-server:8200
       - CERT_PRIVATE_KEY_PATH=/run/secrets/jwt-private-key.{{ts}}
       - CERT_PUBLIC_KEY_PATH=/run/secrets/jwt-public-key.{{ts}}
@@ -691,7 +690,6 @@ services:
       - jwt-public-key.{{ts}}
     environment:
       - NODE_ENV=production
-      - SENTRY_DSN=${SENTRY_DSN:-}
       - APN_SERVICE_URL=http://apm-server:8200
       - RECORD_SEARCH_QUOTA=2000
       - CERT_PUBLIC_KEY_PATH=/run/secrets/jwt-public-key.{{ts}}
@@ -734,7 +732,6 @@ services:
     environment:
       - NODE_ENV=production
       - LANGUAGES=en,fr
-      - SENTRY_DSN=${SENTRY_DSN:-}
       - APN_SERVICE_URL=http://apm-server:8200
       - CERT_PUBLIC_KEY_PATH=/run/secrets/jwt-public-key.{{ts}}
       - MONGO_URL=mongodb://notification:${NOTIFICATION_MONGODB_PASSWORD}@mongo1/notification?replicaSet=rs0
@@ -755,7 +752,6 @@ services:
     environment:
       - NODE_ENV=production
       - LANGUAGES=en,fr
-      - SENTRY_DSN=${SENTRY_DSN:-}
       - APN_SERVICE_URL=http://apm-server:8200
       - CERT_PUBLIC_KEY_PATH=/run/secrets/jwt-public-key.{{ts}}
       - LOGIN_URL=https://login.{{hostname}}
@@ -794,7 +790,6 @@ services:
     environment:
       - NODE_ENV=production
       - LANGUAGES=en,fr
-      - SENTRY_DSN=${SENTRY_DSN:-}
       - APN_SERVICE_URL=http://apm-server:8200
       - CERT_PUBLIC_KEY_PATH=/run/secrets/jwt-public-key.{{ts}}
       - REDIS_USERNAME=${WORKFLOW_REDIS_USERNAME}
@@ -815,7 +810,6 @@ services:
       - jwt-public-key.{{ts}}
     environment:
       - NODE_ENV=production
-      - SENTRY_DSN=${SENTRY_DSN:-}
       - ES_HOST=search-user:${ROTATING_SEARCH_ELASTIC_PASSWORD}@elasticsearch:9200
       - APN_SERVICE_URL=http://apm-server:8200
       - CERT_PUBLIC_KEY_PATH=/run/secrets/jwt-public-key.{{ts}}
@@ -838,7 +832,6 @@ services:
       - /data/vsexport:/usr/src/app/packages/metrics/src/scripts
     environment:
       - NODE_ENV=production
-      - SENTRY_DSN=${SENTRY_DSN:-}
       - APN_SERVICE_URL=http://apm-server:8200
       - CERT_PUBLIC_KEY_PATH=/run/secrets/jwt-public-key.{{ts}}
       - MONGO_URL=mongodb://metrics:${METRICS_MONGODB_PASSWORD}@mongo1/metrics?replicaSet=rs0
@@ -902,7 +895,6 @@ services:
       - jwt-public-key.{{ts}}
     environment:
       - NODE_ENV=production
-      - SENTRY_DSN=${SENTRY_DSN:-}
       - APN_SERVICE_URL=http://apm-server:8200
       - CERT_PUBLIC_KEY_PATH=/run/secrets/jwt-public-key.{{ts}}
       - MONGO_URL=mongodb://config:${CONFIG_MONGODB_PASSWORD}@mongo1/application-config?replicaSet=rs0
@@ -1039,7 +1031,6 @@ services:
       - jwt-public-key.{{ts}}
     environment:
       - NODE_ENV=production
-      - SENTRY_DSN=${SENTRY_DSN:-}
       - APN_SERVICE_URL=http://apm-server:8200
       - MONGO_URL=mongodb://webhooks:${WEBHOOKS_MONGODB_PASSWORD}@mongo1/webhooks?replicaSet=rs0
       - CERT_PUBLIC_KEY_PATH=/run/secrets/jwt-public-key.{{ts}}
