@@ -35,6 +35,9 @@ export const env = cleanEnv(process.env, {
   COUNTRY_CONFIG_PORT: port({ default: 3040 }),
   AUTH_URL: url({ devDefault: 'http://localhost:4040' }),
   COUNTRY_CONFIG_URL: url({ devDefault: 'http://localhost:3040' }),
+  TWO_FA_ENABLED: bool({ default: true }),
+  OPENCRVS_ENVIRONMENT: str({ devDefault: 'development' }),
+  EVENTS_URL: url({ devDefault: 'http://localhost:5555/' }),
   ESIGNET_REDIRECT_URL: url({ devDefault: 'http://localhost:20260/authorize' }),
   OPENID_PROVIDER_CLIENT_ID: str({ devDefault: 'mock-client_id' }),
   OPENID_PROVIDER_CLAIMS: str({
@@ -43,7 +46,6 @@ export const env = cleanEnv(process.env, {
   MOSIP_API_USERINFO_URL: url({
     devDefault: 'http://localhost:2024/esignet/get-oidp-user-info'
   }),
-  EVENTS_URL: url({ devDefault: 'http://localhost:5555/' }),
   ANALYTICS_DATABASE_URL: url({
     default: undefined,
     devDefault:

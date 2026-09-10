@@ -48,12 +48,13 @@ docker_build(
   ".",
   dockerfile="Dockerfile",
   network="host",
+  entrypoint=["yarn", "start:tilt"],
   only=[
     './src',
+    './typings',
     './package.json',
     './yarn.lock',
     './tsconfig.json',
-    './start-prod.sh',
     './Dockerfile'
   ],
   live_update=[
@@ -61,8 +62,8 @@ docker_build(
     fall_back_on(['package.json', 'yarn.lock', 'Dockerfile']),
     # Sync source code changes
     sync('./src', '/usr/src/app/src'),
-    # Sync start script if it changes
-    sync('./start-prod.sh', '/usr/src/app/start-prod.sh'),
+    # tsconfig.json's "include" pulls in typings/ for type-checking
+    sync('./typings', '/usr/src/app/typings'),
   ]
 )
 

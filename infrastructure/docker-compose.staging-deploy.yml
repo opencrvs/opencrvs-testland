@@ -31,6 +31,8 @@ services:
       - jwt-public-key.{{ts}}
     environment:
       - NODE_ENV=production
+      - OPENCRVS_ENVIRONMENT=staging
+      - AUTH_URL=http://auth:4040
       - SENDER_EMAIL_ADDRESS=${SENDER_EMAIL_ADDRESS}
       - ALERT_EMAIL=${ALERT_EMAIL}
       - SMTP_HOST=${SMTP_HOST}
