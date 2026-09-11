@@ -36,7 +36,6 @@ export const env = cleanEnv(process.env, {
   AUTH_URL: url({ devDefault: 'http://localhost:4040' }),
   COUNTRY_CONFIG_URL: url({ devDefault: 'http://localhost:3040' }),
   TWO_FA_ENABLED: bool({ default: true }),
-  OPENCRVS_ENVIRONMENT: str({ devDefault: 'development' }),
   EVENTS_URL: url({ devDefault: 'http://localhost:5555/' }),
   ESIGNET_REDIRECT_URL: url({ devDefault: 'http://localhost:20260/authorize' }),
   OPENID_PROVIDER_CLIENT_ID: str({ devDefault: 'mock-client_id' }),
