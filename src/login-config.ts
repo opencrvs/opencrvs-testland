@@ -16,7 +16,6 @@ export default defineLoginConfig({
   COUNTRY: 'FAR',
   LANGUAGES: ['en', 'fr'],
   LOGIN_BACKGROUND: { backgroundColor: '36304E' },
-  SENTRY: '',
   USER_NOTIFICATION_DELIVERY_METHOD:
     applicationConfig.USER_NOTIFICATION_DELIVERY_METHOD,
   INFORMANT_NOTIFICATION_DELIVERY_METHOD:

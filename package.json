@@ -1,6 +1,6 @@
 {
   "name": "@opencrvs/countryconfig",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "OpenCRVS country configuration for reference data",
   "os": [
     "darwin",
@@ -26,6 +26,7 @@
     "setup-reference-data": "docker exec -i -e POSTGRES_HOST=localhost -e POSTGRES_PORT=5432 -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e REFERENCE_DATA_POSTGRES_USER=events_reference_data -e REFERENCE_DATA_POSTGRES_PASSWORD=reference_data_password -e REFERENCE_DATA_EDITOR_USER=reference_data_editor_user -e REFERENCE_DATA_EDITOR_PASSWORD=reference_data_editor_password postgres bash -s < ./infrastructure/postgres/setup-reference-data.sh",
     "db:clear:all": "bash infrastructure/clear-all-data-dev.sh && yarn setup-analytics",
     "start": "yarn setup-analytics && yarn setup-reference-data &&  cross-env NODE_ENV=development NODE_OPTIONS=--dns-result-order=ipv4first nodemon --watch src --exec ts-node -r tsconfig-paths/register src/index.ts",
+    "start:tilt": "cross-env NODE_ENV=development NODE_OPTIONS=--dns-result-order=ipv4first nodemon --exec ts-node -r tsconfig-paths/register src/index.ts",
     "start:prod": "ts-node --transpile-only -r tsconfig-paths/register src/index.ts",
     "data-generator": "ts-node -r tsconfig-paths/register -T src/data-generator/index.ts",
     "data-generator:generate-types": "graphql-codegen --config codegen.yml && yarn prettier --write src/data-generator/gateway.ts",
@@ -117,7 +118,6 @@
     "handlebars": "^4.7.9",
     "hapi-auth-jwt2": "10.4.0",
     "hapi-pino": "^9.0.0",
-    "hapi-sentry": "^3.1.0",
     "joi": "^17.4.0",
     "jwt-decode": "^2.2.0",
     "kysely": "^0.28.14",

@@ -598,19 +598,6 @@ const vpnHostQuestions = [
   }
 ]
 
-const sentryQuestions = [
-  {
-    name: 'sentryDsn',
-    type: 'text' as const,
-    message: 'What is your Sentry DSN?',
-    valueType: 'SECRET' as const,
-    validate: notEmpty,
-    valueLabel: 'SENTRY_DSN',
-    initial: process.env.SENTRY_DSN,
-    scope: 'ENVIRONMENT' as const
-  }
-]
-
 const derivedVariables = [
   {
     name: 'ACTIVATE_USERS',
@@ -783,7 +770,6 @@ ALL_QUESTIONS.push(
   ...smsQuestions,
   ...emailQuestions,
   ...vpnHostQuestions,
-  ...sentryQuestions,
   ...derivedVariables,
   ...metabaseAdminQuestions
 )
@@ -1027,34 +1013,6 @@ const SPECIAL_NON_APPLICATION_ENVIRONMENTS = ['jump', 'backup']
       databaseAndMonitoringQuestions,
       existingValues
     )
-    log('\n', kleur.bold().underline('Sentry'))
-    const sentryDSNExists = findExistingValue(
-      'SENTRY_DSN',
-      'SECRET',
-      'ENVIRONMENT',
-      existingValues
-    )
-
-    if (sentryDSNExists) {
-      await promptAndStoreAnswer(environment, sentryQuestions, existingValues)
-    } else {
-      const { useSentry } = await prompts(
-        [
-          {
-            name: 'useSentry',
-            type: 'confirm' as const,
-            message: 'Do you want to use Sentry?',
-            scope: 'ENVIRONMENT' as const,
-            initial: Boolean(process.env.SENTRY_DNS)
-          }
-        ].map(questionToPrompt)
-      )
-
-      if (useSentry) {
-        await promptAndStoreAnswer(environment, sentryQuestions, existingValues)
-      }
-    }
-
     log('\n', kleur.bold().underline('METABASE ADMIN'))
     await promptAndStoreAnswer(
       environment,

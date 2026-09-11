@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.0.2 Release Candidate
+
+## 1.9.17
+
+### Breaking changes
+
+- Sentry has been removed from OpenCRVS core, so this configuration no longer wires it up. `SENTRY_DSN` is gone from `src/environment.ts`, the `hapi-sentry` plugin, the `{{sentry}}` substitution in `start-prod.sh`, the `SENTRY` field in the client and login browser configs, and every `docker-compose*.yml`. Any `SENTRY_DSN` still set in your environment is ignored. Crash reporting is no longer built in — deployments that relied on Sentry for alerting should put their own error tracking in place. [#13460](https://github.com/opencrvs/opencrvs-core/issues/13460)
+
 ## 2.0.1 Release
 
 ### Security fixes

@@ -23,8 +23,6 @@ export const COUNTRY_CONFIG_PORT = env.COUNTRY_CONFIG_PORT
 export const AUTH_URL = env.AUTH_URL
 export const COUNTRY_CONFIG_URL = env.COUNTRY_CONFIG_URL
 
-export const SENTRY_DSN = env.SENTRY_DSN
-
 export const PRODUCTION = env.isProd
 export const ESIGNET_REDIRECT_URL = env.ESIGNET_REDIRECT_URL
 export const OPENID_PROVIDER_CLIENT_ID = env.OPENID_PROVIDER_CLIENT_ID
