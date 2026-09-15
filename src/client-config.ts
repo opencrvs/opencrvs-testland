@@ -14,7 +14,6 @@ export default defineClientConfig({
   // Country code in uppercase ALPHA-3 format
   COUNTRY: 'FAR',
   LANGUAGES: ['en', 'fr'],
-  SENTRY: '',
   REGISTER_BACKGROUND: { backgroundColor: '36304E' },
   DASHBOARDS: [
     {

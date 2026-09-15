@@ -45,20 +45,62 @@ Recommended minimum:
 
 ### Software requirements
 
-| Tool       | Description                                                                                                                  |
-| ---------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| Kubernetes | Local Kubernetes cluster. Minikube is recommended for Linux. Docker Desktop Kubernetes is recommended for macOS and Windows. |
-| Docker     | Required for building the countryconfig image locally.                                                                       |
-| kubectl    | Kubernetes command-line tool.                                                                                                |
-| Helm       | Used by Tilt to render and deploy OpenCRVS Helm charts.                                                                      |
-| Tilt       | Used to manage the local development environment.                                                                            |
-| Git        | Used by the Tiltfile to clone OpenCRVS Core charts.                                                                          |
+## Prerequisites for Quick Start
+
+* **Kubernetes**: choose the option recommended for your OS, or any other Kubernetes engine you prefer:
+  * Windows — enable Kubernetes in [Docker Desktop](https://docs.docker.com/desktop/features/kubernetes/)
+  * macOS — install [OrbStack](https://orbstack.dev/) (includes Kubernetes)
+  * Linux — install [Minikube](https://minikube.sigs.k8s.io/docs/start)
+* **kubectl**: install the Kubernetes command-line tool — see the [installation guide](https://kubernetes.io/docs/tasks/tools/)
+* **Helm**: install [Helm](https://helm.sh/docs/intro/install/), the template engine used to manage Kubernetes manifests
+* **Tilt**: install [Tilt](https://docs.tilt.dev/install.html)
 
 ## Development environment setup
 
-### Start local Kubernetes cluster (Minikube)
+### Start your local Kubernetes cluster
 
-Minikube is recommended for Linux users.
+Tilt deploys Traefik with settings that match whichever Kubernetes solution you're running (see [Configuration](#configuration)), so pick the section below for your OS and you shouldn't need to change anything else:
+- [Windows — Docker Desktop](#windows--docker-desktop)
+- [macOS — OrbStack](#macos--orbstack)
+- [Linux — Minikube](#linux--minikube)
+
+#### Windows — Docker Desktop
+
+Enable Kubernetes: **Docker Desktop → Settings → Kubernetes → check "Enable Kubernetes" → Apply & Restart**.
+
+Make sure your kubectl context points to Docker Desktop:
+
+```
+kubectl config current-context
+```
+
+Expected context:
+
+```
+docker-desktop
+```
+
+No extra flags are needed — Docker Desktop assigns `LoadBalancer` services `EXTERNAL-IP: localhost` automatically, so Traefik comes up reachable at `http://opencrvs.localhost` as soon as `tilt up` finishes.
+
+#### macOS — OrbStack
+
+OrbStack requires its embedded Kubernetes to be enabled: **OrbStack → Settings → Kubernetes → toggle "Enable Kubernetes" on**.
+
+Make sure your kubectl context points to OrbStack:
+
+```
+kubectl config current-context
+```
+
+Expected context:
+
+```
+orbstack
+```
+
+No extra flags are needed here either — OrbStack binds `LoadBalancer` service ports straight onto `127.0.0.1`, so `http://opencrvs.localhost` works immediately after `tilt up`.
+
+#### Linux — Minikube
 
 Start Minikube with enough resources, recommended values are 8 CPU cores and 12G RAM. If Minikube was already running before changing these values, recreate it:
 
@@ -82,20 +124,14 @@ Expected context:
 minikube
 ```
 
+Unlike Docker Desktop and OrbStack, minikube doesn't expose `LoadBalancer` services to the host on its own — `EXTERNAL-IP` stays `<pending>` unless you keep a separate `minikube tunnel` process running, and even then it's your Service's ClusterIP that becomes reachable, not `localhost`. The neater fix: Tilt auto-detects the `minikube` context and deploys Traefik as a `NodePort` service instead ([`tilt/examples/traefik/values-minikube.yaml`](tilt/examples/traefik/values-minikube.yaml)), with those NodePorts pinned to `30080` - exactly what `--ports=80:30080` above publishes onto your host, the same mechanism `docker run -p` uses. No `minikube tunnel`, no sudo.
+
 > [!NOTE]
-> Other local Kubernetes engines may also work, for example:
->
-> - Docker Desktop
-> - OrbStack
-> - kind
-> - k3d
-> - MicroK8s
->
-> If you use a different Kubernetes engine, make sure that:
+> Other local Kubernetes engines may also work, for example kind, k3d, or MicroK8s. If you use one of these, make sure that:
 >
 > - Docker image builds are available to the cluster
-> - LoadBalancer or NodePort access is configured
-> - opencrvs.localhost can resolve to the local ingress endpoint
+> - LoadBalancer or NodePort access is configured, and Tilt is told which Traefik values file to use (see [Configuration](#configuration))
+> - `opencrvs.localhost` can resolve to the local ingress endpoint
 
 ### Start OpenCRVS
 
@@ -129,7 +165,7 @@ Then run the data seed task from the Tilt UI:
 
 Open OpenCRVS: http://opencrvs.localhost
 
-Thats it! 🎉
+That's it! 🎉
 
 ### Configuration
 
@@ -137,6 +173,8 @@ The Tiltfile supports the following environment variables.
 
 - `OPENCRVS_CORE_IMAGE_TAG`: Defines the OpenCRVS Core Docker image tag used by the Helm chart.
 - `OPENCRVS_CORE_REF`: Defines the OpenCRVS Core Git branch or tag used to fetch Helm charts, use any release/2.0.X branch or tag from https://github.com/opencrvs/opencrvs-core
+- `LOCAL_K8S`: Selects which Traefik values file to deploy (`tilt/examples/traefik/values.yaml` or `values-minikube.yaml`). Auto-detected from your current kubectl context (anything containing `minikube` is treated as minikube, everything else as OrbStack/Docker Desktop), so you only need to set this if you run minikube under a custom `-p` profile name.
+- `TRAEFIK_VALUES_FILE`: Overrides the Traefik values file directly, e.g. `TRAEFIK_VALUES_FILE=values-custom.yaml tilt up`. You may only need this option to properly expose traefik port 80 in case of not supported local Kubernetes cluster, e/g microk8s, k8s, k3s, etc.
 
 The Tiltfile performs a sparse checkout of the OpenCRVS Core repository and only downloads the charts directory. You still be able to modify changes and create PRs in Core repository.
 
@@ -201,11 +239,11 @@ Stop Tilt and remove deployed resources:
 tilt down
 ```
 
-Remove minikube cluster:
+If you'd also like to tear down the cluster itself:
 
-```
-minikube delete
-```
+- Minikube: `minikube delete`
+- OrbStack: **OrbStack → Settings → Kubernetes → toggle "Enable Kubernetes" off** (or `orb delete k8s` if you use the CLI)
+- Docker Desktop: **Docker Desktop → Settings → Kubernetes → uncheck "Enable Kubernetes" → Apply & Restart**
 
 # What is in the Countryconfig configuration module repository?
 

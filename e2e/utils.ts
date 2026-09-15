@@ -96,23 +96,45 @@ export async function ensureAssignedToUser(
 ) {
   const userFullName = usernameToFullNameMap[username]
 
-  const assignedTo = page.getByTestId('assignedTo-value').locator('span')
+  await page.getByRole('button', { name: 'Action', exact: true }).click()
 
-  // Wait for the value to actually render before deciding
-  await assignedTo.first().waitFor({ state: 'visible' })
+  const actionItem = page.locator('#action-Dropdown-Content li')
+  const assignAction = actionItem
+    .filter({ hasText: new RegExp(`^Assign$`, 'i') })
+    .first()
+  const unassignAction = actionItem
+    .filter({ hasText: new RegExp(`^Unassign$`, 'i') })
+    .first()
 
-  if (await assignedTo.filter({ hasText: userFullName }).isVisible()) {
+  /*
+   * Decide from the action menu, which is derived from the event document the
+   * page has already loaded, so exactly one of these two items appears and it
+   * appears promptly.
+   *
+   * The summary's "Assigned to" cell cannot answer this. It renders the
+   * assignee's *name*, which EventOverview resolves with a second query
+   * (getUsers.useQueryById) after the event itself has loaded, so the cell is
+   * empty both while that query is in flight and when the record is genuinely
+   * unassigned. Sampling it with a one-shot isVisible() therefore read an
+   * assigned record as unassigned, committed to the Assign branch, and burned
+   * the entire test timeout waiting for an Assign item that an already-assigned
+   * record never offers.
+   */
+  await expect(assignAction.or(unassignAction)).toBeVisible()
+
+  if (await unassignAction.isVisible()) {
+    // Already assigned. Dismiss the menu without acting on it — the content is a
+    // native popover, so Escape closes it — and then assert the holder is who
+    // the caller expects. A record held by someone else fails here naming them,
+    // rather than timing out on a menu item that was never going to appear.
+    await page.keyboard.press('Escape')
+    await expect(
+      page.getByTestId('assignedTo-value').locator('span')
+    ).toContainText(userFullName)
+
     return
   }
 
-  await page.getByRole('button', { name: 'Action', exact: true }).click()
-
-  const assignAction = page
-    .locator('#action-Dropdown-Content li')
-    .filter({ hasText: new RegExp(`^Assign$`, 'i') })
-    .first()
-
-  await assignAction.waitFor({ state: 'visible' })
   await assignAction.click()
 
   // Setup the listener before clicking.

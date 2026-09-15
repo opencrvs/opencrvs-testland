@@ -338,7 +338,7 @@ services:
       - overlay_net
 
   minio-mc:
-    image: minio/mc:RELEASE.2025-05-21T01-59-54Z
+    image: quay.io/minio/mc:RELEASE.2025-08-13T08-35-41Z
     entrypoint: >
       /bin/sh -c "
       /usr/bin/mc admin trace --path ocrvs/* minio
@@ -565,6 +565,7 @@ services:
       - NODE_ENV=production
       - OPENCRVS_ENVIRONMENT=production
       - AUTH_URL=http://auth:4040
+      - EVENTS_URL=http://events:5555/
       - MONGO_URL=mongodb://mongo1/user-mgnt?replicaSet=rs0
       - APN_SERVICE_URL=http://apm-server:8200
       - COUNTRY_CONFIG_URL=https://countryconfig.{{hostname}}
@@ -591,6 +592,11 @@ services:
       - MOSIP_API_USERINFO_URL=https://mosip-api.{{hostname}}/esignet/get-oidp-user-info
       - OPENID_PROVIDER_CLAIMS=name,family_name,given_name,middle_name,birthdate,address
       - OPENID_PROVIDER_CLIENT_ID=mock-client_id
+      # MOSIP integration credentials seeded into user-mgnt on startup.
+      # Must match the mosip-api OPENCRVS_CLIENT_ID / OPENCRVS_CLIENT_SECRET below.
+      # Leave empty to have user-mgnt generate credentials (revealed via the NSA UI).
+      - MOSIP_INTEGRATION_CLIENT_ID=${OPENCRVS_MOSIP_CLIENT_ID:-}
+      - MOSIP_INTEGRATION_CLIENT_SECRET=${OPENCRVS_MOSIP_CLIENT_SECRET:-}
     networks:
       - overlay_net
     logging:
@@ -637,7 +643,6 @@ services:
       - jwt-private-key.{{ts}}
     environment:
       - NODE_ENV=production
-      - SENTRY_DSN=${SENTRY_DSN:-}
       - APN_SERVICE_URL=http://apm-server:8200
       - CERT_PRIVATE_KEY_PATH=/run/secrets/jwt-private-key.{{ts}}
       - CERT_PUBLIC_KEY_PATH=/run/secrets/jwt-public-key.{{ts}}
@@ -683,7 +688,6 @@ services:
     environment:
       - NODE_ENV=production
       - LANGUAGES=en,fr
-      - SENTRY_DSN=${SENTRY_DSN:-}
       - APN_SERVICE_URL=http://apm-server:8200
       - CERT_PUBLIC_KEY_PATH=/run/secrets/jwt-public-key.{{ts}}
       - LOGIN_URL=https://login.{{hostname}}
@@ -928,6 +932,13 @@ services:
       - NODE_ENV=production
       - OPENCRVS_GATEWAY_URL=http://gateway:7070
       - OPENCRVS_PUBLIC_KEY_URL=http://auth:4040/.well-known
+      # Direct authentication (ocrvs-12360): confirm registrations with a freshly
+      # issued token minted from this integration's own credentials, so they survive
+      # OpenCRVS redeployments and are audited as the MOSIP system client. The
+      # client id/secret must match countryconfig's MOSIP_INTEGRATION_* values above.
+      - OPENCRVS_AUTH_URL=http://auth:4040
+      - OPENCRVS_CLIENT_ID=${OPENCRVS_MOSIP_CLIENT_ID:-}
+      - OPENCRVS_CLIENT_SECRET=${OPENCRVS_MOSIP_CLIENT_SECRET:-}
       - LOCALE=en
       - ESIGNET_USERINFO_URL=http://esignet-mock:20260/oidc/userinfo
       - ESIGNET_TOKEN_URL=http://esignet-mock:20260/oauth/token

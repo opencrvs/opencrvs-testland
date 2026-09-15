@@ -36,7 +36,6 @@ services:
     environment:
       - NODE_ENV=production
       - MONGO_URL=mongodb://mongo1/user-mgnt?replicaSet=rs0
-      - SENTRY_DSN=${SENTRY_DSN:-}
       - SENDER_EMAIL_ADDRESS=${SENDER_EMAIL_ADDRESS}
       - ALERT_EMAIL=${ALERT_EMAIL}
       - SMTP_HOST=${SMTP_HOST}
@@ -56,14 +55,12 @@ services:
   gateway:
     environment:
       - LANGUAGES=en,fr
-      - SENTRY_DSN=${SENTRY_DSN:-}
       - TWO_FA_ENABLED=false
       - NODE_ENV=production
       - DISABLE_RATE_LIMIT=true
 
   auth:
     environment:
-      - SENTRY_DSN=${SENTRY_DSN:-}
       - TWO_FA_ENABLED=false
       - NODE_ENV=production
 

@@ -68,6 +68,8 @@ CREATE TABLE IF NOT EXISTS analytics.locations (
   location_type TEXT NOT NULL
 );
 
+ALTER TABLE analytics.locations ALTER COLUMN location_type DROP NOT NULL;
+
 CREATE TABLE IF NOT EXISTS analytics.event_actions (
   event_type text NOT NULL,
   action_type TEXT NOT NULL,
@@ -92,6 +94,10 @@ CREATE TABLE IF NOT EXISTS analytics.event_actions (
   content jsonb,
   UNIQUE (id, event_id)
 );
+
+-- Integration-authored actions (e.g. MOSIP) have no role by design.
+-- Existing databases created before this change still have the constraint.
+ALTER TABLE analytics.event_actions ALTER COLUMN created_by_role DROP NOT NULL;
 
 CREATE INDEX CONCURRENTLY IF NOT EXISTS analytics_idx_event_actions_event_id
 ON analytics.event_actions (event_id);

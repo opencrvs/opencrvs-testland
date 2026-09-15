@@ -174,8 +174,6 @@ test.describe.serial('Birth correction trigger eligibility checks', () => {
 // We don't expect a response payload back from MOSIP in this flow; this is only a smoke test.
 // It asserts that when a `child.nid` exists, the correction flow returns 200 instead of 202. It doesn't assert MOSIP API is called. Helpful for verifying the end-to-end flow locally.
 test('Birth correction with existing child NID', async () => {
-  const { clientToken, healthFacilityId } = await createIntegrationContext()
-
   const token = await getToken(CREDENTIALS.REGISTRAR)
   const declarationForNidIssuance: Declaration = await getDeclaration({
     token,
@@ -222,14 +220,23 @@ test('Birth correction with existing child NID', async () => {
   const correctedGender =
     declarationBeforeCorrection['child.gender'] === 'male' ? 'female' : 'male'
 
+  /*
+   * The registrar corrects the record themselves, which is what happens in the
+   * UI: MOSIP confirmed the register as a system user, and system users do not
+   * partake in assignment, so the record is still assigned to the registrar.
+   * `keepAssignmentIfAccepted` mirrors the direct-correction sequence the client
+   * performs (request then approve as the same user), which needs the
+   * assignment to survive the request.
+   */
   const correctionResponse = await fetchClientAPI(
     `/api/events/events/${eventId}/correction/request`,
     'POST',
-    clientToken,
+    token,
     {
       eventId,
       transactionId: uuidv4(),
       type: 'REQUEST_CORRECTION',
+      keepAssignmentIfAccepted: true,
       declaration: {
         'child.name': {
           firstname: correctedFirstName,
@@ -239,8 +246,7 @@ test('Birth correction with existing child NID', async () => {
       },
       annotation: {
         'review.comment': 'MOSIP biographic update trigger e2e check'
-      },
-      createdAtLocation: healthFacilityId
+      }
     }
   )
 
@@ -254,7 +260,7 @@ test('Birth correction with existing child NID', async () => {
   const approveResponse = await fetchClientAPI(
     `/api/events/events/${eventId}/correction/approve`,
     'POST',
-    clientToken,
+    token,
     {
       eventId,
       transactionId: uuidv4(),
@@ -265,8 +271,7 @@ test('Birth correction with existing child NID', async () => {
       },
       annotation: {
         'review.comment': 'MOSIP biographic update approval e2e check'
-      },
-      createdAtLocation: healthFacilityId
+      }
     }
   )
 

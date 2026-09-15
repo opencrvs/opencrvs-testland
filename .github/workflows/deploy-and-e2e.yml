@@ -93,13 +93,24 @@ jobs:
         with:
           node-version-file: .nvmrc
 
+      # Emits the spec list already ordered for the `test` matrix below; see that
+      # job for why the order matters. Replaces a plain
+      # `find * -type f -name "*.spec.ts"`, which silently skipped `.spec.tsx`
+      # (Playwright's default testMatch accepts both), so any `.tsx` spec never
+      # ran in CI.
+      #
+      # MERGE-BACK TO DEVELOP: develop deleted this whole job in 0f63dd8af and
+      # runs e2e from `opencrvs-testland-infrastructure` instead, so resolving
+      # this conflict in develop's favour is correct -- and when you do, also
+      # `git rm .github/scripts/list-e2e-specs.mjs`. That file is a path develop
+      # does not have, so it merges in WITHOUT a conflict and would otherwise be
+      # left behind as dead code with no caller.
       - name: List Test Directories
         id: list-tests
         run: |
-          tests_suites=$(cd e2e/testcases; find * -type f -name "*.spec.ts" | jq -R -s -c 'split("\n")[:-1]')
+          tests_suites=$(node .github/scripts/list-e2e-specs.mjs)
           echo "Test suites: $tests_suites"
           echo "test_matrix=$tests_suites" >> $GITHUB_OUTPUT
-          echo "test_matrix=$tests_suites"
       - name: Cache Node.js dependencies
         uses: actions/cache@v5
         with:
@@ -133,6 +144,9 @@ jobs:
     needs: [deploy, discover-tests, get-core-commit, get-country-config-commit]
     runs-on: ubuntu-24.04
     environment: ${{ github.event.inputs.environment || 'e2e' }}
+    # The default is 360 minutes, so a wedged spec holds a runner for six hours.
+    # The largest spec has ~60 tests at a 90s per-test timeout.
+    timeout-minutes: 60
     strategy:
       max-parallel: 15
       fail-fast: false

@@ -17,12 +17,10 @@ import * as Hapi from '@hapi/hapi'
 import * as Pino from 'hapi-pino'
 import * as JWT from 'hapi-auth-jwt2'
 import * as inert from '@hapi/inert'
-import * as Sentry from 'hapi-sentry'
 import * as H2o2 from '@hapi/h2o2'
 import fetch from 'node-fetch'
 import {
   GATEWAY_URL,
-  SENTRY_DSN,
   COUNTRY_CONFIG_HOST,
   COUNTRY_CONFIG_PORT,
   AUTH_URL,
@@ -51,6 +49,7 @@ import { rolesHandler } from './data-seeding/roles/handler'
 import { usersHandler } from './data-seeding/employees/handler'
 import { applicationConfigHandler } from './api/application/handler'
 import { handlebarsHandler } from './certificate/handlebars/handler'
+import { systemReadyHandler } from './api/integration/handler'
 import { fontsHandler } from './api/fonts/handler'
 import {
   getEventsHandler,
@@ -108,19 +107,6 @@ export default function getPlugins() {
         prettyPrint: false,
         logPayload: false,
         instance: logger
-      }
-    })
-  }
-
-  if (SENTRY_DSN) {
-    plugins.push({
-      plugin: Sentry,
-      options: {
-        client: {
-          environment: process.env.NODE_ENV,
-          dsn: SENTRY_DSN
-        },
-        catchLogErrors: true
       }
     })
   }
@@ -552,6 +538,17 @@ export async function createServer() {
 
   server.route({
     method: 'GET',
+    path: '/triggers/system/ready',
+    handler: systemReadyHandler,
+    options: {
+      tags: ['api', 'integration'],
+      description:
+        'Called by events on startup. Registers integrations in the events service using the provided bootstrap token.'
+    }
+  })
+
+  server.route({
+    method: 'GET',
     path: '/causes-of-death',
     handler: causeOfDeathSearchHandler,
     options: {
@@ -643,28 +640,6 @@ export async function createServer() {
 
   server.route(getUserNotificationRoutes())
   server.route(getVerifiableCredentialRoutes())
-
-  server.route({
-    method: 'GET',
-    path: '/triggers/system/ready',
-    handler: (_request, h) => {
-      // Not implemented by default
-      // You can use this endpoint to for instance set up integration clients
-      return h.response().code(501)
-    },
-    options: {
-      tags: ['api', 'triggers'],
-      description: 'System ready endpoint'
-    }
-  })
-
-  server.ext({
-    type: 'onRequest',
-    method(request: Hapi.Request & { sentryScope?: any }, h) {
-      request.sentryScope?.setExtra('payload', request.payload)
-      return h.continue
-    }
-  })
 
   server.ext('onPostHandler', async (request, h) => {
     if (!env.ANALYTICS_DATABASE_URL) {

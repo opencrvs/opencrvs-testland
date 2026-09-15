@@ -34,7 +34,7 @@ test.describe.serial('Birth correction flow - Mobile', () => {
     eventId = res.eventId
 
     page = await browser.newPage()
-    setMobileViewport(page)
+    await setMobileViewport(page)
   })
 
   test('Login', async () => {

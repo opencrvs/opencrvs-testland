@@ -556,7 +556,13 @@ export const informant = defineFormPage({
           )
         }
       ],
-      parent: field('informant.relation')
+      parent: field('informant.relation'),
+      conditionals: [
+        {
+          type: ConditionalType.SHOW,
+          conditional: not(user.hasRole('HOSPITAL_CLERK'))
+        }
+      ]
     },
     {
       id: 'informant.email',
