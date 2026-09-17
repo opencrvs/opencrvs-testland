@@ -430,6 +430,25 @@ export const birthEvent = defineConfig({
               'This is the label for the comments field for the validate declaration action',
             id: 'event.birth.custom.action.validate-declaration.field.comments.label'
           }
+        },
+        {
+          id: 'print-notification-receipt',
+          type: FieldType.ALPHA_PRINT_BUTTON,
+          label: {
+            defaultMessage: 'Notification receipt',
+            description:
+              'This is the label for the notification receipt print button on the validate declaration action',
+            id: 'event.birth.custom.action.validate-declaration.field.print-notification-receipt.label'
+          },
+          configuration: {
+            template: 'v2.birth-notification-receipt',
+            buttonLabel: {
+              defaultMessage: 'Print notification receipt',
+              description:
+                "The print button's label on the validate declaration action",
+              id: 'event.birth.custom.action.validate-declaration.field.print-notification-receipt.button.label'
+            }
+          }
         }
       ],
       auditHistoryLabel: {

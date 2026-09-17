@@ -184,6 +184,7 @@ certificate.receipt.subheader,Subheader for receipt on payment on certificate,{e
 certificate.selectTemplate,Select certificate template,Type,Taper
 certificate.selectedTemplate,Selected certificate template,Selected certificate template,Modèle de certificat sélectionné
 certificates.birth.certificate,Birth Certificate,Birth Certificate,Acte de naissance
+certificates.birth.notificationReceipt,The label for a birth notification receipt,Birth notification receipt,Reçu de notification de naissance
 certificates.birth.certificate.copy,Birth Certificate Certified Copy,Birth Certificate Certified Copy,Copie certifiée conforme de l'acte de naissance
 certificates.birth.printedCertificateCount,Number of printed copies, Copy #{copiesPrintedForTemplate}, Copie #{copiesPrintedForTemplate}
 certificates.birth.registration.receipt,Birth Registration Receipt,Birth Registration Receipt,Reçu d'enregistrement de naissance
@@ -902,6 +903,8 @@ event.birth.custom.action.issue-vc.field.requester.option.mother,Requester optio
 event.birth.custom.action.issue-vc.field.supporting-copy,Supporting copy shown before issuing verifiable credential,Select the requester you would like to issue this verifiable credential to.,Sélectionnez le demandeur à qui vous souhaitez délivrer cette attestation vérifiable.
 event.birth.custom.action.validate-declaration.audit-history-label,The label to show in audit history for the validate action,Validated,Validé
 event.birth.custom.action.validate-declaration.field.comments.label,This is the label for the comments field for the validate declaration action,Comments,Commentaires
+event.birth.custom.action.validate-declaration.field.print-notification-receipt.button.label,The print button's label on the validate declaration action,Print notification receipt,Imprimer le reçu de notification
+event.birth.custom.action.validate-declaration.field.print-notification-receipt.label,This is the label for the notification receipt print button on the validate declaration action,Notification receipt,Reçu de notification
 event.birth.custom.action.validate-declaration.label,This is shown as the action name anywhere the user can trigger the action from,Validate,Valider
 event.birth.custom.action.validate-declaration.supportingCopy,This is the supporting copy for the Validate declaration -action,Validating this declaration confirms it meets all requirements and is eligible for registration.,La validation de cette déclaration confirme qu'elle répond à toutes les exigences et est éligible à l'enregistrement.
 event.birth.flag.pending-first-certificate-issuance,Pending first certificate issuance,Pending first certificate issuance,En attente de la délivrance d'une copie certifiée conforme
