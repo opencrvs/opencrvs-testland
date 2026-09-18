@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.3 Release Candidate
+
+### Bug fixes
+
+- Corrected the country translations; one country could not be selected at all. [#11954](https://github.com/opencrvs/opencrvs-core/issues/11954)
+
 ## 2.0.2
 
 ## 1.9.18
