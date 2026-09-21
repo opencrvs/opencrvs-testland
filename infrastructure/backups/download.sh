@@ -48,11 +48,21 @@ done
 
 print_usage_and_exit() {
   echo 'Usage: ./download.sh --passphrase=XXX --ssh_user=XXX --ssh_host=XXX --ssh_port=XXX --remote_dir=XXX'
+  echo ""
+  echo "If the backup was taken with MINIO_BACKUP_TYPE=differential (see backup.sh), the encrypted archive"
+  echo "does not contain a Minio dump, so pass the same value here to skip trying to download/restore it:"
+  echo "MINIO_BACKUP_TYPE=differential"
   exit 1
 }
 
 if [ -z "$LABEL" ]; then
   LABEL=$(date +%Y-%m-%d)
+fi
+
+MINIO_BACKUP_TYPE=${MINIO_BACKUP_TYPE:-dump}
+if [ "$MINIO_BACKUP_TYPE" != "dump" ] && [ "$MINIO_BACKUP_TYPE" != "differential" ]; then
+  echo "Error: MINIO_BACKUP_TYPE must be either 'dump' or 'differential'"
+  exit 1
 fi
 
 if [ -z "$SSH_USER" ] ; then
@@ -109,7 +119,11 @@ done
 mv $BACKUP_RAW_FILES_DIR/extract/elasticsearch/* /data/backups/elasticsearch/
 
 mv $BACKUP_RAW_FILES_DIR/extract/influxdb /data/backups/influxdb/${LABEL}
-mv $BACKUP_RAW_FILES_DIR/extract/minio/ocrvs-${LABEL}.tar.gz /data/backups/minio/
+if [ "$MINIO_BACKUP_TYPE" = "dump" ]; then
+  mv $BACKUP_RAW_FILES_DIR/extract/minio/ocrvs-${LABEL}.tar.gz /data/backups/minio/
+else
+  echo "Skipping Minio download, MINIO_BACKUP_TYPE=differential is used instead (Minio data is rsynced directly to the backup server, not included in the encrypted archive)"
+fi
 mv $BACKUP_RAW_FILES_DIR/extract/vsexport/ocrvs-${LABEL}.tar.gz /data/backups/vsexport/
 mv $BACKUP_RAW_FILES_DIR/extract/mongo/* /data/backups/mongo/
 mv $BACKUP_RAW_FILES_DIR/extract/postgres/* /data/backups/postgres/

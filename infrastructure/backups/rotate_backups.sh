@@ -49,4 +49,6 @@ if [ ! -d "$BACKUP_DIR" ]; then
 fi
 
 # Delete subdirectories but keep latest according to AMOUNT_TO_KEEP
-find "$BACKUP_DIR" -mindepth 1 -type d -print | sort -r | tail -n +$(("$AMOUNT_TO_KEEP" + 1)) | xargs rm -rf --
+# The "minio" directory is excluded: it holds the differential (rsync) Minio backup, which is a
+# continuously updated mirror rather than a dated snapshot, so it must never be rotated/deleted here.
+find "$BACKUP_DIR" -mindepth 1 \( -path "$BACKUP_DIR/minio" -prune \) -o -type d -print | sort -r | tail -n +$(("$AMOUNT_TO_KEEP" + 1)) | xargs rm -rf --

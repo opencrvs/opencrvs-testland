@@ -1,6 +1,12 @@
 # Changelog
 
-## 1.9.18 Release Candidate
+## 1.9.19 Release Candidate
+
+## 1.9.18
+
+### Bug fixes
+
+- Minio DockerHub image has been deprecated. Replace minio/mc image with quay.io/minio/mc [#13797](https://github.com/opencrvs/opencrvs-core/issues/13797)
 
 ## 1.9.17
 
