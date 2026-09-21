@@ -456,11 +456,6 @@ export const formMessageDescriptors = {
     description: 'Form section name for Documents',
     id: 'form.section.documents.name'
   },
-  documentsParagraph: {
-    defaultMessage: 'The following documents are required',
-    description: 'Documents Paragraph text',
-    id: 'form.section.documents.birth.requirements'
-  },
   proofOfBirth: {
     defaultMessage: 'Proof of birth',
     description: 'Label for list item Proof of birth',

@@ -85,15 +85,17 @@
     <tspan x="80.9999" y="701.112">{{$lookup $metadata 'updatedAtLocation.name'}}</tspan>
     <tspan x="80.9999" y="713.912">{{$lookup $metadata 'updatedAtLocation.district'}}, {{$lookup $metadata 'updatedAtLocation.province'}}, {{$lookup $metadata 'createdAtLocation.country'}}</tspan>
   </text>
-  <!--<text
+  {{#ifCond ($lookup $declaration "child.nid") '!==' undefined }}
+  <text
   fill="#222222" xml:space="preserve" style="white-space: pre" font-family="Noto Sans"
   font-size="8" letter-spacing="0.485px">
-    <tspan x="80.9999" y="747.084">{{mosipAid}}</tspan>
+    <tspan x="80.9999" y="747.084">{{$lookup $declaration 'child.nid'}}</tspan>
   </text>
   <text fill="#222222" xml:space="preserve" style="white-space: pre" font-family="Noto Sans"
   font-size="8" font-weight="bold" letter-spacing="0px">
-    <tspan x="80.9999" y="735.444">MOSIP Application ID / MOSIP Application ID&#10;</tspan>
-  </text>-->
+    <tspan x="80.9999" y="735.444">NID&#10;</tspan>
+  </text>
+   {{/ifCond}}
   <g clip-path="url(#clip2_1157_5003)">
     <rect x="321.759" y="646.161" width="190.241" height="65.8389" fill="url(#pattern1_1157_5003)" />
   </g>

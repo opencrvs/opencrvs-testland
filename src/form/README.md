@@ -236,19 +236,19 @@ This object holds sections for birth declaration forms. All sections are contain
 
     **Urban options**
 
-  - #### `number`
+  - #### `numberUrbanOption`
 
     Number of property in an urban street. Array index: 1
 
-  - #### `addressLine2`
+  - #### `addressLine2UrbanOption`
 
     Used for street name. Array index: 2
 
-  - #### `addressLine3`
+  - #### `addressLine3UrbanOption`
 
     Used for residential area name. Array index: 3
 
-    - #### `postCode`
+    - #### `postCodeUrbanOption`
 
     Postcode for urban address.
 

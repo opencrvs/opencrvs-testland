@@ -4,6 +4,9 @@
 node_modules
 package-lock.json
 
+# testing
+coverage
+
 # production
 build
 
@@ -15,11 +18,27 @@ build
 # But, keep the .gitignore so the folder is created
 !.secrets/.gitignore
 .idea
-data
+/data
 
+.vscode/launch.json
 .history
+
+src/features/employees/tmp/login-details.json
+src/tests/locations.json
+
+graphql.schema.json
 
 *.tar.gz
 .secrets
 .env*
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
 notebooks
+
+ctrf/
+
+infrastructure/provision-server/hetzner-cloud-empty-server/.terraform*
+infrastructure/provision-server/hetzner-cloud-empty-server/terraform*
+infrastructure/provision-server/hetzner-cloud-empty-server/.ssh

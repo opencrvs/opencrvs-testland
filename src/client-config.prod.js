@@ -19,7 +19,9 @@
  */
 ;(function initClientConfig() {
   const scheme = window.location.protocol // "http:" or "https:"
-  const hostname = '{{hostname}}' // Replaced dynamically
+  const hostname = '{{hostname}}' // Replace dynamically if needed
+  const minioBucket = '{{minio_bucket}}'
+  const minioBaseUrl = '{{minio_base_url}}'
 
   window.config = {
     API_GATEWAY_URL: `${scheme}//gateway.${hostname}/`,
@@ -27,8 +29,15 @@
     LOGIN_URL: `${scheme}//login.${hostname}`,
     AUTH_URL: `${scheme}//gateway.${hostname}/auth/`,
     MINIO_URL: `${scheme}//minio.${hostname}/ocrvs/`,
-    MINIO_BASE_URL: `${scheme}//minio.${hostname}`, // URL without path/bucket information, used for file uploads, v2
-    MINIO_BUCKET: 'ocrvs',
+    /** E2E uses single minio for all the different services. @see start-prod.sh.  */
+    MINIO_BASE_URL: minioBaseUrl.startsWith('http')
+      ? minioBaseUrl
+      : // Resolve the protocol on the same level as the other URLs.
+        `${scheme}${minioBaseUrl}`, // URL without path/bucket information, used for file uploads, v2
+    /** Bucket name is hardcoded as 'ocrvs'. In live system, it cannot be changed without data migration.
+     * In E2E environment, buckets are separated from different PR environments to avoid conflicts. @see start-prod.sh
+     */
+    MINIO_BUCKET: minioBucket,
     COUNTRY_CONFIG_URL: `${scheme}//countryconfig.${hostname}`,
     // Country code in uppercase ALPHA-3 format
     COUNTRY: 'FAR',
@@ -41,7 +50,7 @@
           defaultMessage: 'Registrations Dashboard',
           description: 'Menu item for registrations dashboard'
         },
-        url: `${scheme}//metabase.${hostname}/public/dashboard/03be04d6-bde0-4fa7-9141-21cea2a7518b#bordered=false&titled=false&refresh=300`
+        url: `${scheme}//metabase.${hostname}/public/dashboard/03be04d6-bde0-4fa7-9141-21cea2a7518b#bordered=false&titled=false&refresh=300` // Filled in below
       },
       {
         id: 'completeness',
@@ -62,8 +71,6 @@
         url: `${scheme}//metabase.${hostname}/public/dashboard/dc66b77a-79df-4f68-8fc8-5e5d5a2d7a35#bordered=false&titled=false&refresh=300`
       }
     ],
-    // NOTE: This is not valid javascript until replaced during build time.
-    // IIFE just reveals it.
     FEATURES: {}
   }
 })()

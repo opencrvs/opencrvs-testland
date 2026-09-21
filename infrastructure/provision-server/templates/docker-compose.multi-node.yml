@@ -1,0 +1,230 @@
+#
+# Production deployments of OpenCRVS should never be exposed to the internet.
+# Instead, they should be deployed on a private network and exposed to the internet via a VPN.
+#
+# Before you deploy staging or production environments, make sure the application servers are
+# either in an internal network or protected with a firewall. No ports should be exposed to the internet.
+#
+
+services:
+  gateway:
+    environment:
+      - NODE_ENV=production
+      - LANGUAGES=en,fr
+      - SENTRY_DSN=${SENTRY_DSN:-}
+    deploy:
+      replicas: 2
+
+  workflow:
+    environment:
+      - NODE_ENV=production
+      - LANGUAGES=en,fr
+      - SENTRY_DSN=${SENTRY_DSN:-}
+    deploy:
+      replicas: 2
+
+  search:
+    environment:
+      - NODE_ENV=production
+      - SENTRY_DSN=${SENTRY_DSN:-}
+    deploy:
+      replicas: 2
+
+  metrics:
+    environment:
+      - QA_ENV=true
+      - NODE_ENV=production
+      - SENTRY_DSN=${SENTRY_DSN:-}
+      - MONGO_URL=mongodb://metrics:${METRICS_MONGODB_PASSWORD}@mongo1,mongo2/metrics?replicaSet=rs0
+      - HEARTH_MONGO_URL=mongodb://hearth:${HEARTH_MONGODB_PASSWORD}@mongo1,mongo2/hearth-dev?replicaSet=rs0
+      - DASHBOARD_MONGO_URL=mongodb://performance:${PERFORMANCE_MONGODB_PASSWORD}@mongo1,mongo2/performance?replicaSet=rs0
+
+  auth:
+    environment:
+      - QA_ENV=true
+      - NODE_ENV=production
+      - SENTRY_DSN=${SENTRY_DSN:-}
+    deploy:
+      replicas: 2
+
+  user-mgnt:
+    environment:
+      - QA_ENV=true
+      - NODE_ENV=production
+      - SENTRY_DSN=${SENTRY_DSN:-}
+      - MONGO_URL=mongodb://user-mgnt:${USER_MGNT_MONGODB_PASSWORD}@mongo1,mongo2/user-mgnt?replicaSet=rs0
+    deploy:
+      replicas: 2
+
+  notification:
+    environment:
+      - NODE_ENV=production
+      - LANGUAGES=en,fr
+      - SENTRY_DSN=${SENTRY_DSN:-}
+      - MONGO_URL=mongodb://notification:${NOTIFICATION_MONGODB_PASSWORD}@mongo1,mongo2/notification?replicaSet=rs0
+    deploy:
+      replicas: 2
+
+  webhooks:
+    environment:
+      - NODE_ENV=production
+      - SENTRY_DSN=${SENTRY_DSN:-}
+      - MONGO_URL=mongodb://webhooks:${WEBHOOKS_MONGODB_PASSWORD}@mongo1,mongo2/webhooks?replicaSet=rs0
+    deploy:
+      replicas: 2
+
+  config:
+    environment:
+      - NODE_ENV=production
+      - SENTRY_DSN=${SENTRY_DSN:-}
+      - MONGO_URL=mongodb://config:${CONFIG_MONGODB_PASSWORD}@mongo1,mongo2/application-config?replicaSet=rs0
+    deploy:
+      replicas: 2
+
+  scheduler:
+    environment:
+      - NODE_ENV=production
+      - OPENHIM_MONGO_URL=mongodb://openhim:${OPENHIM_MONGODB_PASSWORD}@mongo1,mongo2/openhim-dev?replicaSet=rs0
+
+  documents:
+    environment:
+      - NODE_ENV=production
+
+  countryconfig:
+    image: ${DOCKERHUB_ACCOUNT}/${DOCKERHUB_REPO}:${COUNTRY_CONFIG_VERSION}
+    restart: unless-stopped
+    secrets:
+      - jwt-public-key.{{ts}}
+    environment:
+      - NODE_ENV=production
+      - CHECK_INVALID_TOKEN=true
+      - SENTRY_DSN=${SENTRY_DSN:-}
+      - SENDER_EMAIL_ADDRESS=${SENDER_EMAIL_ADDRESS}
+      - ALERT_EMAIL=${ALERT_EMAIL}
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_USERNAME=${SMTP_USERNAME}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - SMTP_SECURE=${SMTP_SECURE}
+    deploy:
+      replicas: 2
+
+  client:
+    environment:
+      - DECLARED_DECLARATION_SEARCH_QUERY_COUNT=100
+    deploy:
+      replicas: 2
+
+  logstash:
+    deploy:
+      replicas: 2
+
+  apm-server:
+    deploy:
+      replicas: 2
+
+  login:
+    deploy:
+      replicas: 2
+
+  hearth:
+    environment:
+      - mongodb__url=mongodb://hearth:${HEARTH_MONGODB_PASSWORD}@mongo1,mongo2/hearth-dev?replicaSet=rs0
+
+    deploy:
+      replicas: 2
+
+  migration:
+    environment:
+      - USER_MGNT_MONGO_URL=mongodb://user-mgnt:${USER_MGNT_MONGODB_PASSWORD}@mongo1,mongo2/user-mgnt?replicaSet=rs0
+      - APPLICATION_CONFIG_MONGO_URL=mongodb://config:${CONFIG_MONGODB_PASSWORD}@mongo1,mongo2/application-config?replicaSet=rs0
+      - PERFORMANCE_MONGO_URL=mongodb://performance:${PERFORMANCE_MONGODB_PASSWORD}@mongo1,mongo2/performance?replicaSet=rs0
+      - HEARTH_MONGO_URL=mongodb://hearth:${HEARTH_MONGODB_PASSWORD}@mongo1,mongo2/hearth-dev?replicaSet=rs0
+      - OPENHIM_MONGO_URL=mongodb://openhim:${OPENHIM_MONGODB_PASSWORD}@mongo1,mongo2/openhim-dev?replicaSet=rs0
+      - WAIT_HOSTS=mongo1:27017,mongo2:27017,influxdb:8086,minio:9000,elasticsearch:9200
+
+  mongo2:
+    image: mongo:4.4
+    hostname: 'mongo2'
+    restart: unless-stopped
+    command: mongod --auth --replSet rs0 --keyFile /etc/mongodb-keyfile
+    volumes:
+      - '/data/mongo:/data/db'
+      - '/mongodb-keyfile:/mongodb-keyfile'
+    entrypoint:
+      - bash
+      - -c
+      - |
+        cp /mongodb-keyfile /etc/mongodb-keyfile
+        chmod 400 /etc/mongodb-keyfile
+        chown 999:999 /etc/mongodb-keyfile
+        exec docker-entrypoint.sh $$@
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGODB_ADMIN_USER}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGODB_ADMIN_PASSWORD}
+    deploy:
+      labels:
+        - 'traefik.enable=false'
+      replicas: 1
+      placement:
+        constraints:
+          - node.labels.data2 == true
+    networks:
+      - overlay_net
+
+  mongo-on-update:
+    environment:
+      - REPLICAS=2
+
+  traefik:
+    # These templates use an Automatic Certificate Management Environment (Let's Encrypt).
+    # This makes sure that the HTTPS certificates are automatically generated and renewed without manual maintenance.
+    #
+    # This default configuration will only work if OpenCRVS is directly accessible from the internet.
+    #
+    # WE STRONGLY RECOMMEND THAT YOU DO NOT EXPOSE PRODUCTION OPENCRVS TO THE INTERNET!
+    #
+    # If you are deploying OpenCRVS in a private network, you have two options:
+    # 1. Use a DNS provider that supports ACME DNS-01 challenges.
+    # 2. Use a manually renewed certificate file.
+
+    # For your country to use the DNS-01 challenge, your domain's DNS provider must be one of the ones listed here
+    # https://doc.traefik.io/traefik/https/acme/#providers
+    #
+    # If your DNS provider is not listed, you can use manually renewed certificate files instead of Let's Encrypt.
+    # To do this, remove the `environment` and `certificatesresolvers.certResolver.acme` sections and uncomment the following lines.
+    # You will also need to place your certificates in the `/data/traefik/certs` directory.
+    # Ensure that the file names match the ones defined below.
+    #
+    # volumes:
+    #   - /var/run/docker.sock:/var/run/docker.sock
+    #   - /data/traefik/certs:/certs
+    # command:
+    #   - --tls.certificates.certfile=/certs/crvs.cm.crt
+    #   - --tls.certificates.keyfile=/certs/crvs.cm.key
+    #   - --tls.certificates.stores=default
+    #   - --tls.stores.default.defaultcertificate.certfile=/certs/crvs.cm.crt
+    #   - --tls.stores.default.defaultcertificate.keyfile=/certs/crvs.cm.key
+
+    command:
+      - --certificatesresolvers.certResolver.acme.email=riku@opencrvs.org
+      - --certificatesresolvers.certResolver.acme.storage=acme.json
+      - --certificatesresolvers.certResolver.acme.caserver=https://acme-v02.api.letsencrypt.org/directory
+      - --certificatesresolvers.certResolver.acme.httpchallenge.entrypoint=web
+      - --certificatesresolvers.certResolver.acme.httpchallenge=true
+
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      - --providers.docker
+      - --providers.docker.swarmMode=true
+      - --api.dashboard=true
+      - --api.insecure=true
+      - --log.level=WARNING
+      - --entrypoints.web.http.redirections.entryPoint.to=websecure
+      - --entrypoints.web.http.redirections.entryPoint.scheme=https
+      - --entrypoints.web.http.redirections.entrypoint.permanent=true
+      - --serverstransport.insecureskipverify=true
+      - --entrypoints.websecure.address=:443
+      - --accesslog=true
+      - --accesslog.format=json
+      - --ping=true

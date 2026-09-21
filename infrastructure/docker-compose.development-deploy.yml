@@ -13,10 +13,6 @@ services:
     environment:
       - NODE_ENV=production
       - QA_ENV=true
-      - FHIR_URL=http://hearth:3447/fhir
-      - AUTH_URL=http://auth:4040
-      - APPLICATION_CONFIG_URL=http://config:2021
-      - CONFIRM_REGISTRATION_URL=http://workflow:5050/confirm/registration
       - CHECK_INVALID_TOKEN=true
       - MONGO_URL=mongodb://mongo1/user-mgnt?replicaSet=rs0
       - SENDER_EMAIL_ADDRESS=${SENDER_EMAIL_ADDRESS}
@@ -26,6 +22,7 @@ services:
       - SMTP_USERNAME=${SMTP_USERNAME}
       - SMTP_PASSWORD=${SMTP_PASSWORD}
       - SMTP_SECURE=${SMTP_SECURE}
+      - V2_EVENTS=true
     deploy:
       replicas: 1
     networks:
@@ -40,6 +37,7 @@ services:
       - LANGUAGES=en,fr
       - QA_ENV=true
       - NODE_ENV=production
+      - DISABLE_RATE_LIMIT=true
 
   workflow:
     environment:

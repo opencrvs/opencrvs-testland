@@ -18,19 +18,21 @@ import * as Hapi from '@hapi/hapi'
 import * as Pino from 'hapi-pino'
 import * as JWT from 'hapi-auth-jwt2'
 import * as inert from '@hapi/inert'
+import * as H2o2 from '@hapi/h2o2'
 import fetch from 'node-fetch'
 import {
   CLIENT_APP_URL,
   DOMAIN,
+  GATEWAY_URL,
   LOGIN_URL,
   COUNTRY_CONFIG_HOST,
   COUNTRY_CONFIG_PORT,
   CHECK_INVALID_TOKEN,
   AUTH_URL,
   DEFAULT_TIMEOUT,
-  GATEWAY_URL,
   THIRTY_MINUTES_IN_MILLISECONDS
 } from '@countryconfig/constants'
+import { statisticsHandler } from '@countryconfig/api/data-generator/handler'
 import {
   contentHandler,
   countryLogoHandler
@@ -59,7 +61,9 @@ import { fontsHandler } from './api/fonts/handler'
 import { recordNotificationHandler } from './api/record-notification/handler'
 import {
   getCustomEventsHandler,
-  onAnyActionHandler
+  onAnyActionHandler,
+  onBirthActionHandler,
+  onDeathActionHandler
 } from '@countryconfig/api/custom-event/handler'
 import {
   ActionDocument,
@@ -68,7 +72,12 @@ import {
   EventDocument
 } from '@opencrvs/toolkit/events'
 import { Event } from './form/types/types'
-import { onRegisterHandler } from './api/registration'
+import {
+  onMosipBirthRegisterHandler,
+  onMosipDeathRegisterHandler,
+  onRegisterHandler
+} from './api/registration'
+import { env } from './environment'
 import { workqueueconfigHandler } from './api/workqueue/handler'
 import getUserNotificationRoutes from './config/routes/userNotificationRoutes'
 import {
@@ -79,7 +88,6 @@ import {
   syncLocationStatistics
 } from './analytics/analytics'
 import { getClient } from './analytics/postgres'
-import { env } from './environment'
 import { createClient } from '@opencrvs/toolkit/api'
 
 export interface ITokenPayload {
@@ -90,7 +98,7 @@ export interface ITokenPayload {
 }
 
 export default function getPlugins() {
-  const plugins: any[] = [inert, JWT]
+  const plugins: any[] = [inert, JWT, H2o2]
 
   if (process.env.NODE_ENV === 'production') {
     plugins.push({
@@ -106,7 +114,7 @@ export default function getPlugins() {
   return plugins
 }
 
-const getTokenPayload = (token: string): ITokenPayload => {
+export const getTokenPayload = (token: string): ITokenPayload => {
   let decoded: ITokenPayload
   try {
     decoded = decode(token)
@@ -448,6 +456,17 @@ export async function createServer() {
   })
 
   server.route({
+    method: 'GET',
+    path: '/statistics',
+    handler: statisticsHandler,
+    options: {
+      tags: ['api'],
+      description:
+        'Returns population and crude birth rate statistics for each location'
+    }
+  })
+
+  server.route({
     method: 'POST',
     path: '/email',
     handler: emailHandler,
@@ -526,6 +545,37 @@ export async function createServer() {
     options: {
       tags: ['api'],
       description: 'Provides a tracking id'
+    }
+  })
+
+  server.route({
+    method: '*',
+    path: '/graphql',
+    handler: (_, h) =>
+      h.proxy({
+        uri: `${GATEWAY_URL}/graphql`,
+        passThrough: true
+      }),
+    options: {
+      auth: false,
+      payload: {
+        output: 'data',
+        parse: false
+      }
+    }
+  })
+
+  server.route({
+    method: 'GET',
+    path: '/{param*}',
+    options: {
+      auth: false
+    },
+    handler: {
+      directory: {
+        path: 'public',
+        index: ['index.html', 'default.html']
+      }
     }
   })
 
@@ -629,6 +679,26 @@ export async function createServer() {
 
   server.route({
     method: 'POST',
+    path: '/trigger/events/birth/actions/{action}',
+    handler: onBirthActionHandler,
+    options: {
+      tags: ['api', 'events'],
+      description: 'Receives notifications on event actions'
+    }
+  })
+
+  server.route({
+    method: 'POST',
+    path: '/trigger/events/death/actions/{action}',
+    handler: onDeathActionHandler,
+    options: {
+      tags: ['api', 'events'],
+      description: 'Receives notifications on event actions'
+    }
+  })
+
+  server.route({
+    method: 'POST',
     path: `/trigger/events/${Event.TENNIS_CLUB_MEMBERSHIP}/actions/${ActionType.REGISTER}`,
     handler: onRegisterHandler,
     options: {
@@ -640,7 +710,7 @@ export async function createServer() {
   server.route({
     method: 'POST',
     path: `/trigger/events/${Event.Birth}/actions/${ActionType.REGISTER}`,
-    handler: onRegisterHandler,
+    handler: onMosipBirthRegisterHandler,
     options: {
       tags: ['api', 'events'],
       description: 'Receives notifications on event actions'
@@ -650,7 +720,7 @@ export async function createServer() {
   server.route({
     method: 'POST',
     path: `/trigger/events/${Event.Death}/actions/${ActionType.REGISTER}`,
-    handler: onRegisterHandler,
+    handler: onMosipDeathRegisterHandler,
     options: {
       tags: ['api', 'events'],
       description: 'Receives notifications on event actions'
@@ -660,6 +730,13 @@ export async function createServer() {
   server.route(getUserNotificationRoutes())
 
   server.ext('onPostHandler', async (request, h) => {
+    if (!env.ANALYTICS_DATABASE_URL) {
+      logger.warn(
+        'Skipping reindex, no ANALYTICS_DATABASE_URL environment variable set.'
+      )
+      return h.continue
+    }
+
     const response = request.response as Hapi.ResponseObject
     const parsedPath = /^\/trigger\/events\/[^/]+\/actions\/([^/]+)$/.exec(
       request.route.path
@@ -668,30 +745,66 @@ export async function createServer() {
     const actionType = parsedPath?.[1] as ActionType | null
     const wasRequestForActionConfirmation =
       actionType && request.method === 'post'
+
+    if (!wasRequestForActionConfirmation) {
+      return h.continue
+    }
+
+    const event = request.payload as EventDocument
+
     const wasActionAcceptedImmediately = response.statusCode === 200
 
-    if (wasRequestForActionConfirmation && wasActionAcceptedImmediately) {
-      const event = request.payload as EventDocument
-
-      const eventWithOptimisticallyApprovedLastAction = {
-        ...event,
-        actions: event.actions.map((action, index) =>
-          index === event.actions.length - 1
-            ? {
-                ...action,
-                status: ActionStatus.Accepted,
-                ...(actionType === ActionType.REGISTER
-                  ? {
-                      registrationNumber: (
-                        response.source as { registrationNumber: string }
-                      ).registrationNumber
-                    }
-                  : {})
-              }
-            : action
-        ) as ActionDocument[]
+    // A deferred confirmation (HTTP 202, e.g. pending MOSIP) has no response
+    // body, so the last action must stay as-is — reading registrationNumber
+    // from response.source would crash on null
+    const eventWithOptimisticallyApprovedLastAction =
+      wasActionAcceptedImmediately
+        ? {
+            ...event,
+            actions: event.actions.map((action, index) =>
+              index === event.actions.length - 1
+                ? {
+                    ...action,
+                    status: ActionStatus.Accepted,
+                    ...(actionType === ActionType.REGISTER
+                      ? {
+                          registrationNumber: (
+                            response.source as { registrationNumber: string }
+                          ).registrationNumber
+                        }
+                      : {})
+                  }
+                : action
+            ) as ActionDocument[]
+          }
+        : event
+    /*
+     * Forward event to integration / process management platforms
+     */
+    const urlsToForward = env.FORWARD_ACTIONS_TO.split(',').filter(Boolean)
+    for (const url of urlsToForward) {
+      logger.info(`Forwarding event to ${url}`)
+      try {
+        await fetch(url, {
+          method: 'POST',
+          body: JSON.stringify(eventWithOptimisticallyApprovedLastAction),
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        })
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error(
+          `Failed to forward event to ${url}: `,
+          (error as Error).message
+        )
       }
+    }
 
+    if (wasRequestForActionConfirmation && wasActionAcceptedImmediately) {
+      /*
+       * Store to analytics database
+       */
       const client = getClient()
       try {
         await client.transaction().execute(async (trx) => {
@@ -729,8 +842,10 @@ export async function createServer() {
 
   async function start() {
     await server.start()
-    await syncLocationLevels()
-    await syncLocationStatistics()
+    if (env.ANALYTICS_DATABASE_URL) {
+      await syncLocationLevels()
+      await syncLocationStatistics()
+    }
 
     const logMsg = `Server successfully started on ${COUNTRY_CONFIG_HOST}:${COUNTRY_CONFIG_PORT}`
     logger.info(logMsg)

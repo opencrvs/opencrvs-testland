@@ -106,6 +106,28 @@
         font-size="8" font-weight="bold" letter-spacing="0em">
         <tspan x="90" y="287.208">Recommender Full name</tspan>
         </text>
+        {{#if ($lookup $declaration "applicant.image") }}
+        <text fill="black" xml:space="preserve" style="white-space: pre" font-family="Noto Sans"
+        font-size="8" font-weight="bold" letter-spacing="0em">
+          <tspan x="90" y="327.208">Applicant Image</tspan>
+        </text>
+        <image x="312" y="300" height="50" width="50" xlink:href="{{ $lookup $declaration "applicant.image" }}" />
+        {{else}} {{#if ($lookup $declaration "applicant.idImage") }} 
+        <text fill="black" xml:space="preserve" style="white-space: pre" font-family="Noto Sans"
+        font-size="8" font-weight="bold" letter-spacing="0em">
+          <tspan x="90" y="327.208">Applicant ID Image</tspan>
+        </text>
+        <image x="312" y="300" height="50" width="100" xlink:href="{{ $lookup $declaration "applicant.idImage.ID_FRONT" }}" />
+        <image x="422" y="300" height="50" width="100" xlink:href="{{ $lookup $declaration "applicant.idImage.ID_BACK" }}" />
+        {{else}} {{#if ($actions "PRINT_CERTIFICATE") }}
+        <text fill="black" xml:space="preserve" style="white-space: pre" font-family="Noto Sans"
+        font-size="8" font-weight="bold" letter-spacing="0em">
+          <tspan x="90" y="327.208">Collector's signed affidavit</tspan>
+        </text>
+        <image x="312" y="300" height="50" width="100" xlink:href="{{ $lookup ($action "PRINT_CERTIFICATE") "annotation.collector.OTHER.signedAffidavit" }}" />
+        {{/if}}
+        {{/if}}
+        {{/if}}
         <mask id="mask2_5_2" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="312" y="278"
         width="202" height="12">
         <path d="M514 278H312V290H514V278Z" fill="white" />

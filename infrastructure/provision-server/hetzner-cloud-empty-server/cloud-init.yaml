@@ -1,0 +1,18 @@
+#cloud-config
+packages:
+  - curl
+
+users:
+  - name: provision
+    ssh-authorized-keys:
+    - ${ssh_key}
+    groups: sudo
+    uid: 1000
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+    package_update: true
+    package_upgrade: true
+runcmd:
+- groupmod -g 1000 provision
+- chage -E -1 -I -1 -m 0 -M 99999 -W 7 root
+- bash -c 'echo "root:$(openssl rand -base64 16)" | chpasswd'

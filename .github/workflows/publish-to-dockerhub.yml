@@ -2,13 +2,9 @@ name: Publish image to Dockerhub
 run-name: Publish image to Dockerhub from ${{ inputs.branch_name || github.ref_name }}
 on:
   push:
-    branches:
-      - master
-      - develop
-      - main
-      - 'release*'
-    tags:
-      - '*'
+    branches-ignore:
+      - 'dependabot/**'
+      - 'renovate/**'
   workflow_dispatch:
     inputs:
       branch_name:

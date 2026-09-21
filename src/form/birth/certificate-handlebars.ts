@@ -17,11 +17,11 @@ export const certificateHandlebars = {
   certificateDate: 'certificateDate',
   registrar: 'registrar',
   registrationAgent: 'registrationAgent',
-  registrarName: 'registrarName', // @deprecated use registrar.name instead
-  role: 'role', // @deprecated use registrar.role instead
-  registrarSignature: 'registrarSignature', // @deprecated use registrar.signature instead
+  registrarName: 'registrarName',
+  role: 'role',
+  registrarSignature: 'registrarSignature',
   registrationDate: 'registrationDate',
-  registrationLocation: 'registrationLocation', // @deprecated use registrar.office/state/district instead
+  registrationLocation: 'registrationLocation',
   contactEmail: 'contactEmail',
   contactPhoneNumber: 'contactPhoneNumber',
   birthConfigurableIdentifier1: 'birthConfigurableIdentifier1',
@@ -35,10 +35,11 @@ export const certificateHandlebars = {
   districtPlaceofbirth: 'districtPlaceofbirth', // @deprecated use districtPlaceofbirthId instead: Refer to https://github.com/opencrvs/opencrvs-farajaland/pull/815
   districtPlaceofbirthId: 'districtPlaceofbirthId', // Use with location helper like this: {{location districtPlaceofbirthId 'name'}}
   cityPlaceofbirth: 'cityPlaceofbirth',
-  addressLine3Placeofbirth: 'addressLine3Placeofbirth',
-  addressLine2Placeofbirth: 'addressLine2Placeofbirth',
-  addressLine1Placeofbirth: 'addressLine1Placeofbirth',
+  addressLine3UrbanOptionPlaceofbirth: 'addressLine3UrbanOptionPlaceofbirth',
+  addressLine2UrbanOptionPlaceofbirth: 'addressLine2UrbanOptionPlaceofbirth',
+  addressLine1UrbanOptionPlaceofbirth: 'addressLine1UrbanOptionPlaceofbirth',
   postalCodePlaceofbirth: 'postalCodePlaceofbirth',
+  addressLine1RuralOptionPlaceofbirth: 'addressLine1RuralOptionPlaceofbirth',
   internationalStatePlaceofbirth: 'internationalStatePlaceofbirth',
   internationalDistrictPlaceofbirth: 'internationalDistrictPlaceofbirth',
   internationalCityPlaceofbirth: 'internationalCityPlaceofbirth',
@@ -99,10 +100,15 @@ export const certificateHandlebars = {
   districtPrimaryInformant: 'districtPrimaryInformant', // @deprecated use districtPrimaryInformantId instead: Refer to https://github.com/opencrvs/opencrvs-farajaland/pull/815
   districtPrimaryInformantId: 'districtPrimaryInformantId', // Use with location helper like this: {{location districtPrimaryInformantId 'name'}}
   cityPrimaryInformant: 'cityPrimaryInformant',
-  addressLine3PrimaryInformant: 'addressLine3PrimaryInformant',
-  addressLine2PrimaryInformant: 'addressLine2PrimaryInformant',
-  addressLine1PrimaryInformant: 'addressLine1PrimaryInformant',
+  addressLine3UrbanOptionPrimaryInformant:
+    'addressLine3UrbanOptionPrimaryInformant',
+  addressLine2UrbanOptionPrimaryInformant:
+    'addressLine2UrbanOptionPrimaryInformant',
+  addressLine1UrbanOptionPrimaryInformant:
+    'addressLine1UrbanOptionPrimaryInformant',
   postalCodePrimaryInformant: 'postalCodePrimaryInformant',
+  addressLine1RuralOptionPrimaryInformant:
+    'addressLine1RuralOptionPrimaryInformant',
   internationalStatePrimaryInformant: 'internationalStatePrimaryInformant',
   internationalDistrictPrimaryInformant:
     'internationalDistrictPrimaryInformant',
@@ -121,10 +127,11 @@ export const certificateHandlebars = {
   districtPrimaryMother: 'districtPrimaryMother', // @deprecated use districtPrimaryMotherId instead: Refer to https://github.com/opencrvs/opencrvs-farajaland/pull/815
   districtPrimaryMotherId: 'districtPrimaryMotherId', // Use with location helper like this: {{location districtPrimaryMotherId 'name'}}
   cityPrimaryMother: 'cityPrimaryMother',
-  addressLine3PrimaryMother: 'addressLine3PrimaryMother',
-  addressLine2PrimaryMother: 'addressLine2PrimaryMother',
-  addressLine1PrimaryMother: 'addressLine1PrimaryMother',
+  addressLine3UrbanOptionPrimaryMother: 'addressLine3UrbanOptionPrimaryMother',
+  addressLine2UrbanOptionPrimaryMother: 'addressLine2UrbanOptionPrimaryMother',
+  addressLine1UrbanOptionPrimaryMother: 'addressLine1UrbanOptionPrimaryMother',
   postalCodePrimaryMother: 'postalCodePrimaryMother',
+  addressLine1RuralOptionPrimaryMother: 'addressLine1RuralOptionPrimaryMother',
   internationalStatePrimaryMother: 'internationalStatePrimaryMother',
   internationalDistrictPrimaryMother: 'internationalDistrictPrimaryMother',
   internationalCityPrimaryMother: 'internationalCityPrimaryMother',
@@ -142,10 +149,11 @@ export const certificateHandlebars = {
   districtPrimaryFather: 'districtPrimaryFather', // @deprecated use districtPrimaryFatherId instead: Refer to https://github.com/opencrvs/opencrvs-farajaland/pull/815
   districtPrimaryFatherId: 'districtPrimaryFatherId', // Use with location helper like this: {{location districtPrimaryFatherId 'name'}}
   cityPrimaryFather: 'cityPrimaryFather',
-  addressLine3PrimaryFather: 'addressLine3PrimaryFather',
-  addressLine2PrimaryFather: 'addressLine2PrimaryFather',
-  addressLine1PrimaryFather: 'addressLine1PrimaryFather',
+  addressLine3UrbanOptionPrimaryFather: 'addressLine3UrbanOptionPrimaryFather',
+  addressLine2UrbanOptionPrimaryFather: 'addressLine2UrbanOptionPrimaryFather',
+  addressLine1UrbanOptionPrimaryFather: 'addressLine1UrbanOptionPrimaryFather',
   postalCodePrimaryFather: 'postalCodePrimaryFather',
+  addressLine1RuralOptionPrimaryFather: 'addressLine1RuralOptionPrimaryFather',
   internationalStatePrimaryFather: 'internationalStatePrimaryFather',
   internationalDistrictPrimaryFather: 'internationalDistrictPrimaryFather',
   internationalCityPrimaryFather: 'internationalCityPrimaryFather',

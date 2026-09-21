@@ -60,13 +60,6 @@ export const documentsSection = {
     {
       id: 'documents-view-group',
       fields: [
-        {
-          name: 'paragraph',
-          type: 'PARAGRAPH',
-          label: formMessageDescriptors.documentsParagraph,
-          initialValue: '',
-          validator: []
-        },
         getDocUploaderForMarriage(
           'uploadDocForMarriageProof',
           'proofOfMarriageNotice',

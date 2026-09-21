@@ -27,3 +27,21 @@ elasticsearch_host() {
 
 # run migration by restarting migration service
 docker service update --force --update-parallelism 1 --update-delay 30s opencrvs_migration
+
+# wait for migration service to finish before continuing
+while true; do
+  # Get current state of the task(s)
+  state=$(docker service ps --format "{{.CurrentState}}" opencrvs_migration | head -n1)
+
+  echo "Current state: $state"
+
+  if [[ "$state" == *"Complete"* ]]; then
+    echo "Migration finished successfully ✅"
+    break
+  elif [[ "$state" == *"Failed"* ]] || [[ "$state" == *"Rejected"* ]]; then
+    echo "Migration failed ❌"
+    exit 1
+  fi
+
+  sleep 5
+done

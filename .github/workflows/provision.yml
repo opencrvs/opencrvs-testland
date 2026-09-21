@@ -11,6 +11,10 @@ on:
         type: string
         description: Environment to deploy to
         default: all
+      is_env_staging:
+        type: boolean
+        description: Is custom environment a staging like server
+        default: false
   workflow_dispatch:
     inputs:
       environment:
@@ -25,6 +29,14 @@ on:
           - production
           - backup
           - jump
+          - e2e
+          - v17
+          - pentest
+          - v19-beta-staging
+          - v19-beta-prod
+          - fix-analytics
+          - mosip
+          - openfn
       tag:
         type: choice
         description: Select group tag you want to execute
@@ -50,6 +62,10 @@ on:
           - ufw
           - updates
           - users
+      is_env_staging:
+        type: boolean
+        description: Is custom environment a staging like server
+        default: false
 jobs:
   get-backup-ssh-key:
     name: Get backup SSH key
@@ -61,7 +77,6 @@ jobs:
       gh_token: ${{ secrets.GH_TOKEN }}
       encryption_key: ${{ secrets.GH_ENCRYPTION_PASSWORD }}
       SSH_KEY: ${{ secrets.SSH_KEY }}
-
   get-jump-ssh-key:
     name: Get jump SSH key
     uses: ./.github/workflows/get-secret-from-environment.yml
@@ -72,19 +87,35 @@ jobs:
       gh_token: ${{ secrets.GH_TOKEN }}
       encryption_key: ${{ secrets.GH_ENCRYPTION_PASSWORD }}
       SSH_KEY: ${{ secrets.SSH_KEY }}
-
+  get-production-env-name:
+    environment: ${{ inputs.environment }}
+    if: inputs.environment == 'staging' || inputs.is_env_staging
+    runs-on: ubuntu-24.04
+    outputs:
+      environment: ${{ steps.env_name.outputs.environment }}
+    steps:
+      - name: Check environment name
+        id: env_name
+        run: |
+          if [ ${{ inputs.environment }} == 'staging' ]; then
+            echo "environment=production" >> $GITHUB_OUTPUT
+          else
+            echo "⚠️ NOTE: Staging like environment: is_env_staging: ${{ inputs.is_env_staging }}"
+            environment=${{ inputs.environment }}
+            echo "environment=${environment/staging/prod}" >> $GITHUB_OUTPUT
+          fi
   get-production-encryption-key:
     name: Get production backup encryption key
-    if: inputs.environment == 'staging'
+    needs: ['get-production-env-name']
+    if: inputs.environment == 'staging' || inputs.is_env_staging
     uses: ./.github/workflows/get-secret-from-environment.yml
     with:
       secret_name: 'BACKUP_ENCRYPTION_PASSPHRASE'
-      env_name: 'production'
+      env_name: ${{ needs.get-production-env-name.outputs.environment }}
     secrets:
       gh_token: ${{ secrets.GH_TOKEN }}
       encryption_key: ${{ secrets.GH_ENCRYPTION_PASSWORD }}
       BACKUP_ENCRYPTION_PASSPHRASE: ${{ secrets.BACKUP_ENCRYPTION_PASSPHRASE }}
-
   provision:
     name: Provision ${{ inputs.environment }}
     environment: ${{ inputs.environment }}
@@ -101,16 +132,14 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.ref_name }}
           path: './${{ github.event.repository.name }}'
-
       - name: Insert production encryption key to environment variables
-        if: inputs.environment == 'staging' && needs.get-production-encryption-key.outputs.environment_exists == 'true'
+        if: (inputs.environment == 'staging' || inputs.is_env_staging) && needs.get-production-encryption-key.outputs.environment_exists == 'true'
         run: |
           echo "${{ needs.get-production-encryption-key.outputs.secret_value }}" | base64 --decode | \
           openssl enc -aes-256-cbc -pbkdf2 -d -salt -k "${{ secrets.GH_ENCRYPTION_PASSWORD }}" -out /tmp/backup_encryption_key
           BACKUP_RESTORE_ENCRYPTION_PASSPHRASE=$(cat /tmp/backup_encryption_key)
           echo "backup_restore_encryption_passphrase=$BACKUP_RESTORE_ENCRYPTION_PASSPHRASE" >> $GITHUB_ENV
           echo "::add-mask::$BACKUP_RESTORE_ENCRYPTION_PASSPHRASE"
-
       - name: Set variables for ansible
         id: ansible-variables
         run: |
@@ -134,7 +163,6 @@ jobs:
           # @todo @deprecated remove the fallback to secrets.SSH_HOST in OpenCRVS 1.7.0
           manager_production_server_ip: ${{ vars.SSH_HOST || secrets.SSH_HOST }}
           ansible_user: ${{ secrets.SSH_USER }}
-
       - name: Read known hosts
         run: |
           cd ${{ github.event.repository.name }}
@@ -142,27 +170,23 @@ jobs:
           sed -i -e '$a\' ./infrastructure/known-hosts
           cat ./infrastructure/known-hosts >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
-
       - name: Install SSH Key
         uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ secrets.SSH_KEY }}
           known_hosts: ${{ env.KNOWN_HOSTS }}
-
       - name: Write backup SSH key to file
         if: needs.get-backup-ssh-key.outputs.environment_exists == 'true'
         run: |
           echo "${{ needs.get-backup-ssh-key.outputs.secret_value }}" | base64 --decode | \
           openssl enc -aes-256-cbc -pbkdf2 -d -salt -k "${{ secrets.GH_ENCRYPTION_PASSWORD }}" -out /tmp/backup_ssh_private_key
           chmod 600 /tmp/backup_ssh_private_key
-
       - name: Write jump server SSH key to file
         if: needs.get-jump-ssh-key.outputs.environment_exists == 'true'
         run: |
           echo "${{ needs.get-jump-ssh-key.outputs.secret_value }}" | base64 --decode | \
           openssl enc -aes-256-cbc -pbkdf2 -d -salt -k "${{ secrets.GH_ENCRYPTION_PASSWORD }}" -out /tmp/jump_ssh_private_key
           chmod 600 /tmp/jump_ssh_private_key
-
       - name: Check if backup environment if configured in inventory file
         if: needs.get-backup-ssh-key.outputs.environment_exists != 'true'
         run: |
@@ -177,7 +201,6 @@ jobs:
             echo "After that you can proceed with (re)provisioning your staging and production servers."
             exit 1
           fi
-
       - name: Run playbook
         uses: dawidd6/action-ansible-playbook@v2.8.0
         env:

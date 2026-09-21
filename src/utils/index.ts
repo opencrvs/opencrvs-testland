@@ -11,9 +11,11 @@
 
 import fetch from 'node-fetch'
 import { APPLICATION_CONFIG_URL, FHIR_URL } from '@countryconfig/constants'
+import { callingCountries } from 'country-data'
 import csv2json from 'csv2json'
 import { createReadStream } from 'fs'
 import fs from 'fs'
+import { PhoneNumberFormat, PhoneNumberUtil } from 'google-libphonenumber'
 import { URL } from 'url'
 import { build } from 'esbuild'
 import { memoize } from 'lodash'
@@ -23,6 +25,7 @@ export const DECEASED_CODE = 'deceased-details'
 export const OPENCRVS_SPECIFICATION_URL = 'http://opencrvs.org/specs/'
 import { join } from 'path'
 import { stringify } from 'csv-stringify/sync'
+import { promisify } from 'util'
 
 export interface ILocation {
   id?: string
@@ -160,6 +163,21 @@ export async function updateResourceInHearth(resource: fhir.ResourceBase) {
   }
 
   return res.text()
+}
+
+export const convertToMSISDN = (phone: string, countryAlpha3: string) => {
+  const countryCode = callingCountries[countryAlpha3.toUpperCase()].alpha2
+
+  const phoneUtil = PhoneNumberUtil.getInstance()
+  const number = phoneUtil.parse(phone, countryCode)
+
+  return (
+    phoneUtil
+      .format(number, PhoneNumberFormat.INTERNATIONAL)
+      // libphonenumber adds spaces and dashes to phone numbers,
+      // which we do not want to keep for now
+      .replace(/[\s-]/g, '')
+  )
 }
 
 export async function writeJSONToCSV(

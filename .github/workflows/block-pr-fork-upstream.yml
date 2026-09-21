@@ -1,0 +1,20 @@
+name: Block PRs from forks
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  check-fork:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Block PRs from forks
+        run: |
+          echo "PR from: ${{ github.event.pull_request.head.repo.full_name }}"
+          echo "Base repo: ${{ github.repository }}"
+          if [[ "${{ github.event.pull_request.head.repo.full_name }}" != "${{ github.repository }}" ]]; then
+            echo "❌ This pull request is from a fork. Closing."
+            exit 1
+          else
+            echo "✅ This pull request is from the same repository. Proceeding."
+          fi

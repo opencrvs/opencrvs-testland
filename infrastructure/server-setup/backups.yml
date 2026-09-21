@@ -211,6 +211,9 @@
 
     - name: Download the test connection file from the backup server
       shell: rsync --timeout=30 -avz -e "ssh -o StrictHostKeyChecking=no" {{ backup_server_user }}@{{ destination_server }}:{{ backup_server_remote_source_directory }}/downloaded_from_backup.txt /tmp/downloaded_from_backup.txt
+      # FIXME: Don't merge this to countryconfig template
+      # Temporal fix to allow staging provision before production
+      ignore_errors: yes
       remote_user: '{{ crontab_user }}'
       when: "'backups' in groups and groups['backups'] | length > 0 and periodic_restore_from_backup"
       tags:

@@ -270,9 +270,18 @@ get_docker_tags_from_compose_files() {
    | sed -E "s/:-[A-Za-z_0-9]+//g" \
    | sed -E "s/[{}]//g")
 
+   # FIXME: | grep -v 'docker.elastic.co/elasticsearch/elasticsearch' expression added to bypass
+   # duplicates in the docker-compose files.
+   # e/g if top level docker-compose file has elasticsearch image is docker.elastic.co/elasticsearch/elasticsearch
+   # and then redefined to ghcr.io/***/elasticsearch:8.16.4, script pull logic will try to pull
+   # both images and fail with error:
+   # Error response from daemon: Get "https://docker.elastic.co/v2/": net/http: request canceled while waiting for connection (Client.Timeout exceeded while awaiting headers)
+   # Next steps:
+   # Use yq to parse the docker-compose files and remove duplicates.
    echo $IMAGE_TAG_LIST_WITHOUT_VARIABLE_SUBSTITUTION_DEFAULT_VALUES \
    | envsubst \
-   | sed 's/ /\n/g'
+   | sed 's/ /\n/g' \
+   | grep -v 'docker.elastic.co/elasticsearch/elasticsearch'
 }
 
 split_and_join() {
@@ -318,15 +327,7 @@ docker_stack_deploy() {
     docker stack deploy --prune -c '$(split_and_join " " " -c " "$(to_remote_paths $COMPOSE_FILES_USED)")' --with-registry-auth opencrvs'
 }
 
-get_opencrvs_version() {
-  PREVIOUS_VERSION=$(configured_ssh "docker service ls | grep opencrvs_base | cut -d ':' -f 2")
-  echo "Previous opencrvs version: $PREVIOUS_VERSION"
-  echo "Current opencrvs version: $VERSION"
-}
-
 validate_options
-
-get_opencrvs_version
 
 # Create new passwords for all MongoDB users created in
 # infrastructure/mongodb/docker-entrypoint-initdb.d/create-mongo-users.sh
@@ -357,8 +358,8 @@ export WEBHOOKS_REDIS_PASSWORD=`generate_password`
 export EVENTS_APP_POSTGRES_PASSWORD=`generate_password`
 export EVENTS_MIGRATOR_POSTGRES_PASSWORD=`generate_password`
 export ANALYTICS_POSTGRES_PASSWORD=`generate_password`
+export ANALYTICS_POSTGRES_USER=`generate_password`
 
-#
 # Elasticsearch credentials
 #
 # Notice that all of these passwords change on each deployment.

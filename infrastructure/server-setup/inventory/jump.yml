@@ -16,15 +16,66 @@
 all:
   vars:
     users:
-      # @todo this is where you define which development team members have access to the server.
       # If you need to remove access from someone, do not remove them from this list, but instead set their state: absent
-      - name: my-user
+      - name: pyry
         ssh_keys:
-          - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABg...Z/rhU= user@example.com
+          - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJBcrSLLdrkLrhqNQi7Uo/ZIWXb1y4kc0vGb16e2s0Jq pyry@opencrvs.org
         state: present
         sudoer: true
-
+      - name: tameem
+        ssh_keys:
+          - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGUprcQyUFYwRto0aRpgriR95C1pgNxrQ0lEWEe1D8he haidertameem@gmail.com
+        state: present
+        sudoer: true
+      - name: riku
+        ssh_keys:
+          - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDWIF63S4f3z9wQMvWibmvl7MPuJ6EVrkP0HuvgNhcs/4DZYMcR/GRBvV4ldOSYMlBevIXycgGzNDxKJgENUuwIWanjBu7uVAHyD6+cIRD1h63qq7Cjv/2HYTfBDKOrKzPOhA6zWvKO0ZGWsjRXk5LWMCbKOkvKJCxOpj/NVBxeE4FTK5YADYPV3OSsmBtqTHrVLm2sMmShU/2hMYYswWkobidjX65+nK/X+3C+yJbHwiydVvn+QCrFlFfCLPWKe8rUpOxyxofPqWVQh6CHhHfT8okaOc9sOE8Qeip9ljo84DftJh3Xm3ynOdWK1hH2BvRvxNadWqcE1qECbkg4tx2x riku.rouvila@gmail.com
+          - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDGfWxxQHJv6Md/vBVoDH2UNm/uYgIBlFpP1mfh2Yj6jRNiQ/TQrfwpTawq0Sg+UW4LfYk5yxttsZ0h6L/v6PLiawgbMtf2ZqSviRTYSZTSihkK2zLmeJA2ByBCh57w4tR6IGqJK4w0kjYQSaaU6V5skQ4u+gnLQoKtkVQ4K34EFXAiIur96tLwjwDd/xCm+9T91+cAxGLv8Pe0PjirjwnvktUtzpgOhedkYK7KX0l8SKxQXUK6Ul2/QbpGO3rmguzEdtrl3Dw1TAEfu2njXbNGVQ+JWV9htH+ymsMIGoeumJRaaAZ4AXLlQPBCxTXcdQDuAjfFDPuppms/h7qB1S4Aioz7zqyd7pL7Z6Z8mJBZZlP3PsfGvADM2CdShpbL4HAa+n9miNNSYcJ7cHvC/zCitNjfaEYLVYkB5G+ggeK8Ss/MDcnsh3YFB8WnT582zt/TTJda5n+5Q7tquc1m+61t2gEKKTfBoDft9UYW2/4ViHj3ROL2Oyj7udrh/oAqV8M= riku@MBP16inch2231
+        state: present
+        sudoer: true
+      - name: euan
+        ssh_keys:
+          - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDECqHO65UpyrrO8uueD06RxGaVVq22f152Rf8qVQQAAIGAMu6gCs7ztlZ8a3yQgSEIjM/Jl1/RqIVs6CziTEef74nLFTZ5Ufz3CLRVgdebBeSBEmhTfTUV0HLkSyNzwKFpuzJxucGd72ulPvEp6eHvyJAPJz37YcU8cjaL1v05T6s2ee99li35GlDDtCzfjVV4ZPAg5JdfWuTj41RAVC0LQhk2/NB4qEu37UxGGjhRFSjBEsS5LxI9QfvgrsHpl/VOn+soH7ZkK7kS6qRgNP/uYsXRWXhHaamcl5OX68gJWTbrW6c7PCqlbCWGnsHJswCmqPIthwXXMfC7ULDNLSKG6mslAt5Dyc8/MCr3vTW7pDyr2d0FvvY86SMQUggxv3qF7TZewqfX1bhK0fMLarIxVMQ1RFo//wN9QGA+2we8rxd2Y1Kr1DBuJyuwXPfv+Exo8yNYQ+x/AYH5k6UVcSYuaB8eYmplG2KQCxt8RBFtoChrwOKNRWLqXdKyfpdp5XmnnWxPvR95gf3h3yLocVYkF0i0uvKKJ0vt8J0Ezfkdfow0B1kUg5bPXKJROX7PwbaCPdYcxyDaO6wwOigRnSmoFvkH1pLb4j1RQAXcX531CHgfN6Izi/h0mpMS4bnyIUcv2GQr+h4z4TxcCtj7qpH2y6yw7XG12jVh7TfeesXG2Q== euanmillar77@gmail.com
+        state: present
+        sudoer: true
+      - name: tahmid
+        ssh_keys:
+          - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINUml9O5ySwPtEMD1yGEYHlf9Z3jro97NWAnM9+ew9gn tahmidrahman.dsi@gmail.com
+        state: present
+        sudoer: true
+      - name: jump
+        state: present
+        ssh_keys:
+          - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDk15q1EI7FXqX9sgSpO7u89ZjcZV00k2yyq/9YNLk2XWHE54qPhOdaPPgJyuIhgDGQB20uDow/E8mIkPHNstX/Gp0GXn06L7fd/BfwFmFWi0YhLwvX5RaYjm1vIkCLDZrYQiH/GBP9GKMJv3DGORA1tWhFBKIerDwtDTBFC0ysT/nmHSEq1xYb5cSj55UaSyIQUjd1UgqO98OhzItXX4ZWeUil5gEC014dZxNMwM08F6X1XGsy5u6CP4CtpcMGk3fWQz+AdcL0nHZoLjXnIMBNLTyBjThQvupZFhLkKvqOxwQkzEBPjfaQQadnFg0N4rpMrUYqakkpAhgdwmemv13jZk41m5jofS+C4R2uBAb6dbPI0YiRgqaj1kSBGgEEPNhtT9Y0+nrJhmrypLxD0TnDl+hI/EfNpJd4TravCyjpsxUsLRpBp9A3rPAxkHrAt59r0rdCsp57KZ2dGPXJU0QPC30XJrVg05cOQdzPvfJn2Qsx+2JFW2cR4X+R2bWD6k9g8ItFq87DfN2LIeXArffkG735sCR12HCKkyyA8bS6HVr/nAxohb5UvN1HafLmL61gwbsv3OtVkpxT+SNqoXutDkqHW3+efu27dsGLdXsYyQxELZoKkJLJJW4ToU6jTvb3v9wqIEHjayBdGERH06SdXN38BFUMIa44MJVC61h/uw== runner@fv-az1386-243
+          - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDMiGYD2au1bsyZGfCCrOQUKkW1wIGbwHOef0u4BIvI30pXH6tL3rFM3lKa+7ejP6OBQznhRCPZCMIYMDLas9CGoAJxG4fv91iBcrk4i9J4Q+dhHm2PZv8Nq1d36jW5a4mwmDThR/ZRSFLKkaKl61k7iL8eCULakmYlVP618tk3f0mZ/jXsbUrBYt3YeVHvajPK2HVq0SpvoLQIHn2rtlEXzdAHEW1aD1dJLm2AtbHe1NWH7tJMjcWNjoiQGbuA/FYI4lVuJywmgYU/er7GcO2jnejLRWgXtBrpFSvPs4s34BpxNX/EnAvGyjM09f71LjZFtUT4EKz7x/Ct3CXgLGOe0UfTE68ZPVrySzIKZhrkXKEM7gvCrXroFRKY7S/2RcK/l4tFOgspRw9mXvhnDvv0SDdRzhQ5tSVmjk95C8vviDvypmZfBgtrAbBcQquDS/mrpu3CXgcj5Uhkpot7+fehIQo2qhq1I9wbTsD137JsOgZFYl93X1zE51G4eaHXtNNx7v9Sga/4dlOkQoxDkypw3fL2pR44xqJip+vE374aWYDrxa5NN64M1vt1bZqSvwyRyntbBL0P/oi2X30mO8I2pUDc0LZLzUeIqrVYiQc6CS+KB0kIHlAxQQdtPP4DC0AaRdyv5GTJ7+lF4urDjfj7YlZppX+t9n6qvQdqzjfvnQ== runner@fv-az982-41
+        sudoer: false
+        two_factor: false
+      - name: ashikul
+        ssh_keys:
+          - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDFr/v3hUGEbc2wQsDLCmqLrwiz964yVrnLZ6kafemjmX8aRGLp1CNFvrZ674SLnXidZGMkx9d5xVvv8IdFR3R50MqSqfolF43MV34/JVHjQHh9Vk4MJT/3GIaeNmr2GQ/38qAmt2BQn1ecnb7FjNO2bFvHokLhm2wCXt+A4avuTgJe0p4e6uu01IHeIzDb5sPzZ3ID0h6jJnjEDcET+Lf5NGpCjn7YKhLhBWSSl9cXQdOGLzNzg3aBk32kgJ1beP1funSeVd0jniJPZeZRC1G/kRdqBUOHKiENtwgquzZxXzdHkZV9+4mF7YGlx6LpQdNuDpW7JADtYNldtdbexdyfrgNoRzKwyMmaKNDbeHd1FsIHSDJmGm9hCoLTM2dEtsGzgghfe0tat8sOWmsj5v2en0V8rKV+w8OQEmHtaQkgMjqmZaAnd8uWiB2xIbrUuax5Pq8zkj37xnfbRxUPOEkMlOUbhh1wzGbqeUEB7nbv/vXZxwC0b7ryMk5egBP+0ZRONsdib9RkSTr3B9uSb7iTOQftdhy+CTqqOq+6s+TyC2qnu12B1WZb9sx9jQl0mBHd9gx/FgYDs8jfIr2vF4jRkejW/moaVqvCd/FLyS91eCMXQjIXdGKWKPUUL7GEBqdZRLnYSJOqgPp9sk1+NEvMabTXlWmoUjaShq8z+o7JsQ== nileeeem36@gmail.com
+        state: present
+        sudoer: true
+      - name: niko
+        ssh_keys:
+          - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDGy93egakrVxXHb9LafRQ7T0Cl+p+gCTuymLyofTLK2ncwKhOZ/uV5SuzaKb4lJbBnpmxNdvAxsYXff5srvJfrV0ZZXFQdAAg0mmWuXxrhNfaE52S4s6WVKknTqDE5PhMxzVxzynBnaTdW9Cno7mO+rnS/VybjZIadpOuv5Bek1PztBmrUi4h0Qg1PxXNmFqzyc1dsil1T0nFeu5cH59G5fF1/oSUlC6CYBNoHdQ62IBoydBwMumk/trFoTlxPNK1wXgcUvsr8Sa5A4lN2Rrc6Y22CEGwomtyjHb2kDVbI+7B1Zq+S89yyyvkPFezEsCdK/Ehaj8HzfcsR/bassSn0/Xv3bL20eh7wv7cnut40kFizYifNGfpEqPvSzjfJbB4iG2WSKkW8F9t0/cvd0AdY/3jB0vXhvnRvCqHm1X6JVdGamF3GJeHUMk9JDg3rQdT47BZUtSJer4MGWWcNiALjeWPNLXK9cAvrI/6GbHbPyTzACfR6nhs03Z/eebuvpp0=
+        state: absent
+        sudoer: true
+      - name: tareq
+        ssh_keys:
+          - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCWQihdKkwxTItN+rwYAX1vBg+8sv59sFsjYoVaO2mzS01rARfh+M+UVqpEv3zFT/3v6Dr5Z5VhzYvvbH8akiGQxURqie9quEi1iBCqcq+LApkMZxNm7yyvexlFsbkKMHsSZyVCzjE2Wt+6fwR1NqkMQgJjZS+b4CB+CUTNP2i6ytUTmck9K5iAOp1Gpm+Xgyvz6ZEJPkAJ16gV7gzNJUt/DSCkCyV8G2BqYLWeR2QxAbKyuf3LzO5i4XZdiZi9o60QAt3A6KGGLazd0UuYdehQDqVwXzwimLeeuZbaPNmwoAy7DeatOdurrWbnL7ytaiPvAbwai6Grt3PhhM41qO+uojnqTdnFdSOEPVIYMR7+mYu9tuwHZcMJIbbvMPD6EvKumD5Ndn5OxiLY/zQF5PuG89pBdTkTzzREvbV1Dkh2hwAIvgavlZl3P64On+4+FAgjrAx5U55khoRAe2FbEvB+EUGwro0bRffiM2NmxkUBraEuT2Xt5K01ZoBU6F4feO0= tareq.aziz@dsinnovators.com
+        state: present
+        sudoer: true
+      - name: vmudryi
+        ssh_keys:
+          - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINgMcsSBwTE0EbMDRSF1T4vJDcN/5HAjKGbi2DqV7g/Q vmudryi@opencrvs.org
+        state: present
+        sudoer: true
+      - name: cihan
+        ssh_keys:
+          - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIEEtz5M5hYKcUehDiCm84BplV+3t1ex8DPjIsMtQEWGv cihan.m.bebek@gmail.com
+        state: present
+        sudoer: true
 jump-host:
   hosts:
-    your-jumpserver-hostname-here: # @todo set this to be the hostname of your jump server
-      ansible_host: '55.55.55.55'
+    backup:
+      ansible_host: '159.89.14.13'

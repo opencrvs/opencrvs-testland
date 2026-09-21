@@ -9,6 +9,7 @@ COPY package.json package.json
 COPY tsconfig.json tsconfig.json
 COPY yarn.lock yarn.lock
 COPY src src
+COPY public public
 RUN yarn install --production
 
 EXPOSE 3040

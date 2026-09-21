@@ -311,7 +311,7 @@ export function getPlaceOfEventConditionals(
           )}${sentenceCase(section)})`
         }
       ]
-    case 'configurableAddressLines':
+    case 'ruralOrUrban':
       return getLocationLevelConditionals(section, useCase, [
         {
           action: 'hide',
@@ -325,6 +325,62 @@ export function getPlaceOfEventConditionals(
             useCase !== EventLocationAddressCases.PLACE_OF_MARRIAGE
               ? `values.${useCase}!="OTHER" && values.${useCase}!="PRIVATE_HOME"`
               : ''
+        },
+        {
+          action: 'hide',
+          expression: `!isDefaultCountry(values.country${sentenceCase(
+            useCase
+          )}${sentenceCase(section)})`
+        }
+      ])
+    case 'urban':
+      return getLocationLevelConditionals(section, useCase, [
+        {
+          action: 'hide',
+          expression: `!values.country${sentenceCase(useCase)}${sentenceCase(
+            section
+          )}`
+        },
+        {
+          action: 'hide',
+          expression:
+            useCase !== EventLocationAddressCases.PLACE_OF_MARRIAGE
+              ? `values.${useCase}!="OTHER" && values.${useCase}!="PRIVATE_HOME"`
+              : ''
+        },
+        {
+          action: 'hide',
+          expression: `values.ruralOrUrban${sentenceCase(
+            useCase
+          )}${sentenceCase(section)} !== "URBAN"`
+        },
+        {
+          action: 'hide',
+          expression: `!isDefaultCountry(values.country${sentenceCase(
+            useCase
+          )}${sentenceCase(section)})`
+        }
+      ])
+    case 'rural':
+      return getLocationLevelConditionals(section, useCase, [
+        {
+          action: 'hide',
+          expression: `!values.country${sentenceCase(useCase)}${sentenceCase(
+            section
+          )}`
+        },
+        {
+          action: 'hide',
+          expression:
+            useCase !== EventLocationAddressCases.PLACE_OF_MARRIAGE
+              ? `values.${useCase}!="OTHER" && values.${useCase}!="PRIVATE_HOME"`
+              : ''
+        },
+        {
+          action: 'hide',
+          expression: `values.ruralOrUrban${sentenceCase(
+            useCase
+          )}${sentenceCase(section)} !== "RURAL"`
         },
         {
           action: 'hide',
@@ -507,13 +563,55 @@ export function getAddressConditionals(
           )}${sentenceCase(section)})`
         }
       ]
-    case 'configurableAddressLines':
+    case 'ruralOrUrban':
       return getLocationLevelConditionals(section, useCase, [
         {
           action: 'hide',
           expression: `!values.country${sentenceCase(useCase)}${sentenceCase(
             section
           )}`
+        },
+        {
+          action: 'hide',
+          expression: `!isDefaultCountry(values.country${sentenceCase(
+            useCase
+          )}${sentenceCase(section)})`
+        }
+      ])
+    case 'urban':
+      return getLocationLevelConditionals(section, useCase, [
+        {
+          action: 'hide',
+          expression: `!values.country${sentenceCase(useCase)}${sentenceCase(
+            section
+          )}`
+        },
+        {
+          action: 'hide',
+          expression: `values.ruralOrUrban${sentenceCase(
+            useCase
+          )}${sentenceCase(section)} !== "URBAN"`
+        },
+        {
+          action: 'hide',
+          expression: `!isDefaultCountry(values.country${sentenceCase(
+            useCase
+          )}${sentenceCase(section)})`
+        }
+      ])
+    case 'rural':
+      return getLocationLevelConditionals(section, useCase, [
+        {
+          action: 'hide',
+          expression: `!values.country${sentenceCase(useCase)}${sentenceCase(
+            section
+          )}`
+        },
+        {
+          action: 'hide',
+          expression: `values.ruralOrUrban${sentenceCase(
+            useCase
+          )}${sentenceCase(section)} !== "RURAL"`
         },
         {
           action: 'hide',

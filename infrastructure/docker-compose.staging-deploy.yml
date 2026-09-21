@@ -29,6 +29,7 @@ services:
 
   metrics:
     environment:
+      - QA_ENV=true
       - NODE_ENV=production
       - MONGO_URL=mongodb://metrics:${METRICS_MONGODB_PASSWORD}@mongo1/metrics?replicaSet=rs0
       - HEARTH_MONGO_URL=mongodb://hearth:${HEARTH_MONGODB_PASSWORD}@mongo1/hearth-dev?replicaSet=rs0
@@ -36,12 +37,14 @@ services:
 
   auth:
     environment:
+      - QA_ENV=true
       - NODE_ENV=production
     deploy:
       replicas: 1
 
   user-mgnt:
     environment:
+      - QA_ENV=true
       - NODE_ENV=production
       - MONGO_URL=mongodb://user-mgnt:${USER_MGNT_MONGODB_PASSWORD}@mongo1/user-mgnt?replicaSet=rs0
     deploy:
@@ -86,10 +89,6 @@ services:
       - jwt-public-key.{{ts}}
     environment:
       - NODE_ENV=production
-      - FHIR_URL=http://hearth:3447/fhir
-      - AUTH_URL=http://auth:4040
-      - APPLICATION_CONFIG_URL=http://config:2021
-      - CONFIRM_REGISTRATION_URL=http://workflow:5050/confirm/registration
       - CHECK_INVALID_TOKEN=true
       - SENDER_EMAIL_ADDRESS=${SENDER_EMAIL_ADDRESS}
       - ALERT_EMAIL=${ALERT_EMAIL}
@@ -98,6 +97,7 @@ services:
       - SMTP_USERNAME=${SMTP_USERNAME}
       - SMTP_PASSWORD=${SMTP_PASSWORD}
       - SMTP_SECURE=${SMTP_SECURE}
+      - FORWARD_ACTIONS_TO=https://app.openfn.org/i/7e8fb45d-d0ed-4bb4-8def-56da25f288db
     deploy:
       replicas: 1
 
@@ -134,6 +134,8 @@ services:
       - OPENHIM_MONGO_URL=mongodb://openhim:${OPENHIM_MONGODB_PASSWORD}@mongo1/openhim-dev?replicaSet=rs0
       - EVENTS_POSTGRES_URL=postgres://events_migrator:${EVENTS_MIGRATOR_POSTGRES_PASSWORD}@postgres/events
       - WAIT_HOSTS=mongo1:27017,influxdb:8086,minio:9000,elasticsearch:9200,postgres:5432
+    depends_on:
+      - mongo1
 
   mongo-on-update:
     environment:

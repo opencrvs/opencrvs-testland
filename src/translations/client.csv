@@ -303,6 +303,7 @@ constants.gender,Gender label,Gender,Sexe
 constants.healthDivision,The description for HEALTH_DIVISION type,Health Division,Division de la santé
 constants.healthcareWorker,The description for Healthcare Worker type,Healthcare Worker,Travailleur de la santé
 constants.history,History heading,History,Histoire
+constants.history,History heading,History,Histoire
 constants.humanName,Formatted full name,{firstName} {middleName} {lastName},{firstName} {middleName} {lastName}
 constants.retryInSeconds,Button label showing remaining seconds before retry is allowed,Retry in {seconds}s,Réessayer dans {seconds}s
 constants.id,ID Label,ID,ID
@@ -329,6 +330,7 @@ constants.last30Days,Label for  preset date range Last 30 days,Last 30 days,30 d
 constants.lastEdited,Label for rejection date in work queue list item,Last edited,Dernière édition
 constants.lastUpdated,Label for Last updated in list item,Last update,Dernière mise à jour
 constants.loadMore,A label for load more,Load more,Charger plus
+constants.localLeader,The description for Community Leader type,Community Leader,Leader communautaire
 constants.localRegistrar,The description for LOCAL_REGISTRAR role,Registrar,Officier d'état civil de district
 constants.location,Label for location,Location,Situation géographique
 constants.male,The duplicates text for male,Male,Homme
@@ -389,6 +391,7 @@ constants.sentOn,Label for rejection date in work queue list item,Sent on,Envoy�
 constants.sent_incomplete,Declaration submitted without completing the required fields,Sent incomplete,Envoyé incomplet
 constants.showMore,Label for show more link,Show next {pageSize},Afficher la page suivante {pageSize}
 constants.skipToMainContent,Label for a keyboard accessibility link which skips to the main content,Skip to main content,Sauter au contenu principal
+constants.socialWorker,The description for Hospital Clerk type,Hospital Clerk,Commis d'hôpital
 constants.socialWorker,The description for Hospital Clerk type,Hospital Clerk,Commis d'hôpital
 constants.startedAt,Label for Started At in list item,Started,Initié par
 constants.startedBy,Label for Started by in list item,Started by,Initié par
@@ -1049,7 +1052,7 @@ event.death.summary.informant.contact.value,This is the contact value of the inf
 event.death.title,This is the title of the summary,{deceased.name.firstname} {deceased.name.surname},{deceased.name.firstname} {deceased.name.surname}
 event.default.action.certificate.template.type.label,Select certificate template,Type,Taper
 event.default.action.certificate.template.type.notFound,Select certificate template options not found,"No template available for this event, contact Admin","Aucun modèle disponible pour cette event, contactez l’admin"
-event.history.role,Label for the role in event history,"{role, select, LOCAL_REGISTRAR {Local Registrar} FIELD_AGENT {Field Agent} POLICE_OFFICER {Police Officer} REGISTRATION_AGENT {Registration Agent} HEALTHCARE_WORKER {Healthcare Worker} HOSPITAL_CLERK {Hospital Clerk} LOCAL_SYSTEM_ADMIN {Administrator} NATIONAL_REGISTRAR {Registrar General} PERFORMANCE_MANAGER {Operations Manager} NATIONAL_SYSTEM_ADMIN {National Administrator} COMMUNITY_LEADER {Community Leader} HEALTH {Health integration} IMPORT {Import integration} NATIONAL_ID {National ID integration} RECORD_SEARCH {Record search integration} WEBHOOK {Webhook} other {Unknown}}","{role, select, LOCAL_REGISTRAR {Officier d'état civil local} POLICE_OFFICER {Agent de police} FIELD_AGENT {Agent de terrain} REGISTRATION_AGENT {Agent d'enregistrement} HEALTHCARE_WORKER {Professionnel de santé} PERFORMANCE_MANAGER {Responsable des opérations} LOCAL_SYSTEM_ADMIN {Administrateur} NATIONAL_SYSTEM_ADMIN {Administrateur national} NATIONAL_REGISTRAR {Registraire général} HOSPITAL_CLERK {Employé administratif à l'hôpital} HEALTH {Intégration santé} IMPORT {Intégration d'importation} NATIONAL_ID {Intégration ID nationale} RECORD_SEARCH {Intégration de recherche d'enregistrements} WEBHOOK {Webhook} COMMUNITY_LEADER {Responsable communautaire} other {Inconnu}}"
+event.history.role,Label for the role in event history,"{role, select, LOCAL_REGISTRAR {Local Registrar} FIELD_AGENT {Field Agent} POLICE_OFFICER {Police Officer} REGISTRATION_AGENT {Registration Officer} HEALTHCARE_WORKER {Healthcare Worker} HOSPITAL_CLERK {Hospital Clerk} LOCAL_SYSTEM_ADMIN {Administrator} NATIONAL_REGISTRAR {Registrar General} PERFORMANCE_MANAGER {Operations Manager} NATIONAL_SYSTEM_ADMIN {National Administrator} COMMUNITY_LEADER {Community Leader} HEALTH {Health integration} IMPORT {Import integration} NATIONAL_ID {National ID integration} RECORD_SEARCH {Record search integration} WEBHOOK {Webhook} other {Unknown}}","{role, select, LOCAL_REGISTRAR {Officier d'état civil local} POLICE_OFFICER {Agent de police} FIELD_AGENT {Agent de terrain} REGISTRATION_AGENT {Agent d'enregistrement} HEALTHCARE_WORKER {Professionnel de santé} PERFORMANCE_MANAGER {Responsable des opérations} LOCAL_SYSTEM_ADMIN {Administrateur} NATIONAL_SYSTEM_ADMIN {Administrateur national} NATIONAL_REGISTRAR {Registraire général} HOSPITAL_CLERK {Employé administratif à l'hôpital} HEALTH {Intégration santé} IMPORT {Intégration d'importation} NATIONAL_ID {Intégration ID nationale} RECORD_SEARCH {Intégration de recherche d'enregistrements} WEBHOOK {Webhook} COMMUNITY_LEADER {Responsable communautaire} other {Inconnu}}"
 event.history.system,Name for system initiated actions in the event history,System,System
 event.history.systemDefaultName,Fallback for system integration name in the event history,System integration,Intégration système
 event.not.downloaded,Shown when user tries to perform an action on event that is not available,Please ensure the event is first assigned and downloaded to the browser.,Veuillez vous assurer que l'événement est d'abord attribué et téléchargé dans le navigateur.
@@ -1117,7 +1120,7 @@ event.tennis-club-membership.summary.field.recommender.firstname.empty,Shown whe
 event.tennis-club-membership.summary.field.recommender.firstname.label,Label for the recommender's first name field,Recommender's First Name,Recommender's First Name
 event.tennis-club-membership.summary.field.recommender.id.empty,Shown when the recommender id is missing in summary,Recommender's id missing,Recommender's id missing
 event.tennis-club-membership.summary.field.recommender.id.label,Label for the recommender's ID field,Recommender's ID,Recommender's ID
-events.history.status,Events status history,"{status, select, Requested {Waiting for external validation} Rejected {{action, select, REGISTER {Registration failed} other {Rejected}}} other {{action, select, CREATE {Declaration started} NOTIFY {Sent incomplete} VALIDATE {Sent for approval} DRAFT {Draft} DECLARE {Sent for review} REGISTER {Registered} PRINT_CERTIFICATE {Certified} REJECT {Rejected} ARCHIVE {Archived} DUPLICATE_DETECTED {Flagged as potential duplicate} MARKED_AS_DUPLICATE {Marked as a duplicate} MARK_AS_NOT_DUPLICATE {Marked not a duplicate} CORRECTED {Record corrected} REQUEST_CORRECTION {Correction requested} APPROVE_CORRECTION {Correction approved} REJECT_CORRECTION {Correction rejected} READ {Viewed} ASSIGN {Assigned} UNASSIGN {Unassigned} UPDATE {Updated} other {Unknown}}}}","{status, select, Requested {En attente de validation externe} Rejected {{action, select, REGISTER {Échec de l’enregistrement} other {Rejeté}}} other {{action, select, CREATE {Déclaration commencée} NOTIFY {Envoyé incomplet} VALIDATE {Envoyé pour approbation} DRAFT {Brouillon} DECLARE {Envoyé pour révision} REGISTER {Enregistré} PRINT_CERTIFICATE {Certifié} REJECT {Rejeté} ARCHIVE {Archivé} DUPLICATE_DETECTED {Marqué comme doublon} MARKED_AS_DUPLICATE {Marqué comme doublon} MARK_AS_NOT_DUPLICATE {Marqué comme non en doublon} CORRECTED {Enregistrement corrigé} REQUEST_CORRECTION {Correction demandée} APPROVE_CORRECTION {Correction approuvée} REJECT_CORRECTION {Correction refusée} READ {Consulté} ASSIGN {Attribué} UNASSIGN {Désattribué} UPDATE {Mis à jour} other {Inconnu}}}}"
+events.history.status,Events status history,"{status, select, Requested {{action, select, REGISTER {Pending registration and UIN creation} other {Waiting for external validation}}} Rejected {{action, select, REGISTER {Registration and UIN creation failed} other {Rejected}}} other {{action, select, CREATE {Declaration started} NOTIFY {Sent incomplete} VALIDATE {Sent for approval} DRAFT {Draft} DECLARE {Sent for review} REGISTER {{userType, select, system {Registered and UIN created} other {Registered}}} PRINT_CERTIFICATE {Certified} REJECT {Rejected} ARCHIVE {Archived} DUPLICATE_DETECTED {Flagged as potential duplicate} MARKED_AS_DUPLICATE {Marked as a duplicate} MARK_AS_NOT_DUPLICATE {Marked not a duplicate} CORRECTED {Record corrected} REQUEST_CORRECTION {Correction requested} APPROVE_CORRECTION {Correction approved} REJECT_CORRECTION {Correction rejected} READ {Viewed} ASSIGN {Assigned} UNASSIGN {Unassigned} UPDATE {Updated} other {Unknown}}}}","{status, select, Requested {{action, select, REGISTER {Enregistrement et création de l’UIN en attente} other {En attente de validation externe}}} Rejected {{action, select, REGISTER {Échec de l’enregistrement et de la création de l’UIN} other {Rejeté}}} other {{action, select, CREATE {Déclaration commencée} NOTIFY {Envoyé incomplet} VALIDATE {Envoyé pour approbation} DRAFT {Brouillon} DECLARE {Envoyé pour révision} REGISTER {{userType, select, system {Enregistré et UIN créé} other {Enregistré}}} PRINT_CERTIFICATE {Certifié} REJECT {Rejeté} ARCHIVE {Archivé} DUPLICATE_DETECTED {Marqué comme doublon} MARKED_AS_DUPLICATE {Marqué comme doublon} MARK_AS_NOT_DUPLICATE {Marqué comme non en doublon} CORRECTED {Enregistrement corrigé} REQUEST_CORRECTION {Correction demandée} APPROVE_CORRECTION {Correction approuvée} REJECT_CORRECTION {Correction refusée} READ {Consulté} ASSIGN {Attribué} UNASSIGN {Désattribué} UPDATE {Mis à jour} other {Inconnu}}}}"
 events.outbox.processingAction,Message in outbox when processing action,"{action, select, DECLARE {Sending} REGISTER {Registering} VALIDATE {Sending for approval} NOTIFY {Sending} REJECT {Sending for updates} ARCHIVE {Archiving} PRINT_CERTIFICATE {Certifying} REQUEST_CORRECTION {Requesting correction} APPROVE_CORRECTION {Approving correction} REJECT_CORRECTION {Rejecting correction} ASSIGN {Assigning} UNASSIGN {Unassigning} other {processing action}}","{action, select, DECLARE {Envoi} REGISTER {Enregistrement} VALIDATE {Envoi pour approbation} NOTIFY {Envoi} REJECT {Envoi pour mise à jour} ARCHIVE {Archivage} PRINT_CERTIFICATE {Certification} REQUEST_CORRECTION {Demande de correction} APPROVE_CORRECTION {Approbation de la correction} REJECT_CORRECTION {Rejet de la correction} ASSIGN {Attribution} UNASSIGN {Désattribution} other {action en cours}}"
 events.outbox.waitingForAction,Message in outbox when waiting for action,"Waiting to {action, select, DECLARE {send} CREATE {send} REGISTER {register} VALIDATE {send for approval} NOTIFY {send} REJECT {send for updates} ARCHIVE {archive} PRINT_CERTIFICATE {certify} REQUEST_CORRECTION {request correction} APPROVE_CORRECTION {approve correction} REJECT_CORRECTION {reject correction} ASSIGN {assign} UNASSIGN {unassign} other {action}}","En attente de {action, select, DECLARE {l'envoi} CREATE {l'envoi} REGISTER {l'enregistrement} VALIDATE {l'envoi pour approbation} NOTIFY {l'envoi} REJECT {l'envoi pour mise à jour} ARCHIVE {l'archivage} PRINT_CERTIFICATE {la certification} REQUEST_CORRECTION {la demande de correction} APPROVE_CORRECTION {l'approbation de la correction} REJECT_CORRECTION {le rejet de la correction} ASSIGN {l'attribution} UNASSIGN {la désattribution} other {l'action}}"
 events.status,Dynamic event status,"{status, select, OUTBOX {Syncing..} CREATED {Draft} VALIDATED {Validated} DRAFT {Draft} DECLARED {Declared} REGISTERED {Registered} CERTIFIED {Certified} REJECTED {Rejected} ARCHIVED {Archived} MARKED_AS_DUPLICATE {Marked as a duplicate} MARK_AS_NOT_DUPLICATE {Marked not a duplicate} NOTIFIED {In progress} other {Unknown}}","{status, select, OUTBOX {Synchronisation..} CREATED {Brouillon} VALIDATED {Validé} DRAFT {Brouillon} DECLARED {Déclaré} REGISTERED {Enregistré} CERTIFIED {Certifié} REJECTED {Nécessite une mise à jour} ARCHIVED {Archivé} MARKED_AS_DUPLICATE {Marqué comme doublon} MARK_AS_NOT_DUPLICATE {Marqué comme non en doublon} NOTIFIED {Notifié} other {Inconnu}}"
@@ -1355,6 +1358,7 @@ form.field.label.someoneElse,Other Label,Someone else,Quelqu'un d'autre
 form.field.label.someoneElseCollector,,Print and issue to someone else,Imprimer et remettre à quelqu'un d'autre
 form.field.label.spouseDetailsExist,,Spouse's details are not available,Pas d'information sur le conjoint
 form.field.label.state,Label for State,Province,Province
+form.field.label.typeOfDocument,,Choose type of supporting document,Choisissez le type de document
 form.field.label.typeOfId,,Type of ID,Type d'identification
 form.field.label.typeOfMarriage,,Type of marriage,Type de mariage
 form.field.label.updatingUser,,Updating user,Mise à jour de l'utilisateur
@@ -1373,6 +1377,7 @@ form.field.label.verbalAutopsyReport,,Verbal autopsy report,Rapport d'autopsie v
 form.field.label.weightAtBirth,,Weight at birth,Poids à la naissance
 form.field.nidNotVerified,,Authenticate,Authentifier
 form.field.nidNotVerifiedReviewSection,,Unauthenticated,Non authentifié
+form.field.nidOffline,,National ID authentication is currently not available offline.,L'authentification de la carte d'identité nationale n'est actuellement pas disponible hors ligne.
 form.field.nidVerificationOngoing,Label for indicating offline status for the user. NID verification is not currently available offline.,National ID authentication is currently not available offline.,L'authentification de l'identifiant national n'est actuellement pas disponible hors ligne
 form.field.nidVerified,,Authenticated,Authentifié
 form.field.previewGroups.primaryAddress,,Usual place of residence,Adresse résidentielle
@@ -2173,17 +2178,19 @@ user.profile.roleType,Title for roleType field,Role,Rôle/Type
 user.profile.sectionTitle.audit,Title for audit section,History,Historique
 user.profile.startDate,Title for startDate field,Start date,Date de début
 user.profile.userName,Title for userName field,Username,Nom d'utilisateur
+userRole.administrator,Name for user role Administrator,Administrator,Administrateur
+userRole.communityLeader, Name for user role Community Leader,Community Leader,Leader communautaire
 userRole.communityLeader,Name for user role Community Leader,Community Leader,Leader communautaire
 userRole.fieldAgent,Name for user role Field Agent,Field Agent,Agent de terrain
 userRole.healthcareWorker,Name for user role Healthcare Worker,Healthcare Worker,Personnel de santé
+userRole.hospitalClerk, Name for user role Hospital Clerk, Hospital Clerk,Clerk d'hôpital
 userRole.hospitalClerk,Name for user role Hospital Clerk,Hospital Clerk,Commis d'hôpital
 userRole.localRegistrar,Name for user role Local Registrar,Local Registrar,Registraire local
-userRole.localSystemAdmin,Name for user role Local System Admin,Local System Admin,Administrateur système local
-userRole.nationalRegistrar,Name for user role National Registrar,National Registrar,Registraire national
-userRole.nationalSystemAdmin,Name for user role National System Admin,National System Admin,Administrateur système national
-userRole.performanceManager,Name for user role Performance Manager,Performance Manager,Gestion des performances
+userRole.nationalAdministrator,Name for user role National Administrator,National Administrator,Administrateur national
+userRole.operationsManager,Name for user role Operations Manager,Operations Manager,Responsable des opérations
 userRole.policeOfficer,Name for user role Police Officer,Police Officer,Officier de police
-userRole.registrationAgent,Name for user role Registration Agent,Registration Agent,Agent d'enregistrement
+userRole.registrarGeneral, Name for user role Registrar General,Registrar General,Registraire général
+userRole.registrationOfficer,Name for user role Registration Officer,Registration Officer,Agent d'enregistrement
 userSetup.complete.instruction,Instruction for the setup complete,Login to your account with your username and newly created password,Connectez-vous maintenant à votre compte avec votre nom d'utilisateur et votre mot de passe nouvellement créé.
 userSetup.complete.title,Title for the setup complete page,Account setup complete,Configuration du compte terminée
 userSetup.instruction,User setup review page instruction,Check the details below to confirm your account details are correct,Vérifiez les détails ci-dessous pour confirmer que les détails de votre compte sont corrects. et faites les changements nécessaires pour confirmer que les détails de votre compte sont corrects.
@@ -2268,7 +2275,8 @@ verifyCertificate.successTitle,title for success alert,Valid QR code,Code QR val
 verifyCertificate.successUrl,title for success alert for url validation,URL Verification,Vérification des URL
 verifyCertificate.timeOut,message when time out after few minute,You been timed out,Délais expirée
 verifyCertificate.toastMessage,Message for the toast when time spend 1 minute,"After verifying the certificate, please close the browser window","Après avoir vérifié le certificat, veuillez fermer la fenêtre du navigateur."
-views.idReader.label.manualInput,Label that shows below the divider on the id reader component,Complete fields below,Remplissez les champs ci-dessous
+views.idReader.label.eSignet,E-signet button label,Authenticate with e-Signet,S'authentifier avec e-Signet
+views.idReader.label.manualInput,Label that shows below the divider on the id reader component,Complete fields below,Complétez les champs ci-dessous
 views.idReader.label.or,Label that shows on the divider,Or,Ou
 views.idVerification.banner.actions.reset,,Reset,Réinitialiser
 views.idVerification.banner.actions.revoke,,Revoke,Révoquer
@@ -2276,6 +2284,7 @@ views.idVerification.banner.authenticated.description,,"This identity has been s
 views.idVerification.banner.authenticated.resetConfirmation.description,,"By clicking ‘Continue,’ you’ll remove ID Authenticated status and unlock the fields for editing.","En cliquant sur «Continuer», vous supprimerez l'état authentifié de l'ID et déverrouillez les champs pour l'édition."
 views.idVerification.banner.authenticated.resetConfirmation.title,,Revoke authenticated ID?,Révoquer une pièce d'identité authentifiée?
 views.idVerification.banner.authenticated.title,,ID Authenticated,ID authentifié
+views.idVerification.banner.failed.description,,The identity data does not match an entry in Farajaland's National ID System,Les données d'identité ne correspondent pas à une entrée du système national d'identification du Farajaland.
 views.idVerification.banner.failed.description,,The identity data does not match an entry in Farajaland's National ID System,Les données d'identité ne correspondent pas à une entrée du système national d'identification du Farajaland.
 views.idVerification.banner.failed.resetConfirmation.description,,"By clicking ‘Continue,’ you’ll clear all information to it’s default state.","En cliquant sur «Continuer», vous effacerez toutes les informations de son état par défaut."
 views.idVerification.banner.failed.resetConfirmation.title,,Reset information?,Réinitialiser les informations?

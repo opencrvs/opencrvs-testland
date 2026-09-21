@@ -1,0 +1,77 @@
+name: Restart and mount encrypted drive
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        description: Environment to reset
+        required: true
+        default: 'qa'
+        options:
+          - qa
+          - staging
+          - development
+jobs:
+  restart-and-mount:
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    steps:
+      - name: Clone country config resource package
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 1
+          path: './${{ github.event.repository.name }}'
+
+      - name: Install doctl
+        run: |
+          wget https://github.com/digitalocean/doctl/releases/download/v1.46.0/doctl-1.46.0-linux-amd64.tar.gz
+          tar xf doctl-1.46.0-linux-amd64.tar.gz
+          sudo mv doctl /usr/local/bin
+
+      - name: Authenticate doctl
+        env:
+          DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+        run: doctl auth init
+
+      - name: Restart Droplet
+        run: doctl compute droplet-action reboot $(doctl compute droplet list ${{ vars.DIGITAL_OCEAN_DROPLET_NAME }} --format ID --no-header) --wait
+
+      - name: Read known hosts
+        run: |
+          cd ${{ github.event.repository.name }}
+          echo "KNOWN_HOSTS<<EOF" >> $GITHUB_ENV
+          sed -i -e '$a\' ./infrastructure/known-hosts
+          cat ./infrastructure/known-hosts >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Install SSH Key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_KEY }}
+          known_hosts: ${{ env.KNOWN_HOSTS }}
+
+      - name: Wait for SSH connection
+        env:
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_ARGS: ${{ vars.SSH_ARGS }}
+        run: |
+          while ! ssh -o StrictHostKeyChecking=no -o ConnectTimeout=5 $SSH_USER@$SSH_HOST $SSH_ARGS exit 2>/dev/null; do
+            echo "Waiting for SSH connection..."
+            sleep 5
+          done
+          echo "SSH connection established."
+
+      - name: Decrypt and restart docker
+        env:
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_ARGS: ${{ vars.SSH_ARGS }}
+          ENCRYPTION_KEY: ${{ secrets.ENCRYPTION_KEY }}
+        run: |
+          ssh $SSH_USER@$SSH_HOST $SSH_ARGS "
+            sudo /opt/opencrvs/infrastructure/cryptfs/mount.sh -p $ENCRYPTION_KEY"
+
+          ssh $SSH_USER@$SSH_HOST $SSH_ARGS "
+            sudo service docker restart"

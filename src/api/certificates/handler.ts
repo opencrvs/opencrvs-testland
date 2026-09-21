@@ -105,7 +105,7 @@ export async function certificateHandler(
       },
       isDefault: false,
       fee: {
-        onTime: 8,
+        onTime: 0,
         late: 11.5,
         delayed: 17
       },
@@ -164,7 +164,7 @@ export async function certificateHandler(
       },
       isDefault: false,
       fee: {
-        onTime: 6,
+        onTime: 0,
         late: 9,
         delayed: 14.5
       },

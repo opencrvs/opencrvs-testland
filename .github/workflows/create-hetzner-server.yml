@@ -1,0 +1,254 @@
+name: Create Hetzner Server
+run-name: Create server for ${{ inputs.environment }} environment
+on:
+    workflow_dispatch:
+      inputs:
+        environment:
+          description: "Short server name (3–5 letters)"
+          required: true
+        type:
+          description: "Environment type (single or multi node)"
+          required: false
+          type: choice
+          default: 'single-node'
+          options:
+            - single-node
+            - multi-node
+        backup_enabled:
+          type: boolean
+          description: Backup enabled
+          default: false
+          required: false
+    workflow_call:
+      inputs:
+        environment:
+          type: string
+          description: Environment to deploy to
+          required: true
+        type:
+          type: string
+          description: Select group tag you want to execute
+          default: 'single-node'
+        backup_enabled:
+          type: boolean
+          description: Backup enabled
+          default: false
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+  TF_PATH: infrastructure/provision-server/hetzner-cloud-empty-server
+  TF_VAR_hcloud_token: ${{ secrets.HCLOUD_TOKEN }}
+  TF_VAR_country_name: ${{ vars.COUNTRY_NAME }}
+  TF_VAR_env_name: ${{ inputs.environment }}
+  TF_VAR_env_type: ${{ inputs.type }}
+  TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+  TF_VAR_cloudflare_zone_id: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+  TERRAFORM_REPO: opencrvs/terraform-state
+  type: ${{ inputs.type }}
+jobs:
+  create-environment:
+    name: Create New HCloud Environment
+    runs-on: ubuntu-24.04
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Checkout repo ${{ github.repository }}
+        uses: actions/checkout@v4
+        with:
+          # Token permissions:  read:org, read:public_key, repo, workflow
+          token: ${{ secrets.GH_TOKEN }}
+          fetch-depth: 0
+          ref: ${{ github.ref_name }}
+      - name: Configure git client for ${{ github.repository }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+      - name: Checkout repo ${{ env.TERRAFORM_REPO }}
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.TERRAFORM_REPO }}
+          ref: main
+          token: ${{ secrets.GH_TOKEN }}
+          path: terraform-state
+      - name: Configure git client for ${{ env.TERRAFORM_REPO }}
+        working-directory: terraform-state/
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+      - name: Pull SSH key pair files from github
+        run: |
+          ssh_key_path=$TF_PATH/.ssh
+          mkdir -p $ssh_key_path
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > $ssh_key_path/id_rsa
+          echo "${{ secrets.SSH_PUBLIC_KEY }}" > $ssh_key_path/id_rsa.pub
+          chmod 600 $ssh_key_path/id_rsa
+          chmod 644 $ssh_key_path/id_rsa.pub
+
+      - name: Restore terraform state
+        run: |
+          mkdir -p terraform-state/${{ vars.COUNTRY_NAME }}
+          [ -f terraform-state/${{ vars.COUNTRY_NAME }}/${{ inputs.environment }}-${{ env.type }}.tfstate ] && \
+          cp terraform-state/${{ vars.COUNTRY_NAME }}/${{ inputs.environment }}-${{ env.type }}.tfstate ${{ env.TF_PATH }}/terraform.tfstate || \
+          echo "Terraform state file not found. Creating a new one."
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.7
+
+      - name: Terraform Init
+        working-directory: ${{ env.TF_PATH }}
+        run: terraform init
+
+      - name: Terraform Apply
+        working-directory: ${{ env.TF_PATH }}
+        run: |
+          terraform apply -auto-approve -input=false
+
+      - name: Store variables from terraform state file
+        id: output
+        working-directory: ${{ env.TF_PATH }}
+        run: |
+          echo "hostname=$TF_VAR_country_name-$TF_VAR_env_name" >> $GITHUB_OUTPUT
+          echo "public_ip=$(terraform output -raw public_ip)" >> $GITHUB_OUTPUT
+          echo "master_ip=$(terraform output -raw master_ip)" >> $GITHUB_OUTPUT
+          if [ ${{ inputs.type }} == 'single-node' ]
+          then
+            echo "master_hostname=$TF_VAR_country_name-$TF_VAR_env_name" >> $GITHUB_OUTPUT
+          else
+            echo "master_hostname=$TF_VAR_country_name-$TF_VAR_env_name-master" >> $GITHUB_OUTPUT
+            echo "worker_hostname=$TF_VAR_country_name-$TF_VAR_env_name-worker" >> $GITHUB_OUTPUT
+            # echo "backup_hostname=$TF_VAR_country_name-$TF_VAR_env_name-backup" >> $GITHUB_OUTPUT
+            echo "worker_ip=$(terraform output -raw worker_ip)" >> $GITHUB_OUTPUT
+            # echo "backup_ip=$(terraform output -raw backup_ip)" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Update terraform state file in ${{ env.TERRAFORM_REPO }}
+        run: |
+          cp ${{ env.TF_PATH }}/terraform.tfstate terraform-state/${{ vars.COUNTRY_NAME }}/${{ inputs.environment }}-${{ env.type }}.tfstate
+          cd terraform-state/
+          if [[ -n "$(git status --porcelain)" ]]; then
+            git add ${{ vars.COUNTRY_NAME }}/${{ inputs.environment }}-${{ env.type }}.tfstate
+            git commit -m "Add environment file for ${{ inputs.environment }} env with type ${{ env.type }}"
+            git push
+          else
+            echo "No changes to commit"
+          fi
+
+      - name: Create environment file for ansible
+        env:
+          ENV: ${{ inputs.environment }}
+          MASTER_IP: ${{ steps.output.outputs.master_ip }}
+          MASTER_HOSTNAME: ${{ steps.output.outputs.master_hostname }}
+          WORKER_IP: ${{ steps.output.outputs.worker_ip }}
+          WORKER_HOSTNAME: ${{ steps.output.outputs.worker_hostname }}
+          # BACKUP_IP: ${{ steps.output.outputs.backup_ip }}
+          # BACKUP_HOSTNAME: ${{ steps.output.outputs.backup_hostname }}
+        run: |
+          TARGET_ENV_BACKUP=$ENV
+          SOURCE_ENV_BACKUP=${ENV/staging/prod}
+          [ ${{ inputs.backup_enabled }} == 'true' ] && \
+          INVENTORY_TEMPLATE_FILE=infrastructure/provision-server/templates/${{ env.type }}-with-backup-ansible-env.yml || \
+          INVENTORY_TEMPLATE_FILE=infrastructure/provision-server/templates/${{ env.type }}-ansible-env.yml
+          cat $INVENTORY_TEMPLATE_FILE | \
+          sed -e "s#SSH_HOST_MASTER#$MASTER_IP#" \
+              -e "s#HOSTNAME_MASTER#$MASTER_HOSTNAME#" \
+              -e "s#SSH_HOST_WORKER#$WORKER_IP#" \
+              -e "s#HOSTNAME_WORKER#$WORKER_HOSTNAME#" \
+              -e "s#TARGET_ENV_BACKUP#$TARGET_ENV_BACKUP#" \
+              -e "s#SOURCE_ENV_BACKUP#$SOURCE_ENV_BACKUP#" \
+              -e "s#ENV_BACKUP#$${{ inputs.environment }}#" \
+              > infrastructure/server-setup/inventory/${{ inputs.environment }}.yml && \
+          echo "Environment file created: infrastructure/server-setup/inventory/${{ inputs.environment }}.yml"
+      - name: Create docker compose
+        run: |
+          [ ! -f infrastructure/docker-compose.${{ inputs.environment }}-deploy.yml ] && \
+          cp infrastructure/provision-server/templates/docker-compose.${{ env.type }}.yml infrastructure/docker-compose.${{ inputs.environment }}-deploy.yml && \
+          echo "Docker-compose created" || \
+          echo "Docker-compose already exists"
+
+      - name: Update workflows
+        run: |
+          workflows=(
+            ".github/workflows/provision.yml"
+            ".github/workflows/deploy.yml"
+            ".github/workflows/seed-data.yml"
+            ".github/workflows/clear-environment.yml"
+          )
+          path=".on.workflow_dispatch.inputs.environment.options"
+
+          # Check if option already exists in first workflows file
+          if ! yq e "$path" "$workflows" | grep -qc "${{ inputs.environment }}"; then
+            echo "Adding new option '${{ inputs.environment }}' to workflows: ${workflows[@]}"
+            for workflow in ${workflows[@]}
+            do
+              yq e "$path += [\"${{ inputs.environment }}\"]" -i "$workflow"
+              echo "Updated workflow $workflow"
+            done
+          else
+            echo "Option '${{ inputs.environment }}' already exists in workflows ${workflows[@]}"
+          fi
+
+      - name: Create environment variables and secrets on GitHub
+        env:
+          MASTER_IP: ${{ steps.output.outputs.master_ip }}
+          DOMAIN: ${{ inputs.environment }}.opencrvs.dev
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          ENVIRONMENT: ${{ inputs.environment }}
+        run: |
+          cat infrastructure/provision-server/templates/environment.variables.${{ env.type }}.tpl | \
+          sed -e "s/#SSH_HOST#/$MASTER_IP/" \
+              -e "s/#DOMAIN#/$DOMAIN/" \
+              > infrastructure/environment.variables
+          echo "Environment variables file created: infrastructure/environment.variables"
+          while read line; do
+            if [[ $line == *"="* ]]; then
+              key=$(echo "$line" | cut -d '=' -f 1)
+              value=$(echo "$line" | cut -d '=' -f 2-)
+              echo "Adding variable: $key"
+              gh variable set --env "$ENVIRONMENT" $key --body "$value"
+            fi
+          done < infrastructure/environment.variables
+          existing_secrets=$(gh secret list --env "$ENVIRONMENT" --json name -q '.[].name')
+          while read line; do
+            key=$(echo "$line" | cut -d '=' -f 1)
+            if echo "$existing_secrets" | grep -qw "$key"; then
+              echo "Secret $key already exists, skipping."
+              continue;
+            fi
+
+            if [[ $line == *"="* ]]; then
+              value=$(echo "$line" | cut -d '=' -f 2-)
+              echo "Adding secret with predefined value: $key"
+            else
+              value=`openssl rand -base64 25 | tr -cd '[:alnum:]._-' ; echo ''`
+              echo "Adding secret with random value: $key"
+            fi
+            gh secret set "$key" --env "$ENVIRONMENT" --body "$value"
+          done < infrastructure/provision-server/templates/environment.secrets.tpl
+          gh secret set SSH_KEY --env ${{ inputs.environment }} < $TF_PATH/.ssh/id_rsa || echo "Failed"
+      - name: Update known-hosts
+        env:
+          SSH_PORT: 22
+          MASTER_IP: ${{ steps.output.outputs.master_ip }}
+          MASTER_HOSTNAME: ${{ steps.output.outputs.master_hostname }}
+          WORKER_IP: ${{ steps.output.outputs.worker_ip }}
+          WORKER_HOSTNAME: ${{ steps.output.outputs.worker_hostname }}
+          # BACKUP_IP: ${{ steps.output.outputs.backup_ip }}
+          # BACKUP_HOSTNAME: ${{ steps.output.outputs.backup_hostname }}
+        run: |
+          echo "Wait few seconds for server to be available" && sleep 10
+          bash ./infrastructure/environments/update-known-hosts.sh ${{ env.MASTER_IP }} ${{ env.SSH_PORT }}
+          if [ ${{ inputs.type }} == 'multi-node' ]
+          then
+            bash ./infrastructure/environments/update-known-hosts.sh ${{ env.WORKER_IP }} ${{ env.SSH_PORT }}
+          fi
+
+      - name: Commit and push changes to ${{ github.repository }}
+        run: |
+          git add infrastructure/server-setup/inventory/${{ inputs.environment }}.yml \
+                  infrastructure/known-hosts \
+                  .github \
+                  infrastructure/docker-compose.${{ inputs.environment }}-deploy.yml
+          git status
+          git commit -m "Add environment files for ${{ inputs.environment }}"
+          git push

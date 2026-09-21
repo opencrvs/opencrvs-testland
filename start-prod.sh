@@ -13,4 +13,16 @@ set -e
 sed -i "s/{{hostname}}/$DOMAIN/g" src/client-config.prod.js
 sed -i "s/{{hostname}}/$DOMAIN/g" src/login-config.prod.js
 
+DEFAULT_MINIO_BUCKET="ocrvs"
+MINIO_BUCKET="${E2E_MINIO_BUCKET:-$DEFAULT_MINIO_BUCKET}"
+
+# '//' is used to indicate a protocol-relative URL. Protocol is resolved at runtime.
+DEFAULT_MINIO_BASE_URL="//minio.$DOMAIN"
+# E2E environment needs to override the MinIO base URL.
+# To keep the configuration experience consistent, all the URL envs are given *with protocol*. This exception is handled in client-config.prod.js.
+MINIO_BASE_URL="${E2E_MINIO_BASE_URL:-$DEFAULT_MINIO_BASE_URL}"
+# Replace the MinIO bucket placeholder. Only e2e should override this without migration.
+sed -i "s/{{minio_bucket}}/$MINIO_BUCKET/g" src/client-config.prod.js
+sed -i "s|{{minio_base_url}}|$MINIO_BASE_URL|g" src/client-config.prod.js
+
 yarn start:prod

@@ -14,8 +14,8 @@
 </text>
 <text fill="#222222" xml:space="default" style="white-space: pre" font-family="Noto Sans" font-size="10" font-weight="400" letter-spacing="0px">
 <tspan x="10%" y="90" >{{countryPrimaryInformant}}&#10;</tspan>
-<tspan x="10%" y="102" >{{location statePrimaryInformantId 'name'}}{{internationalStatePrimaryInformant}}&#10;</tspan>
-<tspan x="10%" y="114" >{{location districtPrimaryInformantId 'name'}}{{internationalDistrictPrimaryInformant}}&#10;</tspan>
+<tspan x="10%" y="102" >{{statePrimaryInformant}}{{internationalStatePrimaryInformant}}&#10;</tspan>
+<tspan x="10%" y="114" >{{districtPrimaryInformant}}{{internationalDistrictPrimaryInformant}}&#10;</tspan>
 <tspan x="10%" y="126" >{{cityPrimaryInformant}}{{internationalCityPrimaryInformant}}{{addressLine1RuralOptionPrimaryInformant}}&#10;</tspan>
 <tspan x="10%" y="138" >{{addressLine1UrbanOptionPrimaryInformant}}{{internationalAddressLine1PrimaryInformant}}&#10;</tspan>
 <tspan x="10%" y="150" >{{addressLine2UrbanOptionPrimaryInformant}}{{internationalAddressLine2PrimaryInformant}}&#10;</tspan>
@@ -27,8 +27,8 @@
 </text>
 <text fill="#222222" xml:space="default" style="white-space: pre" font-family="Noto Sans" font-size="10" font-weight="400" letter-spacing="0px">
 <tspan x="10%" y="210" >{{countryPlaceofbirth}}{{countryPlaceofdeath}}{{countryPlaceofmarriage}}&#10;</tspan>
-<tspan x="10%" y="222" >{{location statePlaceofbirthId 'name'}}{{internationalStatePlaceofbirth}}{{location statePlaceofdeathId 'name'}}{{internationalStatePlaceofdeath}}{{location statePlaceofmarriageId 'name'}}{{internationalStatePlaceofmarriage}}&#10;</tspan>
-<tspan x="10%" y="234" >{{location districtPlaceofbirthId 'name'}}{{internationalDistrictPlaceofbirth}}{{location districtPlaceofdeathId 'name'}}{{internationalDistrictPlaceofdeath}}{{location districtPlaceofmarriageId 'name'}}{{internationalDistrictPlaceofmarriage}}&#10;</tspan>
+<tspan x="10%" y="222" >{{statePlaceofbirth}}{{internationalStatePlaceofbirth}}{{statePlaceofdeath}}{{internationalStatePlaceofdeath}}{{statePlaceofmarriage}}{{internationalStatePlaceofmarriage}}&#10;</tspan>
+<tspan x="10%" y="234" >{{districtPlaceofbirth}}{{internationalDistrictPlaceofbirth}}{{districtPlaceofdeath}}{{internationalDistrictPlaceofdeath}}{{districtPlaceofmarriage}}{{internationalDistrictPlaceofmarriage}}&#10;</tspan>
 <tspan x="10%" y="246" >{{cityPlaceofbirth}}{{internationalCityPlaceofbirth}}{{cityPlaceofdeath}}{{internationalCityPlaceofdeath}}{{cityPlaceofmarriage}}{{internationalCityPlaceofmarriage}}{{addressLine1RuralOptionPlaceofbirth}}{{addressLine1RuralOptionPlaceofdeath}}{{addressLine1RuralOptionPlaceofmarriage}}&#10;</tspan>
 <tspan x="10%" y="258" >{{addressLine1UrbanOptionPlaceofbirth}}{{internationalAddressLine1Placeofbirth}}{{addressLine1UrbanOptionPlaceofdeath}}{{internationalAddressLine1Placeofdeath}}{{addressLine1UrbanOptionPlaceofmarriage}}{{internationalAddressLine1Placeofmarriage}}&#10;</tspan>
 <tspan x="10%" y="270" >{{addressLine2UrbanOptionPlaceofbirth}}{{internationalAddressLine2Placeofbirth}}{{addressLine2UrbanOptionPlaceofdeath}}{{internationalAddressLine2Placeofdeath}}{{addressLine2UrbanOptionPlaceofmarriage}}{{internationalAddressLine2Placeofmarriage}}&#10;</tspan>
@@ -40,8 +40,8 @@
 </text>
 <text fill="#222222" xml:space="default" style="white-space: pre" font-family="Noto Sans" font-size="10" font-weight="400" letter-spacing="0px">
 <tspan x="50%" y="90" >{{countryPrimaryMother}}{{countryPrimaryBride}}&#10;</tspan>
-<tspan x="50%" y="102" >{{location statePrimaryMotherId 'name'}}{{internationalStatePrimaryMother}}{{location statePrimaryBrideId 'name'}}{{internationalStatePrimaryBride}}&#10;</tspan>
-<tspan x="50%" y="114" >{{location districtPrimaryMotherId 'name'}}{{internationalDistrictPrimaryMother}}{{location districtPrimaryBrideId 'name'}}{{internationalDistrictPrimaryBride}}&#10;</tspan>
+<tspan x="50%" y="102" >{{statePrimaryMother}}{{internationalStatePrimaryMother}}{{statePrimaryBride}}{{internationalStatePrimaryBride}}&#10;</tspan>
+<tspan x="50%" y="114" >{{districtPrimaryMother}}{{internationalDistrictPrimaryMother}}{{districtPrimaryBride}}{{internationalDistrictPrimaryBride}}&#10;</tspan>
 <tspan x="50%" y="126" >{{cityPrimaryMother}}{{internationalCityPrimaryMother}}{{addressLine1RuralOptionPrimaryMother}}{{cityPrimaryBride}}{{internationalCityPrimaryBride}}{{addressLine1RuralOptionPrimaryBride}}&#10;</tspan>
 <tspan x="50%" y="138" >{{addressLine1UrbanOptionPrimaryMother}}{{internationalAddressLine1PrimaryMother}}{{addressLine1UrbanOptionPrimaryBride}}{{internationalAddressLine1PrimaryBride}}&#10;</tspan>
 <tspan x="50%" y="150" >{{addressLine2UrbanOptionPrimaryMother}}{{internationalAddressLine2PrimaryMother}}{{addressLine2UrbanOptionPrimaryBride}}{{internationalAddressLine2PrimaryBride}}&#10;</tspan>
@@ -53,8 +53,8 @@
 </text>
 <text fill="#222222" xml:space="default" style="white-space: pre" font-family="Noto Sans" font-size="10" font-weight="400" letter-spacing="0px">
 <tspan x="50%" y="210" >{{countryPrimaryFather}}{{countryPrimaryGroom}}&#10;</tspan>
-<tspan x="50%" y="222" >{{location statePrimaryFatherId 'name'}}{{internationalStatePrimaryFather}}{{location statePrimaryGroomId 'name'}}{{internationalStatePrimaryGroom}}&#10;</tspan>
-<tspan x="50%" y="234" >{{location districtPrimaryFatherId 'name'}}{{internationalDistrictPrimaryFather}}{{location districtPrimaryGroomId 'name'}}{{internationalDistrictPrimaryGroom}}&#10;</tspan>
+<tspan x="50%" y="222" >{{statePrimaryFather}}{{internationalStatePrimaryFather}}{{statePrimaryGroom}}{{internationalStatePrimaryGroom}}&#10;</tspan>
+<tspan x="50%" y="234" >{{districtPrimaryFather}}{{internationalDistrictPrimaryFather}}{{districtPrimaryGroom}}{{internationalDistrictPrimaryGroom}}&#10;</tspan>
 <tspan x="50%" y="246" >{{cityPrimaryFather}}{{internationalCityPrimaryFather}}{{addressLine1RuralOptionPrimaryFather}}{{cityPrimaryGroom}}{{internationalCityPrimaryGroom}}{{addressLine1RuralOptionPrimaryGroom}}&#10;</tspan>
 <tspan x="50%" y="258" >{{addressLine1UrbanOptionPrimaryFather}}{{internationalAddressLine1PrimaryFather}}{{addressLine1UrbanOptionPrimaryGroom}}{{internationalAddressLine1PrimaryGroom}}&#10;</tspan>
 <tspan x="50%" y="270" >{{addressLine2UrbanOptionPrimaryFather}}{{internationalAddressLine2PrimaryFather}}{{addressLine2UrbanOptionPrimaryGroom}}{{internationalAddressLine2PrimaryGroom}}&#10;</tspan>

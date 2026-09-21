@@ -208,6 +208,7 @@ export const informantsSignature = {
     id: 'review.inputs.informantsSignature'
   },
   validator: [],
+  required: true,
   type: 'SIGNATURE',
   allowedFileFormats: ['image/png', 'image/svg'],
   mapping: {

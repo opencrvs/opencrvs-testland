@@ -1,0 +1,225 @@
+# How to use this workflow:
+##################################################################
+# Workflow should be triggered manually from release branch
+# environment: Name of the environment to create
+# core_image_tag: OpenCRVS core image tag
+# multi_node_with_backup: This option will deploy production and staging servers
+# with backup configured (farajaland-backup). Currently we are limited with only 
+# one backup server per countryconfig repository.
+# Country config will be provisioned from latest commit to release branch
+#                 +------------------+
+#                 |  get-environment |
+#                 +--------+---------+
+#                          |
+#                          v
+#                 +------------------+
+#                 |  verify-branch   |
+#                 +--------+---------+
+#                          |
+#          +---------------+-------------------+
+#          |                                   |
+#          v                                   v
+# +-------------------+              +----------------------+
+# | multi_node_with   |              | multi_node_with      |
+# | _backup == false  |              | _backup == true      |
+# +-------------------+              +----------------------+
+#          |                                   |
+#          v                                   v
+# +-------------------+              +---------------------+
+# |   create-server   |              | create-server-      |
+# +--------+----------+              | staging             |
+#          |                         +--------+------------+
+#          v                                  |
+# +-------------------+                       v
+# | check-countryconfig|              +---------------------+
+# +--------+----------+               | create-server-prod  |
+#          |                          +--------+------------+
+#          v                                  |
+# +-------------------+                       v
+# | provision-server  |              +---------------------+
+# +--------+----------+              | check-countryconfig-|
+#          |                         | multi               |
+#          v                         +--------+------------+
+# +-------------------+                       |
+# |     deploy        |                       v
+# +-------------------+              +---------------------+
+#                                    | provision-server-   |
+#                                    | prod                |
+#                                    +--------+------------+
+#                                             |
+#                                             v
+#                                    +---------------------+
+#                                    | provision-server-   |
+#                                    | staging             |
+#                                    +--------+------------+
+#                                             |
+#                                             v
+#                                    +---------------------+
+#                                    |   deploy-staging    |
+#                                    +--------+------------+
+#                                             |
+#                                             v
+#                                    +---------------------+
+#                                    |    deploy-prod      |
+#                                    +---------------------+
+name: Release - Create Environment
+run-name: "Create ${{ github.ref_name }} release environment (core: ${{ inputs.core_image_tag }})"
+on:
+    workflow_dispatch:
+        inputs:
+            core_image_tag:
+                # OpenCRVS Core images are built with 2 tags:
+                # - branch name, e.g.: develop
+                # - commit hash, e.g.: 4ae3004 (latest commit hash)
+                # For environment provision we should always use commit hash
+                description: "Core image tag (use commit hash, not actual tag, e/g: 4ae3004)"
+                required: true
+                type: string
+            multi_node_with_backup:
+              type: boolean
+              description: Multi-node with backup enabled
+              default: true
+              required: false
+jobs:
+    get-environment:
+      runs-on: ubuntu-24.04
+      outputs:
+        environment: ${{ steps.set_environment.outputs.environment }}
+      steps:
+      - name: Set environment name
+        id: set_environment
+        # Convert branch name to environment name
+        # e.g. release-v1.2.3 -> v1-2-3,
+        #      1.2.3 -> v1-2-3
+        run: |
+          environment=$(echo ${{ github.ref_name }} | sed -e 's/\./-/g' -e 's/release\-v//g' -e 's/release\///g')
+          echo "environment=v${environment}" >> $GITHUB_OUTPUT
+    verify-branch:
+      needs: get-environment
+      environment: ${{ needs.get-environment.outputs.environment }}
+      runs-on: ubuntu-24.04
+      steps:
+      - name: Fail if not on release branch
+        run: |
+          echo "Current ref name: ${{ github.ref_name }} and ref: ${{ github.ref }}"
+          if [[ "${{ github.ref }}" != refs/heads/release/* ]]
+          then
+              echo "❌ This workflow must be run from a release/* branch."
+              echo "Please check release documentation for more information: TODO: Add link to documentation"
+              exit 0
+          fi
+    
+    create-server:
+      if: ${{ inputs.multi_node_with_backup == false }}
+      needs: [verify-branch, get-environment]
+      uses: ./.github/workflows/create-hetzner-server.yml
+      with:
+        environment: ${{ needs.get-environment.outputs.environment }}
+        backup_enabled: ${{ inputs.multi_node_with_backup }}
+      secrets: inherit
+    create-server-staging:
+      if: ${{ inputs.multi_node_with_backup == true }}
+      needs: [verify-branch, get-environment]
+      uses: ./.github/workflows/create-hetzner-server.yml
+      with:
+        environment: ${{ needs.get-environment.outputs.environment }}-staging
+        type: 'single-node'
+        backup_enabled: ${{ inputs.multi_node_with_backup }}
+      secrets: inherit
+    create-server-prod:
+      if: ${{ inputs.multi_node_with_backup == true }}
+      needs: [verify-branch, get-environment, create-server-staging]
+      uses: ./.github/workflows/create-hetzner-server.yml
+      with:
+        environment: ${{ needs.get-environment.outputs.environment }}-prod
+        type: 'multi-node'
+        backup_enabled: ${{ inputs.multi_node_with_backup }}
+      secrets: inherit
+
+    check-countryconfig:
+      if: ${{ inputs.multi_node_with_backup == false }}
+      runs-on: ubuntu-24.04
+      needs: [verify-branch, create-server, get-environment]
+      outputs:
+        image_tag: ${{ steps.get_latest_commit.outputs.config_tag }}
+      steps:
+          - name: Checkout repo ${{ github.repository }}
+            uses: actions/checkout@v4
+          - name: Get latest commit SHA
+            id: get_latest_commit
+            run: |
+              git pull
+              git status
+              config_tag=$(git rev-parse HEAD | cut -c 1-7)
+              echo "Latest commit SHA: $config_tag"
+              echo "config_tag=$config_tag" >> $GITHUB_OUTPUT
+    check-countryconfig-multi:
+      if: ${{ inputs.multi_node_with_backup == true }}
+      runs-on: ubuntu-24.04
+      needs: [verify-branch, create-server-staging, create-server-prod, get-environment]
+      outputs:
+        image_tag: ${{ steps.get_latest_commit.outputs.config_tag }}
+      steps:
+          - name: Checkout repo ${{ github.repository }}
+            uses: actions/checkout@v4
+          - name: Get latest commit SHA
+            id: get_latest_commit
+            run: |
+              git pull
+              git status
+              config_tag=$(git rev-parse HEAD | cut -c 1-7)
+              echo "Latest commit SHA: $config_tag"
+              echo "config_tag=$config_tag" >> $GITHUB_OUTPUT
+    provision-server:
+      if: ${{ inputs.multi_node_with_backup == false }}
+      needs: [verify-branch, create-server, check-countryconfig, get-environment]
+      uses: ./.github/workflows/provision.yml
+      with:
+        environment: ${{ needs.get-environment.outputs.environment }}
+      secrets: inherit
+    deploy:
+      if: ${{ inputs.multi_node_with_backup == false }}
+      needs: [verify-branch, provision-server, check-countryconfig, create-server, get-environment]
+      uses: ./.github/workflows/deploy.yml
+      with:
+        environment: ${{ needs.get-environment.outputs.environment }}
+        core-image-tag: ${{ inputs.core_image_tag }}
+        countryconfig-image-tag: ${{ needs.check-countryconfig.outputs.image_tag }}
+        reset: 'true'
+      secrets: inherit
+
+    provision-server-prod:
+      needs: [verify-branch, create-server-prod, check-countryconfig-multi, get-environment]
+      if: ${{ inputs.multi_node_with_backup == true }}
+      uses: ./.github/workflows/provision.yml
+      with:
+        environment: ${{ needs.get-environment.outputs.environment }}-prod
+      secrets: inherit
+    provision-server-staging:
+      needs: [verify-branch, create-server-staging, check-countryconfig-multi, get-environment, provision-server-prod]
+      if: ${{ inputs.multi_node_with_backup == true }}
+      uses: ./.github/workflows/provision.yml
+      with:
+        environment: ${{ needs.get-environment.outputs.environment }}-staging
+        is_env_staging: true
+      secrets: inherit
+    deploy-staging:
+      needs: [verify-branch, provision-server-staging, check-countryconfig-multi, create-server-staging, get-environment]
+      if: ${{ inputs.multi_node_with_backup == true }}
+      uses: ./.github/workflows/deploy.yml
+      with:
+        environment: ${{ needs.get-environment.outputs.environment }}-staging
+        core-image-tag: ${{ inputs.core_image_tag }}
+        countryconfig-image-tag: ${{ needs.check-countryconfig-multi.outputs.image_tag }}
+        reset: 'true'
+      secrets: inherit
+    deploy-prod:
+      needs: [verify-branch, provision-server-prod, check-countryconfig-multi, create-server-prod, get-environment]
+      if: ${{ inputs.multi_node_with_backup == true }}
+      uses: ./.github/workflows/deploy.yml
+      with:
+        environment: ${{ needs.get-environment.outputs.environment }}-prod
+        core-image-tag: ${{ inputs.core_image_tag }}
+        countryconfig-image-tag: ${{ needs.check-countryconfig-multi.outputs.image_tag }}
+        reset: 'true'
+      secrets: inherit

@@ -19,7 +19,8 @@ import {
   or,
   PageTypes,
   field,
-  user
+  user,
+  never
 } from '@opencrvs/toolkit/events'
 import { not } from '@opencrvs/toolkit/conditionals'
 
@@ -193,6 +194,21 @@ export const child = defineFormPage({
     id: 'form.birth.child.title'
   },
   fields: [
+    {
+      id: 'child.nid',
+      type: FieldType.TEXT,
+      label: {
+        defaultMessage: 'National ID',
+        description: 'Label for national ID field for child',
+        id: 'event.birth.action.declare.form.section.child.field.nid.label'
+      },
+      conditionals: [
+        {
+          type: ConditionalType.SHOW,
+          conditional: never()
+        }
+      ]
+    },
     {
       id: 'child.name',
       type: FieldType.NAME,

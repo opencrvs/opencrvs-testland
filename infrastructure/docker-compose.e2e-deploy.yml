@@ -1,0 +1,122 @@
+services:
+  notification:
+    environment:
+      - LANGUAGES=en,fr
+      - SENTRY_DSN=${SENTRY_DSN:-}
+      - QA_ENV=true
+      - NODE_ENV=production
+
+  countryconfig:
+    image: ${DOCKERHUB_ACCOUNT}/${DOCKERHUB_REPO}:${COUNTRY_CONFIG_VERSION}
+    restart: unless-stopped
+    secrets:
+      - jwt-public-key.{{ts}}
+    environment:
+      - NODE_ENV=production
+      - QA_ENV=true
+      - CHECK_INVALID_TOKEN=true
+      - MONGO_URL=mongodb://mongo1/user-mgnt?replicaSet=rs0
+      - SENTRY_DSN=${SENTRY_DSN:-}
+      - SENDER_EMAIL_ADDRESS=${SENDER_EMAIL_ADDRESS}
+      - ALERT_EMAIL=${ALERT_EMAIL}
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_USERNAME=${SMTP_USERNAME}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - SMTP_SECURE=${SMTP_SECURE}
+    deploy:
+      replicas: 1
+    networks:
+      - overlay_net
+
+  client:
+    environment:
+      - DECLARED_DECLARATION_SEARCH_QUERY_COUNT=100
+
+  gateway:
+    environment:
+      - LANGUAGES=en,fr
+      - SENTRY_DSN=${SENTRY_DSN:-}
+      - QA_ENV=true
+      - NODE_ENV=production
+      - DISABLE_RATE_LIMIT=true
+
+  workflow:
+    environment:
+      - LANGUAGES=en,fr
+      - SENTRY_DSN=${SENTRY_DSN:-}
+      - QA_ENV=true
+      - NODE_ENV=production
+
+  search:
+    environment:
+      - SENTRY_DSN=${SENTRY_DSN:-}
+      - QA_ENV=true
+      - NODE_ENV=production
+
+  metrics:
+    environment:
+      - SENTRY_DSN=${SENTRY_DSN:-}
+      - QA_ENV=true
+      - NODE_ENV=production
+
+  auth:
+    environment:
+      - SENTRY_DSN=${SENTRY_DSN:-}
+      - QA_ENV=true
+      - NODE_ENV=production
+
+  user-mgnt:
+    environment:
+      - SENTRY_DSN=${SENTRY_DSN:-}
+      - QA_ENV=true
+      - NODE_ENV=production
+
+  webhooks:
+    environment:
+      - SENTRY_DSN=${SENTRY_DSN:-}
+      - QA_ENV=true
+      - NODE_ENV=production
+
+  config:
+    environment:
+      - SENTRY_DSN=${SENTRY_DSN:-}
+      - QA_ENV=true
+      - NODE_ENV=production
+
+  documents:
+    environment:
+      - QA_ENV=true
+      - NODE_ENV=production
+
+  scheduler:
+    environment:
+      - QA_ENV=true
+      - NODE_ENV=production
+
+  traefik:
+    command:
+      # Use HTTP-01 challenge as the web server is publicly available
+      # https://doc.traefik.io/traefik/https/acme/#httpchallenge
+      # For DNS-01 challenge and manual certificates, check staging and production configurations
+      - --certificatesresolvers.certResolver.acme.email=riku@opencrvs.org
+      - --certificatesresolvers.certResolver.acme.storage=acme.json
+      - --certificatesresolvers.certResolver.acme.caserver=https://acme-v02.api.letsencrypt.org/directory
+      - --certificatesresolvers.certResolver.acme.httpchallenge.entrypoint=web
+      - --certificatesresolvers.certResolver.acme.httpchallenge=true
+
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      - --providers.docker
+      - --providers.docker.swarmMode=true
+      - --api.dashboard=true
+      - --api.insecure=true
+      - --log.level=WARNING
+      - --entrypoints.web.http.redirections.entryPoint.to=websecure
+      - --entrypoints.web.http.redirections.entryPoint.scheme=https
+      - --entrypoints.web.http.redirections.entrypoint.permanent=true
+      - --serverstransport.insecureskipverify=true
+      - --entrypoints.websecure.address=:443
+      - --accesslog=true
+      - --accesslog.format=json
+      - --ping=true

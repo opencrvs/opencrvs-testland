@@ -21,7 +21,8 @@ jobs:
         if: env.blocked == 'true'
         uses: thollander/actions-comment-pull-request@v2
         with:
-          message: "🚫 **Pull requests from 'develop' to 'release-*' are not allowed!**  
+          message:
+            "🚫 **Pull requests from 'develop' to 'release-*' are not allowed!**
             Please create pull request from hotfix into 'release-*' branch instead."
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

@@ -1,8 +1,3 @@
-> [!NOTE]
-> Currently, we do **not** run e2e tests as a check on `opencrvs-countryconfig`-repo PRs. Please ensure your PR doesn't break any e2e tests.
->
-> One method for doing this is to open a PR with these changes to `opencrvs-farajaland` as well, and see if the PR check passes there.
-
 ## Description
 
 Clearly describe what has been changed. Include relevant context or background.

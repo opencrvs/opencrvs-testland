@@ -21,6 +21,14 @@ on:
           - qa
           - staging
           - production
+          - e2e
+          - v17
+          - pentest
+          - v19-beta-staging
+          - v19-beta-prod
+          - fix-analytics
+          - mosip
+          - openfn
       core-image-tag:
         description: Core DockerHub image tag
         required: true
@@ -28,12 +36,12 @@ jobs:
   seed-data:
     environment: ${{ inputs.environment }}
     runs-on: ubuntu-24.04
+    outputs:
+      outcome: ${{ steps.seed.outcome }}
     timeout-minutes: 60
-
     steps:
       - name: Pull the seed-data image
         run: docker pull ghcr.io/opencrvs/ocrvs-data-seeder:${{ inputs.core-image-tag }}
-
       - name: Run docker container
         run: |
           docker run \

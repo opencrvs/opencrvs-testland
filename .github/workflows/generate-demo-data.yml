@@ -1,0 +1,48 @@
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at https://mozilla.org/MPL/2.0/.
+#
+# OpenCRVS is also distributed under the terms of the Civil Registration
+# & Healthcare Disclaimer located at http://opencrvs.org/license.
+#
+# Copyright (C) The OpenCRVS Authors located at https://github.com/opencrvs/opencrvs-core/blob/master/AUTHORS.
+name: Generate demo data
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to run from'
+        required: false
+        default: 'develop'
+      environment:
+        type: choice
+        description: Environment to deploy to
+        required: true
+        options:
+          - production
+          - qa
+          - staging
+
+jobs:
+  generate-demo-data:
+    environment: ${{ github.event.inputs.environment }}
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        node-version: [14.17.0]
+    steps:
+      - name: Checking out git repo
+        uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.inputs.branch }}
+      - name: Install dependencies
+        run: yarn install
+      - name: Start generating test data
+        run: yarn data-generator
+        env:
+          COUNTRY_CONFIG_HOST: ${{ vars.COUNTRY_CONFIG_HOST }}
+          AUTH_HOST: ${{ vars.AUTH_HOST }}
+          GATEWAY_HOST: ${{ vars.GATEWAY_HOST }}
+          CONFIG_HOST: ${{ vars.CONFIG_HOST }}
+          CONCURRENCY: ${{ vars.CONCURRENCY }}

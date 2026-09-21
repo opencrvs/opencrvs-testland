@@ -39,7 +39,10 @@ const motherIdMatchesIfGiven = or(
   motherIdNotProvided,
   field('mother.nid').strictMatches(),
   field('mother.passport').strictMatches(),
-  field('mother.brn').strictMatches()
+  field('mother.brn').strictMatches(),
+  field('mother.verified').strictMatches({
+    value: 'authenticated'
+  })
 )
 
 const childDobWithin9Months = field('child.dob').dateRangeMatches({

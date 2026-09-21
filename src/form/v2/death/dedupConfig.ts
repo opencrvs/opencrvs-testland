@@ -21,7 +21,10 @@ const deceasedIdMatchesIfGiven = or(
   deceasedIdNotProvided,
   field('deceased.nid').strictMatches(),
   field('deceased.passport').strictMatches(),
-  field('deceased.brn').strictMatches()
+  field('deceased.brn').strictMatches(),
+  field('deceased.verified').strictMatches({
+    value: 'authenticated'
+  })
 )
 
 const deceasedDateOfDeathWithin5Days = field(

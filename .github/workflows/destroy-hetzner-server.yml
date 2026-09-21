@@ -1,0 +1,167 @@
+name: Destroy Hetzner Server
+run-name: Destroy server for ${{ github.event.inputs.environment }} environment
+on:
+    workflow_dispatch:
+      inputs:
+        environment:
+          description: "Short server name (3–5 letters)"
+          required: true
+        type:
+          description: "Environment type (single or multi node)"
+          required: false
+          type: choice
+          default: 'single-node'
+          options:
+            - single-node
+            - multi-node
+    workflow_call:
+      inputs:
+        environment:
+          type: string
+          description: Environment to deploy to
+          required: true
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+  TF_PATH: infrastructure/provision-server/hetzner-cloud-empty-server
+  TF_VAR_hcloud_token: ${{ secrets.HCLOUD_TOKEN }}
+  TF_VAR_country_name: ${{ vars.COUNTRY_NAME }}
+  TF_VAR_env_name: ${{ github.event.inputs.environment }}
+  TF_VAR_env_type: ${{ inputs.type }}
+  TF_VAR_cloudflare_api_token: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+  TF_VAR_cloudflare_zone_id: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+  TERRAFORM_REPO: opencrvs/terraform-state
+  type: ${{ inputs.type }}
+jobs:
+  destroy-environment:
+    name: Destroy HCloud Environment
+    runs-on: ubuntu-24.04
+    outputs:
+      ssh_host: ${{ steps.output.outputs.ssh_host }}
+      hostname: ${{ steps.output.outputs.hostname }}
+    environment: ${{ github.event.inputs.environment }}
+    steps:
+      - name: Checkout repo ${{ github.repository }}
+        uses: actions/checkout@v4
+        with:
+          # Token permissions:  read:org, read:public_key, repo, workflow
+          token: ${{ secrets.GH_TOKEN }}
+      - name: Configure git client for ${{ github.repository }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+      - name: Checkout repo ${{ env.TERRAFORM_REPO }}
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.TERRAFORM_REPO }}
+          ref: main
+          token: ${{ secrets.GH_TOKEN }}
+          path: terraform-state
+      - name: Configure git client for ${{ env.TERRAFORM_REPO }}
+        working-directory: terraform-state/
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+      - name: Pull SSH key pair files from github
+        run: |
+          ssh_key_path=$TF_PATH/.ssh
+          mkdir -p $ssh_key_path
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > $ssh_key_path/id_rsa
+          echo "${{ secrets.SSH_PUBLIC_KEY }}" > $ssh_key_path/id_rsa.pub
+          chmod 600 $ssh_key_path/id_rsa
+          chmod 644 $ssh_key_path/id_rsa.pub
+
+      - name: Restore terraform state
+        run: |
+          mkdir -p terraform-state/${{ vars.COUNTRY_NAME }}
+          [ -f terraform-state/${{ vars.COUNTRY_NAME }}/${{ github.event.inputs.environment }}-${{ env.type }}.tfstate ] && \
+          cp terraform-state/${{ vars.COUNTRY_NAME }}/${{ github.event.inputs.environment }}-${{ env.type }}.tfstate ${{ env.TF_PATH }}/terraform.tfstate || \
+          (echo "Terraform state file not found. Please destroy ${{ github.event.inputs.environment }} environment manually" && exit 1)
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.7
+  
+      - name: Terraform Init
+        working-directory: ${{ env.TF_PATH }}
+        run: terraform init
+      - name: Store variables from terraform state file
+        id: output
+        working-directory: ${{ env.TF_PATH }}
+        run: |
+          echo "ssh_host=$(terraform output -raw public_ip)" >> $GITHUB_OUTPUT
+          echo "hostname=$TF_VAR_country_name-$TF_VAR_env_name" >> $GITHUB_OUTPUT
+      - name: Terraform Destroy
+        working-directory: ${{ env.TF_PATH }}
+        run: |
+          terraform destroy -auto-approve -input=false
+
+      - name: Remove terraform state file in ${{ env.TERRAFORM_REPO }}
+        run: |
+          cd terraform-state/
+          if [ -f ${{ vars.COUNTRY_NAME }}/${{ github.event.inputs.environment }}-${{ env.type }}.tfstate ]; then
+            git rm ${{ vars.COUNTRY_NAME }}/${{ github.event.inputs.environment }}-${{ env.type }}.tfstate
+          fi
+          if [[ -n "$(git status --porcelain)" ]]; then
+            git commit -m "Remove environment state file for ${{ github.event.inputs.environment }} env with type ${{ env.type }}"
+            git push
+          else
+            echo "No changes to commit"
+          fi
+
+      - name: Remove environment file for ansible
+        run: |
+          [ -f infrastructure/server-setup/inventory/${{ github.event.inputs.environment }}.yml ] && \
+          git rm infrastructure/server-setup/inventory/${{ github.event.inputs.environment }}.yml && \
+          echo "Environment file removed: infrastructure/server-setup/inventory/${{ github.event.inputs.environment }}.yml" || \
+          echo "infrastructure/server-setup/inventory/${{ github.event.inputs.environment }}.yml doesn't exist"
+      - name: Remove docker compose
+        run: |
+          [ -f infrastructure/docker-compose.${{ github.event.inputs.environment }}-deploy.yml ] && \
+          git rm infrastructure/docker-compose.${{ github.event.inputs.environment }}-deploy.yml && \
+          echo "Docker-compose removed" || \
+          echo "Docker-compose doesn't exist"
+
+      - name: Update workflows
+        run: |
+          workflows=(
+            ".github/workflows/provision.yml"
+            ".github/workflows/deploy.yml"
+            ".github/workflows/seed-data.yml"
+            ".github/workflows/clear-environment.yml"
+          )
+          path=".on.workflow_dispatch.inputs.environment.options"
+
+          # Check if option already exists in first workflows file
+          for workflow in "${workflows[@]}"
+          do
+            yq e "$path |= map(select(. != \"${{ github.event.inputs.environment }}\"))" -i "$workflow"
+            echo "Removed option '${{ github.event.inputs.environment }}' from $workflow"
+          done
+
+      - env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        name: Remove environment variables and secrets on GitHub
+        run: |
+          curl  -X DELETE \
+                -H "Authorization: Bearer $GH_TOKEN" \
+                -H "Accept: application/vnd.github+json" \
+                "https://api.github.com/repos/$OWNER/$REPO/environments/$ENVIRONMENT"
+      - name: Update known-hosts
+        env:
+          HOST_IP: ${{ steps.output.outputs.ssh_host }}
+          HOSTNAME: ${{ steps.output.outputs.hostname }}
+        run: |
+          grep -vE '${{ env.HOST_IP }}|${{ env.HOSTNAME }}' infrastructure/known-hosts > infrastructure/known-hosts.tmp
+          mv infrastructure/known-hosts.tmp infrastructure/known-hosts
+  
+      - name: Commit and push changes to ${{ github.repository }}
+        run: |
+          git add infrastructure/server-setup/inventory/* \
+                  infrastructure/known-hosts \
+                  .github \
+                  infrastructure/*
+          git status
+          git commit -m "Remove environment files for ${{ github.event.inputs.environment }}"
+          git push

@@ -1,0 +1,794 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Workqueue config > should match the snapshot (Workqueue integrity) 1`] = `
+[
+  {
+    "actions": [
+      {
+        "conditionals": [],
+        "type": "VALIDATE",
+      },
+    ],
+    "columns": [
+      {
+        "label": {
+          "defaultMessage": "Date of Event",
+          "description": "Label for workqueue column: dateOfEvent",
+          "id": "workqueues.dateOfEvent",
+        },
+        "value": {
+          "$event": "dateOfEvent",
+        },
+      },
+      {
+        "label": {
+          "defaultMessage": "Last updated",
+          "description": "This is the label for the workqueue column",
+          "id": "workqueue.default.column.modifiedAt",
+        },
+        "value": {
+          "$event": "updatedAt",
+        },
+      },
+    ],
+    "icon": "Draft",
+    "name": {
+      "defaultMessage": "In progress",
+      "description": "Title of in progress workqueue",
+      "id": "workqueues.inProgress.title",
+    },
+    "query": {
+      "clauses": [
+        {},
+      ],
+      "type": "and",
+    },
+    "slug": "in-progress",
+  },
+  {
+    "actions": [
+      {
+        "conditionals": [],
+        "type": "READ",
+      },
+    ],
+    "columns": [
+      {
+        "label": {
+          "defaultMessage": "Date of Event",
+          "description": "Label for workqueue column: dateOfEvent",
+          "id": "workqueues.dateOfEvent",
+        },
+        "value": {
+          "$event": "dateOfEvent",
+        },
+      },
+      {
+        "label": {
+          "defaultMessage": "Last updated",
+          "description": "This is the label for the workqueue column",
+          "id": "workqueue.default.column.modifiedAt",
+        },
+        "value": {
+          "$event": "updatedAt",
+        },
+      },
+    ],
+    "icon": "FileSearch",
+    "name": {
+      "defaultMessage": "Correction requested",
+      "description": "Title of correction requested workqueue",
+      "id": "workqueues.correctionRequested.title",
+    },
+    "query": {
+      "clauses": [
+        {},
+      ],
+      "type": "and",
+    },
+    "slug": "correction-requested",
+  },
+  {
+    "actions": [],
+    "columns": [
+      {
+        "label": {
+          "defaultMessage": "Sent for your attestation",
+          "description": "Label for workqueue column: waitingForAttestation.dateOfEvent",
+          "id": "workqueues.waitingForAttestation.dateOfEvent",
+        },
+        "value": {
+          "$event": "createdAt",
+        },
+      },
+      {
+        "label": {
+          "defaultMessage": "Status of the event",
+          "description": "Label for workqueue column: eventStatus",
+          "id": "workqueues.eventStatus",
+        },
+        "value": {
+          "$event": "status",
+        },
+      },
+    ],
+    "icon": "FileSearch",
+    "name": {
+      "defaultMessage": "Waiting for attestation",
+      "description": "Title of waiting for attestation",
+      "id": "workqueues.waitingForAttestation.title",
+    },
+    "query": {
+      "clauses": [
+        {},
+      ],
+      "type": "and",
+    },
+    "slug": "waiting-for-attestation",
+  },
+  {
+    "actions": [
+      {
+        "conditionals": [],
+        "type": "DEFAULT",
+      },
+    ],
+    "columns": [
+      {
+        "label": {
+          "defaultMessage": "Date of Event",
+          "description": "Label for workqueue column: dateOfEvent",
+          "id": "workqueues.dateOfEvent",
+        },
+        "value": {
+          "$event": "dateOfEvent",
+        },
+      },
+      {
+        "label": {
+          "defaultMessage": "Last updated",
+          "description": "This is the label for the workqueue column",
+          "id": "workqueue.default.column.modifiedAt",
+        },
+        "value": {
+          "$event": "updatedAt",
+        },
+      },
+    ],
+    "icon": "PushPin",
+    "name": {
+      "defaultMessage": "Assigned to you",
+      "description": "Title of assigned to you workqueue",
+      "id": "workqueues.assignedToYou.title",
+    },
+    "query": {
+      "clauses": [
+        {
+          "assignedTo": {
+            "term": {
+              "$userField": "id",
+            },
+            "type": "exact",
+          },
+        },
+      ],
+      "type": "and",
+    },
+    "slug": "assigned-to-you",
+  },
+  {
+    "actions": [
+      {
+        "conditionals": [],
+        "type": "DEFAULT",
+      },
+    ],
+    "columns": [
+      {
+        "label": {
+          "defaultMessage": "Date of Event",
+          "description": "Label for workqueue column: dateOfEvent",
+          "id": "workqueues.dateOfEvent",
+        },
+        "value": {
+          "$event": "dateOfEvent",
+        },
+      },
+      {
+        "label": {
+          "defaultMessage": "Last updated",
+          "description": "This is the label for the workqueue column",
+          "id": "workqueue.default.column.modifiedAt",
+        },
+        "value": {
+          "$event": "updatedAt",
+        },
+      },
+    ],
+    "emptyMessage": {
+      "defaultMessage": "No recent records",
+      "description": "Empty message for recent workqueue",
+      "id": "workqueues.recent.emptyMessage",
+    },
+    "icon": "Timer",
+    "name": {
+      "defaultMessage": "Recent",
+      "description": "Title of recent workqueue",
+      "id": "workqueues.recent.title",
+    },
+    "query": {
+      "clauses": [
+        {
+          "updatedAt": {
+            "term": "last7Days",
+            "type": "timePeriod",
+          },
+          "updatedBy": {
+            "term": {
+              "$userField": "id",
+            },
+            "type": "exact",
+          },
+        },
+      ],
+      "type": "and",
+    },
+    "slug": "recent",
+  },
+  {
+    "actions": [
+      {
+        "conditionals": [],
+        "type": "DEFAULT",
+      },
+    ],
+    "columns": [
+      {
+        "label": {
+          "defaultMessage": "Date of Event",
+          "description": "Label for workqueue column: dateOfEvent",
+          "id": "workqueues.dateOfEvent",
+        },
+        "value": {
+          "$event": "dateOfEvent",
+        },
+      },
+      {
+        "label": {
+          "defaultMessage": "Last updated",
+          "description": "This is the label for the workqueue column",
+          "id": "workqueue.default.column.modifiedAt",
+        },
+        "value": {
+          "$event": "updatedAt",
+        },
+      },
+    ],
+    "emptyMessage": {
+      "defaultMessage": "No notifications",
+      "description": "Empty message for notifications workqueue",
+      "id": "workqueues.notifications.emptyMessage",
+    },
+    "icon": "File",
+    "name": {
+      "defaultMessage": "Notifications",
+      "description": "Title of notifications workqueue",
+      "id": "workqueues.notifications.title",
+    },
+    "query": {
+      "clauses": [
+        {
+          "flags": {
+            "anyOf": [
+              "incomplete",
+            ],
+            "noneOf": [
+              "rejected",
+            ],
+          },
+          "updatedAtLocation": {
+            "term": {
+              "$userField": "primaryOfficeId",
+            },
+            "type": "exact",
+          },
+        },
+      ],
+      "type": "and",
+    },
+    "slug": "requires-completion",
+  },
+  {
+    "actions": [],
+    "columns": [
+      {
+        "label": {
+          "defaultMessage": "Date of Event",
+          "description": "Label for workqueue column: dateOfEvent",
+          "id": "workqueues.dateOfEvent",
+        },
+        "value": {
+          "$event": "dateOfEvent",
+        },
+      },
+      {
+        "label": {
+          "defaultMessage": "Sent for review",
+          "description": "This is the label for the workqueue column",
+          "id": "workqueue.sent-for-review.column.sent-for-review",
+        },
+        "value": {
+          "$event": "updatedAt",
+        },
+      },
+    ],
+    "icon": "FileSearch",
+    "name": {
+      "defaultMessage": "Sent for review",
+      "description": "Title of sent for review workqueue",
+      "id": "workqueues.sentForReview.title",
+    },
+    "query": {
+      "clauses": [
+        {
+          "createdBy": {
+            "term": {
+              "$userField": "id",
+            },
+            "type": "exact",
+          },
+          "flags": {
+            "noneOf": [
+              "rejected",
+            ],
+          },
+          "status": {
+            "terms": [
+              "DECLARED",
+              "NOTIFIED",
+            ],
+            "type": "anyOf",
+          },
+        },
+      ],
+      "type": "and",
+    },
+    "slug": "sent-for-review",
+  },
+  {
+    "actions": [
+      {
+        "conditionals": [],
+        "type": "DEFAULT",
+      },
+    ],
+    "columns": [
+      {
+        "label": {
+          "defaultMessage": "Date of Event",
+          "description": "Label for workqueue column: dateOfEvent",
+          "id": "workqueues.dateOfEvent",
+        },
+        "value": {
+          "$event": "dateOfEvent",
+        },
+      },
+      {
+        "label": {
+          "defaultMessage": "Sent for review",
+          "description": "This is the label for the workqueue column",
+          "id": "workqueue.in-review.column.sent-for-update",
+        },
+        "value": {
+          "$event": "updatedAt",
+        },
+      },
+    ],
+    "icon": "FileSearch",
+    "name": {
+      "defaultMessage": "Ready for review",
+      "description": "Title of ready for review workqueue",
+      "id": "workqueues.inReview.title",
+    },
+    "query": {
+      "clauses": [
+        {
+          "flags": {
+            "noneOf": [
+              "rejected",
+            ],
+          },
+          "status": {
+            "term": "DECLARED",
+            "type": "exact",
+          },
+          "updatedAtLocation": {
+            "term": {
+              "$userField": "primaryOfficeId",
+            },
+            "type": "exact",
+          },
+        },
+      ],
+      "type": "and",
+    },
+    "slug": "in-review",
+  },
+  {
+    "actions": [
+      {
+        "conditionals": [],
+        "type": "DEFAULT",
+      },
+    ],
+    "columns": [
+      {
+        "label": {
+          "defaultMessage": "Date of Event",
+          "description": "Label for workqueue column: dateOfEvent",
+          "id": "workqueues.dateOfEvent",
+        },
+        "value": {
+          "$event": "dateOfEvent",
+        },
+      },
+      {
+        "label": {
+          "defaultMessage": "Sent for review",
+          "description": "This is the label for the workqueue column",
+          "id": "workqueue.in-review-all.column.sent-for-review",
+        },
+        "value": {
+          "$event": "updatedAt",
+        },
+      },
+    ],
+    "icon": "FileSearch",
+    "name": {
+      "defaultMessage": "Ready for review",
+      "description": "Title of ready for review (all) workqueue",
+      "id": "workqueues.inReviewAll.title",
+    },
+    "query": {
+      "clauses": [
+        {
+          "flags": {
+            "noneOf": [
+              "rejected",
+            ],
+          },
+          "status": {
+            "terms": [
+              "DECLARED",
+              "VALIDATED",
+            ],
+            "type": "anyOf",
+          },
+          "updatedAtLocation": {
+            "term": {
+              "$userField": "primaryOfficeId",
+            },
+            "type": "exact",
+          },
+        },
+        {
+          "flags": {
+            "anyOf": [
+              "correction-requested",
+            ],
+          },
+          "updatedAtLocation": {
+            "term": {
+              "$userField": "primaryOfficeId",
+            },
+            "type": "exact",
+          },
+        },
+      ],
+      "type": "or",
+    },
+    "slug": "in-review-all",
+  },
+  {
+    "actions": [
+      {
+        "conditionals": [],
+        "type": "DEFAULT",
+      },
+    ],
+    "columns": [
+      {
+        "label": {
+          "defaultMessage": "Date of Event",
+          "description": "Label for workqueue column: dateOfEvent",
+          "id": "workqueues.dateOfEvent",
+        },
+        "value": {
+          "$event": "dateOfEvent",
+        },
+      },
+      {
+        "label": {
+          "defaultMessage": "Sent for update",
+          "description": "This is the label for the workqueue column",
+          "id": "workqueue.sent-for-update.column.sent-for-update",
+        },
+        "value": {
+          "$event": "updatedAt",
+        },
+      },
+    ],
+    "icon": "FileMinus",
+    "name": {
+      "defaultMessage": "Requires updates",
+      "description": "Title of requires updates workqueue",
+      "id": "workqueues.requiresUpdates.title",
+    },
+    "query": {
+      "clauses": [
+        {
+          "createdBy": {
+            "term": {
+              "$userField": "id",
+            },
+            "type": "exact",
+          },
+          "flags": {
+            "anyOf": [
+              "rejected",
+            ],
+          },
+          "status": {
+            "terms": [
+              "DECLARED",
+              "NOTIFIED",
+            ],
+            "type": "anyOf",
+          },
+        },
+      ],
+      "type": "and",
+    },
+    "slug": "requires-updates-self",
+  },
+  {
+    "actions": [
+      {
+        "conditionals": [],
+        "type": "DEFAULT",
+      },
+    ],
+    "columns": [
+      {
+        "label": {
+          "defaultMessage": "Date of Event",
+          "description": "Label for workqueue column: dateOfEvent",
+          "id": "workqueues.dateOfEvent",
+        },
+        "value": {
+          "$event": "dateOfEvent",
+        },
+      },
+      {
+        "label": {
+          "defaultMessage": "Sent for update",
+          "description": "This is the label for the workqueue column",
+          "id": "workqueue.sent-for-update.column.sent-for-update",
+        },
+        "value": {
+          "$event": "updatedAt",
+        },
+      },
+    ],
+    "icon": "FileMinus",
+    "name": {
+      "defaultMessage": "Requires updates",
+      "description": "Title of requires updates workqueue",
+      "id": "workqueues.requiresUpdates.title",
+    },
+    "query": {
+      "clauses": [
+        {
+          "flags": {
+            "anyOf": [
+              "rejected",
+            ],
+          },
+          "updatedAtLocation": {
+            "term": {
+              "$userField": "primaryOfficeId",
+            },
+            "type": "exact",
+          },
+        },
+      ],
+      "type": "and",
+    },
+    "slug": "requires-updates-office",
+  },
+  {
+    "actions": [],
+    "columns": [
+      {
+        "label": {
+          "defaultMessage": "Date of Event",
+          "description": "Label for workqueue column: dateOfEvent",
+          "id": "workqueues.dateOfEvent",
+        },
+        "value": {
+          "$event": "dateOfEvent",
+        },
+      },
+      {
+        "label": {
+          "defaultMessage": "Sent for approval",
+          "description": "This is the label for the workqueue column",
+          "id": "workqueue.sent-for-approval.column.sent-for-approval",
+        },
+        "value": {
+          "$event": "updatedAt",
+        },
+      },
+    ],
+    "icon": "FileText",
+    "name": {
+      "defaultMessage": "Sent for approval",
+      "description": "Title of sent for approval workqueue",
+      "id": "workqueues.sentForApproval.title",
+    },
+    "query": {
+      "clauses": [
+        {
+          "flags": {
+            "noneOf": [
+              "rejected",
+            ],
+          },
+          "status": {
+            "term": "VALIDATED",
+            "type": "exact",
+          },
+          "updatedBy": {
+            "term": {
+              "$userField": "id",
+            },
+            "type": "exact",
+          },
+        },
+        {
+          "flags": {
+            "anyOf": [
+              "correction-requested",
+            ],
+          },
+          "updatedBy": {
+            "term": {
+              "$userField": "id",
+            },
+            "type": "exact",
+          },
+        },
+      ],
+      "type": "or",
+    },
+    "slug": "sent-for-approval",
+  },
+  {
+    "actions": [
+      {
+        "conditionals": [],
+        "type": "DEFAULT",
+      },
+    ],
+    "columns": [
+      {
+        "label": {
+          "defaultMessage": "Date of Event",
+          "description": "Label for workqueue column: dateOfEvent",
+          "id": "workqueues.dateOfEvent",
+        },
+        "value": {
+          "$event": "dateOfEvent",
+        },
+      },
+      {
+        "label": {
+          "defaultMessage": "Last updated",
+          "description": "This is the label for the workqueue column",
+          "id": "workqueue.default.column.modifiedAt",
+        },
+        "value": {
+          "$event": "updatedAt",
+        },
+      },
+    ],
+    "icon": "FileText",
+    "name": {
+      "defaultMessage": "In external validation",
+      "description": "Title of in external validation workqueue",
+      "id": "workqueues.inExternalValidation.title",
+    },
+    "query": {
+      "clauses": [
+        {
+          "flags": {
+            "anyOf": [
+              "register:requested",
+            ],
+          },
+          "updatedAtLocation": {
+            "term": {
+              "$userField": "primaryOfficeId",
+            },
+            "type": "exact",
+          },
+        },
+      ],
+      "type": "and",
+    },
+    "slug": "in-external-validation",
+  },
+  {
+    "actions": [
+      {
+        "conditionals": [],
+        "type": "PRINT_CERTIFICATE",
+      },
+    ],
+    "columns": [
+      {
+        "label": {
+          "defaultMessage": "Date of Event",
+          "description": "Label for workqueue column: dateOfEvent",
+          "id": "workqueues.dateOfEvent",
+        },
+        "value": {
+          "$event": "dateOfEvent",
+        },
+      },
+      {
+        "label": {
+          "defaultMessage": "Registered",
+          "description": "This is the label for the workqueue column",
+          "id": "workqueue.ready-to-print.column.registered",
+        },
+        "value": {
+          "$event": "updatedAt",
+        },
+      },
+    ],
+    "icon": "Printer",
+    "name": {
+      "defaultMessage": "Ready to print",
+      "description": "Title of ready to print workqueue",
+      "id": "workqueues.readyToPrint.title",
+    },
+    "query": {
+      "clauses": [
+        {
+          "flags": {
+            "anyOf": [
+              "pending-certification",
+            ],
+            "noneOf": [
+              "correction-requested",
+            ],
+          },
+          "status": {
+            "term": "REGISTERED",
+            "type": "exact",
+          },
+          "updatedAtLocation": {
+            "term": {
+              "$userField": "primaryOfficeId",
+            },
+            "type": "exact",
+          },
+        },
+      ],
+      "type": "and",
+    },
+    "slug": "ready-to-print",
+  },
+]
+`;
