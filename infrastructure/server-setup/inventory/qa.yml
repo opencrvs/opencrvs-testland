@@ -87,7 +87,7 @@ all:
 docker-manager-first:
   hosts:
     farajaland-qa:
-      ansible_host: '5.223.46.129'
+      ansible_host: '37.27.182.181'
       data_label: data1
 
 # QA and staging servers are not configured to use workers.
