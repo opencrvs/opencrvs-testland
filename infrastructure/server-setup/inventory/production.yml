@@ -27,6 +27,10 @@ all:
       #- 55.55.55.55 # example jump server IP address
       []
     backup_server_remote_target_directory: /home/backup/backups
+    # Optional. How the Minio attachments backup is taken: "dump" (default) does a full tar.gz dump of Minio data on every run,
+    # "differential" rsyncs only the changed attachments to the backup server, which is much faster for large Minio volumes.
+    # See infrastructure/backups/README.md for details.
+    # minio_backup_type: dump
     single_node: false  # At least 2 nodes are recommended for production environment. Set "single_node: true" at your own discretion.
     users:
       # @todo this is where you define which development team members have access to the server.
