@@ -420,6 +420,21 @@ const TENNIS_CLUB_DECLARATION_FORM = defineDeclarationForm({
           }
         },
         {
+          id: 'applicant.passportPhoto',
+          type: FieldType.FILE,
+          required: false,
+          uncorrectable: true,
+          configuration: {
+            acceptedFileTypes: ['image/jpeg', 'image/png'],
+            maxImageSize: { targetSize: { width: 350, height: 450 } }
+          },
+          label: {
+            defaultMessage: "Applicant's passport photo",
+            description: 'This is the label for the passport photo field',
+            id: 'event.tennis-club-membership.action.declare.form.section.who.field.passportPhoto.label'
+          }
+        },
+        {
           id: 'applicant.idImage',
           type: 'FILE_WITH_OPTIONS',
           required: false,

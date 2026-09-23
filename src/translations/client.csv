@@ -1139,6 +1139,7 @@ event.tennis-club-membership.action.declare.form.section.who.field.dob.error,Thi
 event.tennis-club-membership.action.declare.form.section.who.field.dob.label,This is the label for the field,Applicant's date of birth,Applicant's date of birth
 event.tennis-club-membership.action.declare.form.section.who.field.image.label,This is the label for the field,Applicant's profile picture,Applicant's profile picture
 event.tennis-club-membership.action.declare.form.section.who.field.name.label,This is the title for the name field,Name of applicant,Nom du demandeur
+event.tennis-club-membership.action.declare.form.section.who.field.passportPhoto.label,This is the label for the passport photo field,Applicant's passport photo,Photo d'identité du demandeur
 event.tennis-club-membership.action.declare.form.section.who.title,This is the title of the section,Who is applying for the membership?,Who is applying for the membership?
 event.tennis-club-membership.action.declare.label,This is shown as the action name anywhere the user can trigger the action from,Send an application,Send an application
 event.tennis-club-membership.action.delete.label,This is shown as the action name anywhere the user can trigger the action from,Delete draft,Delete draft
