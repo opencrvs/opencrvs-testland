@@ -1,6 +1,8 @@
 import { expect, test } from '@playwright/test'
 import { createClient } from '@opencrvs/toolkit/api'
+import { ActionType } from '@opencrvs/toolkit/events'
 import { omit } from 'lodash'
+import { v4 as uuidv4 } from 'uuid'
 import { CREDENTIALS, GATEWAY_HOST } from '../../constants'
 import { getToken, login } from '../../helpers'
 import {
@@ -78,6 +80,17 @@ test('Birth registration forwarding to MOSIP attributes the certificate to the r
         }
       )
       .toBe(true)
+  })
+
+  await test.step('release the assignment kept by the asynchronous registration', async () => {
+    // An async REGISTER is only Requested, so the registrar keeps the record.
+    // Unassign it so the UI assigns it again, which downloads the full record.
+    const client = createClient(`${GATEWAY_HOST}/events`, `Bearer ${token}`)
+    await client.event.actions.assignment.unassign.mutate({
+      eventId,
+      transactionId: uuidv4(),
+      type: ActionType.UNASSIGN
+    })
   })
 
   await test.step('log in as the registrar', async () => {
