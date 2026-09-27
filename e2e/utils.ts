@@ -96,6 +96,9 @@ export async function ensureAssignedToUser(
 ) {
   const userFullName = usernameToFullNameMap[username]
 
+  // wait for the network requests to settle
+  await page.waitForLoadState('networkidle')
+
   await page.getByRole('button', { name: 'Action', exact: true }).click()
 
   const actionItem = page.locator('#action-Dropdown-Content li')
