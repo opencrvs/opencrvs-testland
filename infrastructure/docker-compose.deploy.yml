@@ -307,6 +307,7 @@ services:
 
   # Configure elasticsearch
   minio:
+    image: ghcr.io/opencrvs/minio:release.2025-06-13t11-33-47z
     environment:
       - MINIO_ROOT_USER=${MINIO_ROOT_USER}
       - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
@@ -343,7 +344,7 @@ services:
       - overlay_net
 
   minio-mc:
-    image: minio/mc:RELEASE.2025-05-21T01-59-54Z
+    image: ghcr.io/opencrvs/minio-mc:release.2025-05-21t01-59-54z
     entrypoint: >
       /bin/sh -c "
       /usr/bin/mc admin trace --path ocrvs/* minio

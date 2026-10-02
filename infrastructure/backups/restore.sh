@@ -31,6 +31,22 @@ for i in "$@"; do
     LABEL="${i#*=}"
     shift
     ;;
+  --ssh_user=*)
+    SSH_USER="${i#*=}"
+    shift
+    ;;
+  --ssh_host=*)
+    SSH_HOST="${i#*=}"
+    shift
+    ;;
+  --ssh_port=*)
+    SSH_PORT="${i#*=}"
+    shift
+    ;;
+  --remote_dir=*)
+    REMOTE_DIR="${i#*=}"
+    shift
+    ;;
   *) ;;
   esac
 done
@@ -48,6 +64,10 @@ print_usage_and_exit() {
   echo ""
   echo "If your Elasticsearch is password protected, an admin user's credentials can be given as environment variables:"
   echo "ELASTICSEARCH_ADMIN_USER=your_user ELASTICSEARCH_ADMIN_PASSWORD=your_pass"
+  echo ""
+  echo "If the backup was taken with MINIO_BACKUP_TYPE=differential (see backup.sh), pass the same value here so Minio"
+  echo "is restored by rsyncing straight from the backup server instead of extracting a local dump:"
+  echo "MINIO_BACKUP_TYPE=differential --ssh_user=XXX --ssh_host=XXX --ssh_port=XXX --remote_dir=XXX"
   exit 1
 }
 
@@ -59,6 +79,23 @@ fi
 if ! [[ "$REPLICAS" =~ ^[0-9]+$ ]]; then
   echo "Script must be passed a positive integer number of replicas"
   exit 1
+fi
+
+MINIO_BACKUP_TYPE=${MINIO_BACKUP_TYPE:-dump}
+if [ "$MINIO_BACKUP_TYPE" != "dump" ] && [ "$MINIO_BACKUP_TYPE" != "differential" ]; then
+  echo "Error: MINIO_BACKUP_TYPE must be either 'dump' or 'differential'"
+  exit 1
+fi
+
+if [ "$MINIO_BACKUP_TYPE" = "differential" ]; then
+  if [ "$IS_LOCAL" = true ]; then
+    echo "Error: MINIO_BACKUP_TYPE=differential requires a remote backup server and cannot be used in a local environment"
+    exit 1
+  fi
+  if [ -z "$SSH_USER" ] || [ -z "$SSH_HOST" ] || [ -z "$SSH_PORT" ] || [ -z "$REMOTE_DIR" ]; then
+    echo "Error: --ssh_user, --ssh_host, --ssh_port and --remote_dir are all required when MINIO_BACKUP_TYPE=differential."
+    print_usage_and_exit
+  fi
 fi
 
 if [ "$IS_LOCAL" = false ]; then
@@ -300,7 +337,14 @@ fi
 ##
 # ------ MINIO -----
 ##
-tar -xzvf $ROOT_PATH/backups/minio/ocrvs-$LABEL.tar.gz -C $ROOT_PATH/minio
+if [ "$MINIO_BACKUP_TYPE" = "dump" ]; then
+  tar -xzvf $ROOT_PATH/backups/minio/ocrvs-$LABEL.tar.gz -C $ROOT_PATH/minio
+else
+  echo "Restoring Minio by rsyncing the differential backup from the backup server"
+  rsync -a -r --delete --progress --exclude=".minio.sys/config/iam/" --rsh="ssh -o StrictHostKeyChecking=no -p $SSH_PORT" \
+    $SSH_USER@$SSH_HOST:$REMOTE_DIR/minio/ \
+    $ROOT_PATH/minio/
+fi
 
 # Restart minio again so it picks up the updated files
 docker service update --force opencrvs_minio
