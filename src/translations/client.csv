@@ -184,6 +184,7 @@ certificate.receipt.subheader,Subheader for receipt on payment on certificate,{e
 certificate.selectTemplate,Select certificate template,Type,Taper
 certificate.selectedTemplate,Selected certificate template,Selected certificate template,Modèle de certificat sélectionné
 certificates.birth.certificate,Birth Certificate,Birth Certificate,Acte de naissance
+certificates.birth.notificationReceipt,The label for a birth notification receipt,Birth notification receipt,Reçu de notification de naissance
 certificates.birth.certificate.copy,Birth Certificate Certified Copy,Birth Certificate Certified Copy,Copie certifiée conforme de l'acte de naissance
 certificates.birth.printedCertificateCount,Number of printed copies, Copy #{copiesPrintedForTemplate}, Copie #{copiesPrintedForTemplate}
 certificates.birth.registration.receipt,Birth Registration Receipt,Birth Registration Receipt,Reçu d'enregistrement de naissance
@@ -636,12 +637,13 @@ countries.JOR,,Jordan,Jordanie
 countries.JPN,,Japan,Japon
 countries.KAZ,,Kazakhstan,Kazakhstan
 countries.KEN,,Kenya,Kenya
-countries.KGZ,,Lao People's Democratic Republic Republic,République démocratique populaire lao
+countries.KGZ,,Kyrgyzstan,Kirghizistan
 countries.KHM,,Cambodia,Cambodge
 countries.KIR,,Kiribati,Kiribati
 countries.KNA,,Saint Kitts and Nevis,Saint-Kitts-et-Nevis
 countries.KOR,,Republic of Korea,République de Corée
 countries.KWT,,Kuwait,Koweït
+countries.LAO,,Lao People's Democratic Republic,République démocratique populaire lao
 countries.LBN,,Lebanon,Liban
 countries.LBR,,Liberia,Liberia
 countries.LBY,,Libya,Libye
@@ -661,7 +663,7 @@ countries.MDG,,Madagascar,Madagascar
 countries.MDV,,Maldives,Maldives
 countries.MEX,,Mexico,Mexique
 countries.MHL,,Marshall Islands,Îles Marshall
-countries.MKD,,The former Yugoslav Republic of Macedonia,L'ancienne République yougoslave de Macédoine
+countries.MKD,,North Macedonia,Macédoine du Nord
 countries.MLI,,Mali,Mali
 countries.MLT,,Malta,Malte
 countries.MMR,,Myanmar,Myanmar
@@ -743,7 +745,7 @@ countries.TLS,,Timor-Leste,Timor-Leste
 countries.TON,,Tonga,Tonga
 countries.TTO,,Trinidad and Tobago,Trinité-et-Tobago
 countries.TUN,,Tunisia,Tunisie
-countries.TUR,,Turkey,Turquie
+countries.TUR,,Türkiye,Türkiye
 countries.TUV,,Tuvalu,Tuvalu
 countries.TZA,,United Republic of Tanzania,République-Unie de Tanzanie
 countries.UGA,,Uganda,Ouganda
@@ -902,6 +904,8 @@ event.birth.custom.action.issue-vc.field.requester.option.mother,Requester optio
 event.birth.custom.action.issue-vc.field.supporting-copy,Supporting copy shown before issuing verifiable credential,Select the requester you would like to issue this verifiable credential to.,Sélectionnez le demandeur à qui vous souhaitez délivrer cette attestation vérifiable.
 event.birth.custom.action.validate-declaration.audit-history-label,The label to show in audit history for the validate action,Validated,Validé
 event.birth.custom.action.validate-declaration.field.comments.label,This is the label for the comments field for the validate declaration action,Comments,Commentaires
+event.birth.custom.action.validate-declaration.field.print-notification-receipt.button.label,The print button's label on the validate declaration action,Print notification receipt,Imprimer le reçu de notification
+event.birth.custom.action.validate-declaration.field.print-notification-receipt.label,This is the label for the notification receipt print button on the validate declaration action,Notification receipt,Reçu de notification
 event.birth.custom.action.validate-declaration.label,This is shown as the action name anywhere the user can trigger the action from,Validate,Valider
 event.birth.custom.action.validate-declaration.supportingCopy,This is the supporting copy for the Validate declaration -action,Validating this declaration confirms it meets all requirements and is eligible for registration.,La validation de cette déclaration confirme qu'elle répond à toutes les exigences et est éligible à l'enregistrement.
 event.birth.flag.pending-first-certificate-issuance,Pending first certificate issuance,Pending first certificate issuance,En attente de la délivrance d'une copie certifiée conforme
@@ -1122,6 +1126,7 @@ event.tennis-club-membership.action.certificate.form.label,This is what this for
 event.tennis-club-membership.action.certificate.form.section.requester.informant.label,This is the label for the field,Print and issue Informant,Print and issue Informant
 event.tennis-club-membership.action.certificate.form.section.requester.label,This is the label for the field,Requester,Requester
 event.tennis-club-membership.action.certificate.form.section.requester.other.label,This is the label for the field,Print and issue someone else,Print and issue someone else
+event.tennis-club-membership.action.certificate.form.section.requester.recommender.label,This is the label for the field,Print and issue to recommender,Imprimer et délivrer au parrain
 event.tennis-club-membership.action.certificate.form.section.requester.printInAdvance.label,This is the label for the field,Print in advance,Imprimer à l'avance pour les signatures et la collecte
 event.tennis-club-membership.action.certificate.form.section.who.title,This is the title of the section,Print certified copy,Imprimer une copie certifiée
 event.tennis-club-membership.action.collect-certificate.label,This is shown as the action name anywhere the user can trigger the action from,Print certificate,Imprimer le certificat
@@ -1135,6 +1140,7 @@ event.tennis-club-membership.action.declare.form.section.who.field.dob.error,Thi
 event.tennis-club-membership.action.declare.form.section.who.field.dob.label,This is the label for the field,Applicant's date of birth,Applicant's date of birth
 event.tennis-club-membership.action.declare.form.section.who.field.image.label,This is the label for the field,Applicant's profile picture,Applicant's profile picture
 event.tennis-club-membership.action.declare.form.section.who.field.name.label,This is the title for the name field,Name of applicant,Nom du demandeur
+event.tennis-club-membership.action.declare.form.section.who.field.passportPhoto.label,This is the label for the passport photo field,Applicant's passport photo,Photo d'identité du demandeur
 event.tennis-club-membership.action.declare.form.section.who.title,This is the title of the section,Who is applying for the membership?,Who is applying for the membership?
 event.tennis-club-membership.action.declare.label,This is shown as the action name anywhere the user can trigger the action from,Send an application,Send an application
 event.tennis-club-membership.action.delete.label,This is shown as the action name anywhere the user can trigger the action from,Delete draft,Delete draft

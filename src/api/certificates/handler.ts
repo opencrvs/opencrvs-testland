@@ -215,6 +215,37 @@ export async function certificateHandler(
       fonts: notoSansFont
     },
     {
+      /*
+       * Printed from the ALPHA_PRINT_BUTTON configured on the
+       * VALIDATE_DECLARATION custom action, so it must render for a record that
+       * has not been printed or registered yet. Never offered to a certificate
+       * collector.
+       */
+      id: 'v2.birth-notification-receipt',
+      event: Event.Birth,
+      isV2Template: true,
+      label: {
+        id: 'certificates.birth.notificationReceipt',
+        defaultMessage: 'Birth notification receipt',
+        description: 'The label for a birth notification receipt'
+      },
+      isDefault: false,
+      fee: {
+        onTime: 0,
+        late: 0,
+        delayed: 0
+      },
+      svgUrl:
+        '/api/countryconfig/certificates/v2.birth-notification-receipt.svg',
+      fonts: notoSansFont,
+      conditionals: [
+        {
+          type: 'SHOW',
+          conditional: never()
+        }
+      ]
+    },
+    {
       id: 'v2.birth-certificate',
       event: Event.Birth,
       isV2Template: true,
