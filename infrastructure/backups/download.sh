@@ -48,11 +48,21 @@ done
 
 print_usage_and_exit() {
   echo 'Usage: ./download.sh --passphrase=XXX --ssh_user=XXX --ssh_host=XXX --ssh_port=XXX --remote_dir=XXX'
+  echo ""
+  echo "If the backup was taken with MINIO_BACKUP_TYPE=differential (see backup.sh), the encrypted archive"
+  echo "does not contain a Minio dump, so pass the same value here to skip trying to download/restore it:"
+  echo "MINIO_BACKUP_TYPE=differential"
   exit 1
 }
 
 if [ -z "$LABEL" ]; then
   LABEL=$(date +%Y-%m-%d)
+fi
+
+MINIO_BACKUP_TYPE=${MINIO_BACKUP_TYPE:-dump}
+if [ "$MINIO_BACKUP_TYPE" != "dump" ] && [ "$MINIO_BACKUP_TYPE" != "differential" ]; then
+  echo "Error: MINIO_BACKUP_TYPE must be either 'dump' or 'differential'"
+  exit 1
 fi
 
 if [ -z "$SSH_USER" ] ; then
@@ -79,7 +89,7 @@ fi
 #-------------------------------------------
 
 # Create a temporary directory to store the backup files before decrypting
-BACKUP_RAW_FILES_DIR=/tmp/backup-$LABEL
+BACKUP_RAW_FILES_DIR=/data/backup-$LABEL
 REMOTE_DIR_WITH_DATE="$REMOTE_DIR/${LABEL:-$BACKUP_DATE}"
 
 mkdir -p $BACKUP_RAW_FILES_DIR
@@ -93,29 +103,27 @@ echo "Copied backup files from server to $BACKUP_RAW_FILES_DIR/${LABEL}.tar.gz.e
 
 # Decrypt
 openssl enc -d -aes-256-cbc -salt -pbkdf2 -in $BACKUP_RAW_FILES_DIR/${LABEL}.tar.gz.enc --out $BACKUP_RAW_FILES_DIR/${LABEL}.tar.gz -pass pass:$PASSPHRASE
+rm $BACKUP_RAW_FILES_DIR/${LABEL}.tar.gz.enc
 
 # Extract
 mkdir -p $BACKUP_RAW_FILES_DIR/extract
 tar -xvf $BACKUP_RAW_FILES_DIR/${LABEL}.tar.gz -C $BACKUP_RAW_FILES_DIR/extract
+rm $BACKUP_RAW_FILES_DIR/${LABEL}.tar.gz
 
-# Delete previous days restore(s) and move the newly downloaded one in place
-for BACKUP_DIR in /data/backups/*; do
-  if [ -d "$BACKUP_DIR" ]; then
-    rm -rf $BACKUP_DIR/*
-  fi
+BACKUP_SERVICES=(
+  elasticsearch
+  influxdb
+  vsexport
+  mongo
+  postgres
+)
+[ "$MINIO_BACKUP_TYPE" = "dump" ] && BACKUP_SERVICES+=(minio)
+
+for service in "${BACKUP_SERVICES[@]}"; do
+  rm -rf /data/backups/$service/*
+  mv $BACKUP_RAW_FILES_DIR/extract/$service/* /data/backups/$service/
 done
 
-
-mv $BACKUP_RAW_FILES_DIR/extract/elasticsearch/* /data/backups/elasticsearch/
-
-mv $BACKUP_RAW_FILES_DIR/extract/influxdb /data/backups/influxdb/${LABEL}
-mv $BACKUP_RAW_FILES_DIR/extract/minio/ocrvs-${LABEL}.tar.gz /data/backups/minio/
-mv $BACKUP_RAW_FILES_DIR/extract/vsexport/ocrvs-${LABEL}.tar.gz /data/backups/vsexport/
-mv $BACKUP_RAW_FILES_DIR/extract/mongo/* /data/backups/mongo/
-mv $BACKUP_RAW_FILES_DIR/extract/postgres/* /data/backups/postgres/
-
 # Clean up
-rm $BACKUP_RAW_FILES_DIR/${LABEL}.tar.gz.enc
-rm $BACKUP_RAW_FILES_DIR/${LABEL}.tar.gz
 rm -r $BACKUP_RAW_FILES_DIR
 echo "Done"
