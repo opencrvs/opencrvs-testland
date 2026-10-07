@@ -237,6 +237,100 @@ const TENNIS_CLUB_DECLARATION_REVIEW = {
   ]
 }
 
+/**
+ * QA pages for the page "Clear" button (opencrvs-core#13459), shaped like
+ * Somalia's residence member pages: no required fields, and a checkbox kept
+ * off the review page that switches between date of birth and age. Shown only
+ * when "No recommender" is ticked, so the regular declaration flow is unchanged.
+ */
+function householdMemberPage(memberNumber: 1 | 2) {
+  const id = `householdMember${memberNumber}`
+
+  return {
+    id,
+    type: PageTypes.enum.FORM,
+    conditional: field('recommender.none').isEqualTo(true),
+    title: {
+      id: `event.tennis-club-membership.action.declare.form.section.${id}.title`,
+      defaultMessage: `Household member ${memberNumber}`,
+      description: 'This is the title of the section'
+    },
+    showClearButton: true,
+    fields: [
+      {
+        id: `${id}.nationality`,
+        type: FieldType.COUNTRY,
+        required: false,
+        label: {
+          id: 'form.field.label.nationality',
+          defaultMessage: 'Nationality',
+          description: 'Label for nationality field'
+        }
+      },
+      {
+        id: `${id}.name`,
+        type: FieldType.NAME,
+        required: false,
+        hideLabel: true,
+        configuration: { maxLength: MAX_NAME_LENGTH },
+        label: {
+          id: 'event.tennis-club-membership.action.declare.form.section.householdMember.field.name.label',
+          defaultMessage: "Member's name",
+          description: 'This is the label for the field'
+        }
+      },
+      {
+        id: `${id}.dob`,
+        type: FieldType.DATE,
+        required: false,
+        conditionals: [
+          {
+            type: ConditionalType.SHOW,
+            conditional: not(field(`${id}.exactDateUnknown`).isEqualTo(true))
+          }
+        ],
+        label: {
+          id: 'form.field.label.dateOfBirth',
+          defaultMessage: 'Date of birth',
+          description: 'Label for date of birth field'
+        }
+      },
+      {
+        id: `${id}.exactDateUnknown`,
+        type: FieldType.CHECKBOX,
+        required: false,
+        conditionals: [
+          {
+            type: ConditionalType.DISPLAY_ON_REVIEW,
+            conditional: never()
+          }
+        ],
+        label: {
+          id: 'form.field.label.exactDateUnknown',
+          defaultMessage: 'Exact date of birth unknown',
+          description: 'Label for exact date of birth unknown checkbox'
+        }
+      },
+      {
+        id: `${id}.ageInYears`,
+        type: FieldType.NUMBER,
+        required: false,
+        conditionals: [
+          {
+            type: ConditionalType.SHOW,
+            conditional: field(`${id}.exactDateUnknown`).isEqualTo(true)
+          }
+        ],
+        label: {
+          id: 'form.field.label.ageInYears',
+          defaultMessage: 'Age in years',
+          description: 'Label for age in years field'
+        }
+      }
+    ]
+  }
+}
+
 const TENNIS_CLUB_DECLARATION_FORM = defineDeclarationForm({
   label: {
     id: 'event.tennis-club-membership.action.declare.form.label',
@@ -759,7 +853,9 @@ const TENNIS_CLUB_DECLARATION_FORM = defineDeclarationForm({
           }
         }
       ]
-    }
+    },
+    householdMemberPage(1),
+    householdMemberPage(2)
   ]
 })
 
