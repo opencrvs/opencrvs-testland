@@ -455,7 +455,7 @@ correction.corrector.father,Label for father option in certificate correction fo
 correction.corrector.groom,Label for groom option in certificate correction form,Groom,Marié
 correction.corrector.identity.instruction,The title for the corrector form,Please verify the identity of the person making this request,Please verify the identity of the person making this request
 correction.corrector.identity.verified,Label for verified option in corrector identity check page,I have verified their identity,I have verified their identity
-correction.corrector.identity.verified.label,The title for the corrector form,@todo,@todo
+correction.corrector.identity.verified.label,The title for the corrector form,Identity verified,Identité vérifiée
 correction.corrector.informant,Label for informant option in certificate correction form,"Informant ({informant, select, MOTHER {Mother} FATHER {Father} GRANDFATHER {Grandfather} GRANDMOTHER {Grandmother} BROTHER {Brother} SISTER {Sister} LEGAL_GUARDIAN {Legal guardian} BRIDE {Bride} GROOM {Groom} HEAD_OF_GROOM_FAMILY {Head of groom's family} HEAD_OF_BRIDE_FAMILY {Head of bride's family} SPOUSE {Spouse} SON {Son} DAUGHTER {Daughter} SON_IN_LAW {Son in law} DAUGHTER_IN_LAW {Daughter in law} GRANDSON {Grandson} GRANDDAUGHTER {Granddaughter} other {{informant}}})","Informateur ({informant, select, MOTHER {Mère} FATHER {Père} GRANDFATHER {Grand-père} GRANDMOTHER {Grand-mère} BROTHER {Frère} SISTER {Sœur} LEGAL_GUARDIAN {Tuteur légal} BRIDE {Mariée} GROOM {Marié} HEAD_OF_GROOM_FAMILY {Chef de la famille du marié} HEAD_OF_BRIDE_FAMILY {Chef de la famille de la mariée} SPOUSE {Conjoint} SON {Fils} DAUGHTER {Fille} SON_IN_LAW {Beau-fils} DAUGHTER_IN_LAW {Belle-fille} GRANDSON {Petit-fils} GRANDDAUGHTER {Petite-fille} other {{informant}}})"
 correction.corrector.legalGuardian,Label for legal guardian option in certificate correction form,Legal guardian,Tuteur légal
 correction.corrector.me,Label for registrar option in certificate correction form,Me,Moi
@@ -1079,6 +1079,9 @@ event.tennis-club-membership.action.certificate.form.section.who.title,This is t
 event.tennis-club-membership.action.collect-certificate.label,This is shown as the action name anywhere the user can trigger the action from,Print certificate,Imprimer le certificat
 event.tennis-club-membership.action.declare.form.label,This is what this form is referred as in the system,Tennis club membership application,Tennis club membership application
 event.tennis-club-membership.action.declare.form.review.title,Title of the form to show in review page,"{applicant.name.firstname, select, __EMPTY__{{applicant.name.surname, select, __EMPTY__{Member declaration} other{Member declaration for {applicant.name.surname}}}} other{{applicant.name.surname, select, __EMPTY__{Member declaration for {applicant.name.firstname}} other{Member declaration for {applicant.name.firstname} {applicant.name.surname}}}}}","{applicant.name.firstname, select, __EMPTY__ {{applicant.name.surname, select, __EMPTY__ {Déclaration des membres} other {Déclaration des membres pour {applicant.name.surname}}}} other {{applicant.name.surname, select, __EMPTY__ {Déclaration des membres pour {applicant.name.firstname}} other {Déclaration des membres pour {applicant.name.firstname} {applicant.name.surname}}}}}"
+event.tennis-club-membership.action.declare.form.section.householdMember.field.name.label,This is the label for the field,Member's name,Nom du membre
+event.tennis-club-membership.action.declare.form.section.householdMember1.title,This is the title of the section,Household member 1,Membre du ménage 1
+event.tennis-club-membership.action.declare.form.section.householdMember2.title,This is the title of the section,Household member 2,Membre du ménage 2
 event.tennis-club-membership.action.declare.form.section.recommender.field.firstname.label,This is the label for the field,Recommender's first name,Recommender's first name
 event.tennis-club-membership.action.declare.form.section.recommender.field.id.label,This is the label for the field,Recommender's membership ID,Recommender's membership ID
 event.tennis-club-membership.action.declare.form.section.recommender.field.none.label,This is the label for the field,No recommender,No recommender
@@ -1164,6 +1167,7 @@ form.field.label.No,Label for form field radio option No,No,Non
 form.field.label.Yes,Label for form field radio option Yes,Yes,Ouio
 form.field.label.addFile,,Upload,Télécharger
 form.field.label.addressLine2,,Area / Ward / Mouja / Village,Zone / Quartier / Mouja / Village
+form.field.label.ageInYears,Label for age in years field,Age in years,Âge en années
 form.field.label.ageOfBride,,Age of bride,Âge de la mariée
 form.field.label.ageOfDeceased,,Age of deceased,âge du défunt
 form.field.label.ageOfFather,,Age of father,Âge du père
@@ -1233,6 +1237,7 @@ form.field.label.educationAttainmentNone,Option for form field: no education,No 
 form.field.label.email,,Email,e-mail
 form.field.label.empty,empty string, ,
 form.field.label.exactDateOfBirthUnknown,,Exact date of birth unknown,Date de naissance exacte inconnue
+form.field.label.exactDateUnknown,Label for exact date of birth unknown checkbox,Exact date of birth unknown,Date de naissance exacte inconnue
 form.field.label.familyName,,Last name,Nom de famille
 form.field.label.fathersDetailsExist,,Father's details are not available,Pas d'information sur le père
 form.field.label.fileSizeError,,File size must be less than 2MB,La taille du fichier doit être inférieure à 2 Mo
