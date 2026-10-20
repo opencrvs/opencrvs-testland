@@ -3,12 +3,13 @@ import { createClient } from '@opencrvs/toolkit/api'
 import {
   continueForm,
   drawSignature,
+  getRandomDate,
   goToSection,
   login,
   triggerDeclarationAction
 } from '../../helpers'
 import { CREDENTIALS, GATEWAY_HOST } from '../../constants'
-import { openBirthDeclaration } from '../birth/helpers'
+import { fillDate, openBirthDeclaration } from '../birth/helpers'
 
 const MOCK_NID = '1234567898'
 const EXPECTED_SUB = `12345678901234567890123456${MOCK_NID}`
@@ -49,9 +50,7 @@ async function fillChildDetails(page: Page) {
   await page.locator('#child____gender').click()
   await page.getByText('Female', { exact: true }).click()
 
-  await page.getByPlaceholder('dd').fill('10')
-  await page.getByPlaceholder('mm').fill('10')
-  await page.getByPlaceholder('yyyy').fill('2025')
+  await fillDate(page, getRandomDate(0, 200))
 
   await page.locator('#child____placeOfBirth').click()
   await page.getByText('Health Institution', { exact: true }).click()
