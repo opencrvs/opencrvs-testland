@@ -14,6 +14,8 @@ services:
 
       - --entrypoints.web.address=:80
       - --entrypoints.websecure.address=:443
+      # Run deny-internal on every HTTPS request before routing
+      - --entrypoints.websecure.http.middlewares=deny-internal@docker
       - --providers.docker
       - --providers.docker.swarmMode=true
       - --api.dashboard=true
