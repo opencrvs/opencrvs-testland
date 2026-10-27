@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.9.22
+
+### Improvements
+
+- Upgrade Node.js to 22.23.4, a Node.js security release, in the country config image and for local development.
+
 ## 1.9.21
 
 ### Security
