@@ -25,6 +25,8 @@ services:
     command:
       - --entrypoints.web.address=:80
       - --entrypoints.websecure.address=:443
+      # Run deny-internal on every HTTPS request before routing
+      - --entrypoints.websecure.http.middlewares=deny-internal@docker
       - --providers.docker
       - --providers.docker.swarmMode=true
       - --api.dashboard=true
@@ -48,6 +50,11 @@ services:
       labels:
         - 'traefik.http.services.traefik.loadbalancer.server.port=80'
         - 'traefik.http.middlewares.gzip-compression.compress=true'
+        # Rewrite any path containing "internal" (any letter case, percent-encoded or double-encoded) to a path that doesn't exist,
+        # so /internal/* auth endpoints can't be reached from outside.
+        # Internal callers use http://auth:4040 directly and are unaffected.
+        - 'traefik.http.middlewares.deny-internal.replacepathregex.regex=(?i)^.*((i|%69)(n|%6e)(t|%74)(e|%65)(r|%72)(n|%6e)(a|%61)(l|%6c)|%25[0-9a-f]{2}).*'
+        - 'traefik.http.middlewares.deny-internal.replacepathregex.replacement=/__blocked'
       placement:
         constraints:
           - node.role == manager

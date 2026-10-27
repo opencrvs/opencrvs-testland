@@ -1,10 +1,18 @@
 # Changelog
 
-## 1.9.20 Release Candidate
+## 1.9.22
 
-### Bug fixes
+### Improvements
 
-- The "Identity verified" label in the correction request form showed the placeholder text "@todo" instead of a translation. [#13459](https://github.com/opencrvs/opencrvs-core/issues/13459)
+- Upgrade Node.js to 22.23.4, a Node.js security release, in the country config image and for local development.
+
+## 1.9.21
+
+### Security
+
+- Traefik now blocks every inbound request whose path contains `internal`, including percent-encoded and double-encoded forms, so the auth service's internal endpoints can't be reached from outside. Internal callers use `http://auth:4040` directly and are unaffected. If you have customised these files, bring over the `deny-internal` labels in `infrastructure/docker-compose.deploy.yml`, and the `--entrypoints.websecure.http.middlewares=deny-internal@docker` argument in `docker-compose.deploy.yml` and in every `docker-compose.<environment>-deploy.yml`. Each environment file replaces Traefik's whole `command` list, so the argument must be in all of them.
+
+## 1.9.20
 
 ## 1.9.19
 
