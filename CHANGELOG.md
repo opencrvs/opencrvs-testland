@@ -1,5 +1,7 @@
 # Changelog
 
+## 1.9.23
+
 ## 1.9.22
 
 ### Improvements
@@ -24,7 +26,6 @@
 ### Bug fixes
 
 - Replace MinIO server and client images with OpenCRVS-hosted images: `ghcr.io/opencrvs/minio:release.2025-06-13t11-33-47z` and `ghcr.io/opencrvs/minio-mc:release.2025-05-21t01-59-54z`
-
 
 ## 1.9.18
 
@@ -58,7 +59,6 @@
 ### Improvements
 
 - Create index for analytics.event_actions.event_id field [#12182](https://github.com/opencrvs/opencrvs-core/issues/12182)
-
 
 ## 1.9.11
 
