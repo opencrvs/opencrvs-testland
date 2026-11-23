@@ -213,3 +213,34 @@ export const assertTexts = async ({
     }
   }
 }
+
+function normalizeUsername(str: string) {
+  return str
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z0-9.-]/g, '')
+    .replace(/^[.-]+|[.-]+$/g, '')
+    .toLowerCase()
+}
+
+/**
+ * The username that the server generates for a new user with this name.
+ * Follows `generateUsername()` in the events service.
+ */
+export function getExpectedUsername(name: {
+  firstname: string
+  surname: string
+}) {
+  const initials = normalizeUsername(
+    name.firstname
+      .split(' ')
+      .map((n) => n.charAt(0))
+      .join('')
+  )
+  const surname = normalizeUsername(name.surname)
+  const raw = `${initials}${initials ? '.' : ''}${surname}`
+  return raw
+    .padEnd(5, '0')
+    .slice(0, 30)
+    .replace(/[.-]+$/, '')
+}

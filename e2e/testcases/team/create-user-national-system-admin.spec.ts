@@ -3,6 +3,7 @@ import path from 'path'
 import { continueForm, login, loginWithNewUser } from '../../helpers'
 import { faker } from '@faker-js/faker'
 import { CREDENTIALS } from '../../constants'
+import { getExpectedUsername } from '../../utils'
 
 test.describe.serial('1. Create user -1', () => {
   let page: Page
@@ -13,7 +14,10 @@ test.describe.serial('1. Create user -1', () => {
     role: 'Registrar'
   }
   const signaturePath = path.resolve(__dirname, '../../assets/sign1.png')
-  const username = `${userinfo.firstName[0]}.${userinfo.surname}`.toLowerCase()
+  const username = getExpectedUsername({
+    firstname: userinfo.firstName,
+    surname: userinfo.surname
+  })
   test.beforeAll(async ({ browser }) => {
     page = await browser.newPage()
   })
