@@ -1,4 +1,4 @@
-FROM node:22.22.3-alpine AS deps
+FROM node:22.23.4-alpine AS deps
 WORKDIR /usr/src/app
 ENV NPM_CONFIG_LOGLEVEL=warn
 
@@ -7,7 +7,7 @@ ENV NPM_CONFIG_LOGLEVEL=warn
 COPY package.json yarn.lock ./
 RUN yarn install --frozen-lockfile
 
-FROM node:22-alpine AS runner
+FROM node:22.23.4-alpine AS runner
 WORKDIR /usr/src/app
 ENV NPM_CONFIG_LOGLEVEL=warn
 
