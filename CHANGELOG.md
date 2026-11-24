@@ -2,6 +2,10 @@
 
 ## 2.0.5 Release Candidate
 
+### Bug fixes
+
+- The routes for verifiable credentials no longer build URLs with a double slash after `api/countryconfig`. [#14194](https://github.com/opencrvs/opencrvs-core/issues/14194)
+
 ## 2.0.4
 
 ## 2.0.3
