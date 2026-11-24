@@ -11,7 +11,7 @@ import { faker } from '@faker-js/faker'
 import { fillChildDetails, openBirthDeclaration } from '../birth/helpers'
 import { CLIENT_URL, CREDENTIALS } from '../../constants'
 import { createDeclaration, Declaration } from '../test-data/birth-declaration'
-import { selectAction, type } from '../../utils'
+import { selectAction, type, waitForLocalDraftToContain } from '../../utils'
 import {
   navigateToCertificatePrintAction,
   openRecordByTitle,
@@ -97,7 +97,11 @@ test.describe('Form state', () => {
       actionableEventChildName = await fillChildDetails(page)
 
       await page.getByRole('button', { name: 'Save & Exit' }).click()
+      const draftResponse = page.waitForResponse(
+        (res) => res.url().includes('event.draft.create') && res.ok()
+      )
       await page.getByRole('button', { name: 'Confirm' }).click()
+      await draftResponse
 
       // Now create another draft and fill in more details, incl. annotation
       await openBirthDeclaration(page)
@@ -173,8 +177,16 @@ test.describe('Form state', () => {
       )
       await selectRequesterType(page, 'Print and issue to Informant (Mother)')
       await continueForm(page)
+      // HTTP call will override annotation on next step if we do not wait for this.
+      // Workaround: a late HTTP field response overwrites the annotation with a stale copy. Safe to remove if that no longer happens.
+      const credentialResponse = page.waitForResponse(
+        (res) => res.url().includes('verifiable-credentials/paper-credential'),
+        { timeout: 30_000 }
+      )
       await page.getByRole('button', { name: 'Verified' }).click()
       await continueForm(page)
+      await credentialResponse
+
       await page.getByRole('button', { name: 'No, make correction' }).click()
       await page.locator('#requester____type').click()
       await page.getByText('Informant (Mother)', { exact: true }).click()
@@ -198,8 +210,11 @@ test.describe('Form state', () => {
       await continueForm(page)
       await page.getByTestId('change-button-mother.name').click()
       await type(page, '#firstname', updatedMotherName)
+      await waitForLocalDraftToContain(page, updatedMotherName)
       await page.reload()
-      await expect(page.locator('#firstname')).toHaveValue(updatedMotherName)
+      await expect(page.locator('#firstname')).toHaveValue(updatedMotherName, {
+        timeout: 30_000
+      })
     })
 
     test('Form states and annotations are not persisted', async () => {
@@ -262,8 +277,11 @@ test.describe('Form state', () => {
     })
 
     test('refresh the page and verify fields are populated', async () => {
+      await waitForLocalDraftToContain(page, 'bar')
       await page.reload()
-      await expect(page.locator('#firstname')).toHaveValue('foo')
+      await expect(page.locator('#firstname')).toHaveValue('foo', {
+        timeout: 30_000
+      })
       await expect(page.locator('#surname')).toHaveValue('bar')
     })
   })

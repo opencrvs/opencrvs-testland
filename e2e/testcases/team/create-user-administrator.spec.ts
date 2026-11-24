@@ -2,6 +2,7 @@ import { test, expect, type Page } from '@playwright/test'
 import { loginWithNewUser, continueForm, login } from '../../helpers'
 import { faker } from '@faker-js/faker'
 import { CREDENTIALS } from '../../constants'
+import { getExpectedUsername } from '../../utils'
 
 test.describe.serial('1. Create and update user -1', () => {
   let page: Page
@@ -23,10 +24,15 @@ test.describe.serial('1. Create and update user -1', () => {
     role: 'Hospital Official'
   }
 
-  const username = `${userinfo.firstName[0]}.${userinfo.surname}`.toLowerCase()
+  const username = getExpectedUsername({
+    firstname: userinfo.firstName,
+    surname: userinfo.surname
+  })
   const fullname = `${userinfo.firstName} ${userinfo.surname}`
-  const updatedUsername =
-    `${updatedUserInfo.firstName[0]}.${updatedUserInfo.surname}`.toLowerCase()
+  const updatedUsername = getExpectedUsername({
+    firstname: updatedUserInfo.firstName,
+    surname: updatedUserInfo.surname
+  })
   const updatedFullname = `${updatedUserInfo.firstName} ${updatedUserInfo.surname}`
 
   test.beforeAll(async ({ browser }) => {

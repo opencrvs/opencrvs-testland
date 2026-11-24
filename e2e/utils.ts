@@ -169,6 +169,29 @@ export async function type(page: Page, locator: string, text: string) {
   await page.locator(locator).blur()
 }
 
+/**
+ * The client saves form edits to IndexedDB asynchronously, so reloading right
+ * after typing can lose them. Call this before `page.reload()`.
+ */
+export async function waitForLocalDraftToContain(page: Page, text: string) {
+  const readLocalDraft = () =>
+    page.evaluate(
+      () =>
+        new Promise<string>((resolve) => {
+          const db = indexedDB.open('OpenCRVS')
+          db.onsuccess = () => {
+            const draft = db.result
+              .transaction('keyvaluepairs')
+              .objectStore('keyvaluepairs')
+              .get('local-drafts')
+            draft.onsuccess = () => resolve(String(draft.result ?? ''))
+          }
+        })
+    )
+
+  await expect.poll(readLocalDraft).toContain(text)
+}
+
 export const assertTexts = async ({
   root,
   texts,
@@ -189,4 +212,35 @@ export const assertTexts = async ({
       await expect(root.getByText(text)).toBeVisible()
     }
   }
+}
+
+function normalizeUsername(str: string) {
+  return str
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z0-9.-]/g, '')
+    .replace(/^[.-]+|[.-]+$/g, '')
+    .toLowerCase()
+}
+
+/**
+ * The username that the server generates for a new user with this name.
+ * Follows `generateUsername()` in the events service.
+ */
+export function getExpectedUsername(name: {
+  firstname: string
+  surname: string
+}) {
+  const initials = normalizeUsername(
+    name.firstname
+      .split(' ')
+      .map((n) => n.charAt(0))
+      .join('')
+  )
+  const surname = normalizeUsername(name.surname)
+  const raw = `${initials}${initials ? '.' : ''}${surname}`
+  return raw
+    .padEnd(5, '0')
+    .slice(0, 30)
+    .replace(/[.-]+$/, '')
 }
