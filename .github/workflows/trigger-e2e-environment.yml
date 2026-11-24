@@ -25,6 +25,9 @@ concurrency:
 jobs:
   e2e:
     if: ${{ !contains(github.actor, 'bot') }}
+    permissions:
+      contents: read
+      pull-requests: write
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v6
@@ -35,10 +38,12 @@ jobs:
         if: ${{ github.event_name == 'workflow_dispatch' }}
         run: |
           PR_NUMBER=${{ github.event.inputs.pr_number }}
-          PR_DATA=$(gh pr view $PR_NUMBER --json headRefName,headRefOid)
+          PR_DATA=$(gh pr view $PR_NUMBER --json headRefName,headRefOid,baseRefName)
           BRANCH_NAME=$(echo "$PR_DATA" | jq -r '.headRefName')
+          BASE_BRANCH=$(echo "$PR_DATA" | jq -r '.baseRefName')
           HEAD_COMMIT_HASH=$(echo "$PR_DATA" | jq -r '.headRefOid' | cut -c1-7)
           echo "BRANCH_NAME=${BRANCH_NAME}" >> $GITHUB_ENV
+          echo "BASE_BRANCH=${BASE_BRANCH}" >> $GITHUB_ENV
           echo "HEAD_COMMIT_HASH=${HEAD_COMMIT_HASH}" >> $GITHUB_ENV
 
       - name: Get Branch Name and Head Commit Hash (on PR creation)
@@ -46,29 +51,55 @@ jobs:
         id: vars
         run: |
           echo "BRANCH_NAME=$(echo ${{ github.head_ref }})" >> $GITHUB_ENV
+          echo "BASE_BRANCH=${{ github.base_ref }}" >> $GITHUB_ENV
           COMMIT_HASH=$(git rev-parse --short=7 ${{ github.event.pull_request.head.sha }})
           echo "HEAD_COMMIT_HASH=${COMMIT_HASH}" >> $GITHUB_ENV
 
       - name: Check if branch exists in opencrvs-core repo
         run: |
           CORE_REPO=https://github.com/opencrvs/opencrvs-core
-          BASE_BRANCH="${{ github.base_ref || 'develop' }}"
           if git ls-remote --heads $CORE_REPO ${{ env.BRANCH_NAME }} | grep -q "${{ env.BRANCH_NAME }}"; then
+            CORE_BRANCH="${{ env.BRANCH_NAME }}"
             COMMIT_HASH=$(git ls-remote $CORE_REPO refs/heads/${{ env.BRANCH_NAME }} | cut -c1-7)
             echo "Branch ${{ env.BRANCH_NAME }} exists in opencrvs-core repo: $COMMIT_HASH"
           elif git ls-remote --heads $CORE_REPO $BASE_BRANCH | grep -q "$BASE_BRANCH"; then
+            CORE_BRANCH="$BASE_BRANCH"
             COMMIT_HASH=$(git ls-remote $CORE_REPO refs/heads/$BASE_BRANCH | cut -c1-7)
             echo "Branch ${{ env.BRANCH_NAME }} does not exist in opencrvs-core repo, using base branch($BASE_BRANCH): $COMMIT_HASH"
           else
+            CORE_BRANCH="develop"
             COMMIT_HASH=$(git ls-remote $CORE_REPO refs/heads/develop | cut -c1-7)
             echo "Branch ${{ env.BRANCH_NAME }} does not exist in opencrvs-core repo, using develop branch: $COMMIT_HASH"
           fi
+          echo "CORE_BRANCH=${CORE_BRANCH}" >> $GITHUB_ENV
           echo "CORE_COMMIT_HASH=${COMMIT_HASH}" >> $GITHUB_ENV
+
+      # A repository_dispatch event always runs the workflow on the default
+      # branch of e2e (develop). That workflow is for 2.1 and later, where the
+      # tests are in opencrvs-core. Pick the e2e branch for this release line
+      # instead, in the same way as deploy-to-feature-environment.yml in core.
+      - name: Get e2e branch
+        run: |
+          heads=$(git ls-remote --heads "https://github.com/opencrvs/e2e.git" | sed 's|.*refs/heads/||')
+          has() { [ -n "$1" ] && grep -qxF -- "$1" <<< "$heads"; }
+
+          if has "$BRANCH_NAME"; then
+            E2E_BRANCH=$BRANCH_NAME
+          elif has "$BASE_BRANCH"; then
+            E2E_BRANCH=$BASE_BRANCH
+          elif [[ $BASE_BRANCH =~ ^release/([0-9]+)\.([0-9]+)\.x$ ]] && \
+            latest=$(grep -E "^release/${BASH_REMATCH[1]}\.${BASH_REMATCH[2]}\.[0-9]+$" <<< "$heads" | sort -t. -k3 -n | tail -1) && \
+            [ -n "$latest" ]; then
+            E2E_BRANCH=$latest
+          else
+            E2E_BRANCH=develop
+          fi
+          echo "E2E branch: ${E2E_BRANCH}"
+          echo "E2E_BRANCH=${E2E_BRANCH}" >> $GITHUB_ENV
 
       - name: Get chart branch
         run: |
           chart_repo_url="https://github.com/opencrvs/opencrvs-helm-charts.git"
-          BASE_BRANCH="${{ github.base_ref || 'develop' }}"
           if [ -n "$(git ls-remote --heads "$chart_repo_url" "refs/heads/${{ env.BRANCH_NAME }}")" ]; then
             CHART_BRANCH="${{ env.BRANCH_NAME }}"
           elif [ -n "$(git ls-remote --heads "$chart_repo_url" "refs/heads/${BASE_BRANCH}")" ]; then
@@ -85,10 +116,11 @@ jobs:
           echo "PR Head Commit Hash: ${{ env.HEAD_COMMIT_HASH }}"
           echo "Core Commit Hash: ${{ env.CORE_COMMIT_HASH }}"
           echo "Chart Branch: ${{ env.CHART_BRANCH }}"
+          echo "E2E Branch: ${{ env.E2E_BRANCH }}"
 
       - name: Trigger E2E Workflow
         id: dispatch_e2e
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           github-token: ${{ secrets.E2E_WORKFLOWS_TOKEN }}
           script: |
@@ -102,58 +134,40 @@ jobs:
                 .substr(0, 30)
                 .replace(/^[^a-z0-9]+|[^a-z0-9]+$/g, '');
             }
-            const result = await github.rest.repos.createDispatchEvent({
+            const result = await github.rest.actions.createWorkflowDispatch({
               owner: 'opencrvs',
               repo: 'e2e',
-              event_type: 'run_e2e',
-              client_payload: {
-                actor: '${{ github.actor }}',
+              workflow_id: 'deploy-and-e2e.yml',
+              ref: '${{ env.E2E_BRANCH }}',
+
+              // Ask the API to return the ID of the new run.
+              return_run_details: true,
+
+              headers: {
+                'X-GitHub-Api-Version': '2026-03-10',
+              },
+
+              inputs: {
                 'core-image-tag': '${{ env.CORE_COMMIT_HASH }}',
                 'countryconfig-image-tag': '${{ env.HEAD_COMMIT_HASH }}',
-                reset: 'true',
                 stack: slugify('${{ env.BRANCH_NAME }}'),
-                'chart-branch': '${{ env.CHART_BRANCH }}'
+                branch: '${{ env.E2E_BRANCH }}',
+                // e2e checks out the Helm charts from opencrvs-core.
+                'core-branch': '${{ env.CORE_BRANCH }}',
+                actor: '${{ github.actor }}',
+                reset: 'true'
               }
             });
 
-            console.log(result);
+            console.log(JSON.stringify(result.data, null, 2));
 
-            // Record the time just before dispatching so we can ignore any
-            // pre-existing runs when polling below.
-            const dispatchedAt = new Date();
-
-            // GitHub Actions can take variable time to register a newly dispatched
-            // run in the API. Poll every 5 seconds for up to 60 seconds, and only
-            // accept a run whose created_at is >= dispatchedAt to avoid picking up
-            // a stale run from a previous dispatch (e.g. one triggered by opencrvs-core).
-            let runId;
-            for (let i = 0; i < 12; i++) {
-              await new Promise(resolve => setTimeout(resolve, 5000));
-
-              const runs = await github.rest.actions.listWorkflowRunsForRepo({
-                owner: 'opencrvs',
-                repo: 'e2e',
-                event: 'repository_dispatch',
-                per_page: 5
-              });
-
-              const newRun = runs.data.workflow_runs.find(
-                r => new Date(r.created_at) >= dispatchedAt
-              );
-
-              if (newRun) {
-                runId = newRun.id;
-                console.log(`Captured runId: ${runId} (created at ${newRun.created_at})`);
-                break;
-              }
-
-              console.log(`Run not visible yet, retrying... (attempt ${i + 1}/12)`);
-            }
-
+            const runId = result.data.workflow_run_id;
             if (!runId) {
-              throw new Error('No workflow run found after 60 seconds.');
+              throw new Error(`workflow_run_id was not returned. Response: ${JSON.stringify(result.data)}`);
             }
 
+            console.log(`Triggered runId: ${runId}`);
+            console.log(`Run URL: ${result.data.html_url}`);
             core.setOutput('runId', runId);
 
       - name: Print link to E2E workflow run
@@ -162,14 +176,14 @@ jobs:
           E2E_RUN_LINK="https://github.com/opencrvs/e2e/actions/runs/${{ steps.dispatch_e2e.outputs.runId }}"
 
       - name: Wait for Environment Deployment (Deploy Job)
-        uses: actions/github-script@v7
+        id: wait_for_deploy
+        uses: actions/github-script@v9
         with:
           github-token: ${{ secrets.E2E_WORKFLOWS_TOKEN }}
           script: |
             const owner = 'opencrvs';
             const repo = 'e2e';
             const runId = ${{ steps.dispatch_e2e.outputs.runId }};
-            const prNumber = ${{ github.event.pull_request.number }};
 
             function slugify(str) {
               return str
@@ -229,32 +243,24 @@ jobs:
               }
             }
 
-            // Check if the comment already exists
-            const comments = await github.rest.issues.listComments({
-              owner: 'opencrvs',
-              repo: 'opencrvs-farajaland',
-              issue_number: prNumber
-            });
+            core.setOutput('deploymentLink', `https://${branchName}.e2e-k8s.opencrvs.dev`);
 
-            const deploymentLink = `https://${branchName}.e2e-k8s.opencrvs.dev`
-            const deployMessage = `Your environment is deployed to ${deploymentLink}`;
-
-            const existingComment = comments.data.find(comment => comment.body.includes(deployMessage));
-            if (!existingComment) {
-              // Add PR comment if it doesn't exist
-              await github.rest.issues.createComment({
-                owner: 'opencrvs',
-                repo: 'opencrvs-farajaland',
-                issue_number: prNumber,
-                body: deployMessage
-              });
-              console.log('PR comment added');
-            } else {
-              console.log('PR comment already exists, skipping...');
-            }
+      # The E2E token is for the e2e repo. Use the token of this workflow to
+      # comment on the PR in this repository.
+      - name: Comment with the link to the environment
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number || inputs.pr_number }}
+          BODY: Your environment is deployed to ${{ steps.wait_for_deploy.outputs.deploymentLink }}
+        run: |
+          if gh pr view "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --json comments --jq '.comments[].body' | grep -qxF -- "$BODY"; then
+            echo "PR comment already exists, skipping..."
+          else
+            gh pr comment "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --body "$BODY"
+          fi
 
       - name: Wait for E2E Workflow Completion
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         with:
           github-token: ${{ secrets.E2E_WORKFLOWS_TOKEN }}
           script: |
