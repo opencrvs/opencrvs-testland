@@ -114,7 +114,18 @@ test.describe
     await page.getByLabel('Birth').click()
     await goToSection(page, 'review')
     await page.getByRole('button', { name: 'Exit', exact: true }).click()
+
+    // Exit's delete must settle, including its drafts refetch, before going
+    // offline, or 30.4 finds it in the outbox.
+    const deleteResponse = page.waitForResponse(
+      (res) => res.url().includes('event.delete') && res.ok(),
+      { timeout: 60_000 }
+    )
     await page.getByRole('button', { name: 'Confirm', exact: true }).click()
+    await deleteResponse
+    await expect(page.locator('#navigation_workqueue_outbox')).toHaveText(
+      'Outbox'
+    )
 
     await page.context().setOffline(true)
   })
